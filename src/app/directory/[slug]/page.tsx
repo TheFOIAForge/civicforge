@@ -29,6 +29,7 @@ export default function RepProfilePage() {
   const slug = params.slug as string;
   const [rep, setRep] = useState<Representative | null>(null);
   const [loading, setLoading] = useState(true);
+  const [enriching, setEnriching] = useState(true);
   const [imgError, setImgError] = useState(false);
   const [activeCycle, setActiveCycle] = useState<number | "all">("all");
   const [aiMessages, setAiMessages] = useState<Array<{ role: string; content: string }>>([]);
@@ -41,6 +42,7 @@ export default function RepProfilePage() {
   }, []);
 
   useEffect(() => {
+    setEnriching(true);
     fetch("/api/members")
       .then((r) => r.json())
       .then((members: Representative[]) => {
@@ -49,12 +51,14 @@ export default function RepProfilePage() {
           setRep(match);
           fetch(`/api/members/${match.id}`)
             .then((r) => r.json())
-            .then((enriched) => setRep(enriched))
-            .catch(() => {});
+            .then((enriched) => { setRep(enriched); setEnriching(false); })
+            .catch(() => setEnriching(false));
+        } else {
+          setEnriching(false);
         }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => { setLoading(false); setEnriching(false); });
   }, [slug]);
 
   if (loading) {
@@ -342,8 +346,26 @@ export default function RepProfilePage() {
             </section>
           )}
 
+          {/* Deep Data Loading Skeleton */}
+          {enriching && (
+            <section className="border-3 border-border p-6 bg-surface animate-pulse">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-5 h-5 border-2 border-border border-t-red animate-spin" style={{ borderRadius: '50%', animationDuration: '1s' }} />
+                <span className="font-mono text-sm text-gray-mid font-bold">LOADING LOBBYING, HEARINGS &amp; SPENDING DATA&hellip;</span>
+              </div>
+              <div className="space-y-3">
+                {[1,2,3].map(n => (
+                  <div key={n} className="border-b border-border-light pb-3">
+                    <div className="h-4 bg-border/30 w-48 mb-2" />
+                    <div className="h-3 bg-border/20 w-64" />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Lobbying Activity */}
-          {(rep.lobbyingFilings || []).length > 0 && (
+          {!enriching && (rep.lobbyingFilings || []).length > 0 && (
             <section className="border-3 border-border p-6 bg-surface">
               <h2 className="font-headline text-2xl mb-5">&#127970; Lobbying Activity</h2>
               <p className="font-body text-sm text-gray-mid mb-4">
@@ -387,7 +409,7 @@ export default function RepProfilePage() {
           )}
 
           {/* Committee Hearings */}
-          {(rep.committeeHearings || []).length > 0 && (
+          {!enriching && (rep.committeeHearings || []).length > 0 && (
             <section className="border-3 border-border p-6 bg-surface">
               <h2 className="font-headline text-2xl mb-5">&#127963;&#65039; Committee Hearings</h2>
               {rep.committeeHearings!.map((hearing, i) => (
@@ -500,6 +522,35 @@ export default function RepProfilePage() {
           <section className="border-3 border-border p-6 bg-cream-dark">
             <h2 className="font-headline text-2xl mb-4">&#128176; Follow the Money</h2>
 
+            {enriching && (
+              <div className="space-y-4 animate-pulse">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-4 h-4 bg-border animate-spin" style={{ animationDuration: '2s' }} />
+                  <span className="font-mono text-sm text-gray-mid font-bold">LOADING LIVE FEC DATA&hellip;</span>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-surface border-2 border-border p-4">
+                    <div className="h-7 bg-border/40 w-24 mx-auto mb-2" />
+                    <div className="h-3 bg-border/30 w-16 mx-auto" />
+                  </div>
+                  <div className="bg-surface border-2 border-border p-4">
+                    <div className="h-7 bg-border/40 w-16 mx-auto mb-2" />
+                    <div className="h-3 bg-border/30 w-20 mx-auto" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-3 bg-border/30 w-32" />
+                  {[1,2,3,4,5].map(n => (
+                    <div key={n} className="flex justify-between py-2 border-b border-border-light">
+                      <div className="h-4 bg-border/30 w-36" />
+                      <div className="h-4 bg-border/30 w-16" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!enriching && <>
             {/* Cycle tabs */}
             {(rep.financeCycles || []).length > 0 && (
               <div className="flex flex-wrap gap-1 mb-5">
@@ -796,10 +847,11 @@ RULES:
                 FULL PROFILE ON OPENSECRETS &rarr;
               </a>
             )}
+            </>}
           </section>
 
           {/* District Spending */}
-          {rep.districtSpending && rep.districtSpending.totalObligated > 0 && (
+          {!enriching && rep.districtSpending && rep.districtSpending.totalObligated > 0 && (
             <section className="border-3 border-border p-6 bg-cream-dark">
               <h2 className="font-headline text-2xl mb-4">
                 &#127970; Federal Spending in {rep.chamber === "Senate" ? rep.state : `${rep.stateAbbr}-${rep.district}`}
