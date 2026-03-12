@@ -1,26 +1,97 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Backgrounds */
+  --color-cream: #FAFAF9;
+  --color-cream-dark: #F5F5F4;
+  --color-surface: #FFFFFF;
+  --color-hover: #F1F5F9;
+
+  /* Text */
+  --color-black: #0F172A;
+
+  /* Primary (civic red) */
+  --color-red: #C1272D;
+  --color-red-dark: #9B1B20;
+  --color-red-light: #FEF2F2;
+
+  /* Functional status */
+  --color-status-red: #DC2626;
+  --color-status-red-light: #FEF2F2;
+
+  /* Amber (warnings, in-committee) */
+  --color-yellow: #D97706;
+  --color-yellow-light: #FFFBEB;
+
+  /* Secondary accents (kept but muted) */
+  --color-orange: #EA580C;
+  --color-orange-light: #FFF7ED;
+  --color-teal: #0F766E;
+  --color-teal-light: #F0FDFA;
+  --color-purple: #7C3AED;
+  --color-purple-light: #F5F3FF;
+
+  /* Grays */
+  --color-gray-dark: #1E293B;
+  --color-gray-mid: #64748B;
+  --color-gray-light: #94A3B8;
+
+  /* Borders */
+  --color-border: #334155;
+  --color-border-light: #CBD5E1;
+
+  /* Status */
+  --color-green: #16A34A;
+  --color-green-light: #F0FDF4;
+  --color-blue: #2563EB;
+  --color-blue-light: #EFF6FF;
+
+  /* Party */
+  --color-dem: #1E40AF;
+  --color-rep: #B91C1C;
+  --color-ind: #6D28D9;
+
+  /* Section backgrounds */
+  --color-cta: #1E3A5F;
+
+  /* Fonts */
+  --font-headline: "Arial Black", "Arial Bold", Gadget, sans-serif;
+  --font-body: Georgia, "Times New Roman", Times, serif;
+  --font-mono: "Courier New", Courier, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-radius: 0 !important;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-cream);
+  color: var(--color-black);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-headline);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--color-black);
+}
+
+@layer base {
+  a {
+    color: var(--color-red);
+    text-decoration: underline;
+  }
+
+  a:hover {
+    color: var(--color-red-dark);
+  }
+}
+
+::selection {
+  background: var(--color-red);
+  color: white;
 }
