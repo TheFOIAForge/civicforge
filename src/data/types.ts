@@ -105,8 +105,8 @@ export interface Representative {
   notableLegislation: BillRecord[];
   topDonors: Donor[];
   topIndustries: Donor[];
-  outsideSpending: OutsideSpender[];
-  financeCycles: CycleFinance[];
+  outsideSpending?: OutsideSpender[];
+  financeCycles?: CycleFinance[];
   totalFundraising: string;
   smallDollarPct: number;
   opensecrets: string;

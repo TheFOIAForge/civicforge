@@ -431,9 +431,9 @@ export default function RepProfilePage() {
             <h2 className="font-headline text-2xl mb-4">&#128176; Follow the Money</h2>
 
             {/* Cycle tabs */}
-            {rep.financeCycles.length > 0 && (
+            {(rep.financeCycles || []).length > 0 && (
               <div className="flex flex-wrap gap-1 mb-5">
-                {rep.financeCycles.map((cf) => (
+                {(rep.financeCycles || []).map((cf) => (
                   <button
                     key={cf.cycle}
                     onClick={() => setActiveCycle(cf.cycle)}
@@ -451,10 +451,10 @@ export default function RepProfilePage() {
 
             {/* Totals for selected cycle */}
             {(() => {
-              const cycle = rep.financeCycles.find((c) => c.cycle === activeCycle) || {
+              const cycle = (rep.financeCycles || []).find((c) => c.cycle === activeCycle) || {
                 totalFundraising: rep.totalFundraising,
                 smallDollarPct: rep.smallDollarPct,
-                outsideSpending: rep.outsideSpending,
+                outsideSpending: (rep.outsideSpending || []),
               };
               return (
                 <>
@@ -523,11 +523,11 @@ export default function RepProfilePage() {
                       if (!apiKey || !rep) return;
                       setAiLoading(true);
 
-                      const cycleBreakdown = rep.financeCycles
+                      const cycleBreakdown = (rep.financeCycles || [])
                         .map((c) => `${c.cycle === "all" ? "All Time" : c.cycle}: ${c.totalFundraising} raised, ${c.smallDollarPct}% small dollar, ${c.outsideSpending.length} outside spenders`)
                         .join("\n");
 
-                      const outsideDetail = rep.outsideSpending
+                      const outsideDetail = (rep.outsideSpending || [])
                         .map((s) => `${s.support ? "FOR" : "AGAINST"}: ${s.name} (${s.amount})`)
                         .join("\n");
 
@@ -627,10 +627,10 @@ RULES:
                       setFollowUp("");
                       setAiLoading(true);
 
-                      const cycleBreakdown = rep.financeCycles
+                      const cycleBreakdown = (rep.financeCycles || [])
                         .map((c) => `${c.cycle === "all" ? "All Time" : c.cycle}: ${c.totalFundraising} raised, ${c.smallDollarPct}% small dollar`)
                         .join("\n");
-                      const outsideDetail = rep.outsideSpending.map((s) => `${s.support ? "FOR" : "AGAINST"}: ${s.name} (${s.amount})`).join("\n");
+                      const outsideDetail = (rep.outsideSpending || []).map((s) => `${s.support ? "FOR" : "AGAINST"}: ${s.name} (${s.amount})`).join("\n");
                       const systemPrompt = `You are a nonpartisan campaign finance analyst discussing FEC data for ${rep.fullName} (${rep.party === "D" ? "Democrat" : rep.party === "R" ? "Republican" : "Independent"}-${rep.stateAbbr}). Cycle data:\n${cycleBreakdown}\nOutside spending:\n${outsideDetail || "None"}\nTop employers: ${rep.topDonors.map((d) => `${d.name}: ${d.amount}`).join(", ") || "None"}\nOccupations: ${rep.topIndustries.map((d) => `${d.name}: ${d.amount}`).join(", ") || "None"}\n\nRules: Be factual, cite numbers, no partisan framing, write clearly like a journalist. Keep answers concise.`;
 
                       fetch("https://api.anthropic.com/v1/messages", {
