@@ -342,6 +342,76 @@ export default function RepProfilePage() {
             </section>
           )}
 
+          {/* Lobbying Activity */}
+          {(rep.lobbyingFilings || []).length > 0 && (
+            <section className="border-3 border-border p-6 bg-surface">
+              <h2 className="font-headline text-2xl mb-5">&#127970; Lobbying Activity</h2>
+              <p className="font-body text-sm text-gray-mid mb-4">
+                Lobbying filings that reference this member or their legislation. Source: Senate LDA.
+              </p>
+              {rep.lobbyingFilings!.map((filing, i) => (
+                <div key={i} className={`mb-4 pb-4 border-b-2 border-border-light last:border-0 last:mb-0 last:pb-0 ${filing.matchesDonor ? "bg-yellow-light/50 -mx-2 px-2 py-2" : ""}`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="font-headline text-base">{filing.client}</div>
+                      <div className="font-mono text-xs text-gray-mid mt-0.5">
+                        via {filing.registrant} ({filing.filingYear})
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      {filing.amount > 0 && (
+                        <span className="font-mono text-sm font-bold">
+                          ${filing.amount.toLocaleString()}
+                        </span>
+                      )}
+                      {filing.matchesDonor && (
+                        <div className="mt-1 px-2 py-0.5 bg-yellow font-mono text-[10px] font-bold text-black">
+                          MATCHES DONOR
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {filing.specificIssues.length > 0 && (
+                    <div className="mt-2 font-body text-sm text-gray-mid">
+                      {filing.specificIssues[0].slice(0, 200)}
+                    </div>
+                  )}
+                  {filing.lobbyists.length > 0 && (
+                    <div className="mt-1 font-mono text-xs text-gray-mid">
+                      Lobbyists: {filing.lobbyists.slice(0, 3).join(", ")}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </section>
+          )}
+
+          {/* Committee Hearings */}
+          {(rep.committeeHearings || []).length > 0 && (
+            <section className="border-3 border-border p-6 bg-surface">
+              <h2 className="font-headline text-2xl mb-5">&#127963;&#65039; Committee Hearings</h2>
+              {rep.committeeHearings!.map((hearing, i) => (
+                <div key={i} className="mb-4 pb-4 border-b-2 border-border-light last:border-0 last:mb-0 last:pb-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="px-2 py-0.5 font-mono text-xs font-bold bg-black text-white">
+                      {hearing.chamber.toUpperCase()}
+                    </span>
+                    <span className="font-mono text-xs text-gray-mid">{hearing.date}</span>
+                  </div>
+                  <a
+                    href={hearing.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-body text-base text-black no-underline hover:text-red"
+                  >
+                    {hearing.title}
+                  </a>
+                  <div className="font-mono text-xs text-gray-mid mt-1">{hearing.committee}</div>
+                </div>
+              ))}
+            </section>
+          )}
+
           {/* Controversies */}
           {rep.controversies.length > 0 && (
             <section className="border-3 border-status-red p-6 bg-status-red-light">
@@ -686,6 +756,36 @@ RULES:
               )}
             </div>
 
+            {/* Dark Money Connections */}
+            {(rep.darkMoneyConnections || []).length > 0 && (
+              <div className="mb-5 border-t-2 border-border-light pt-5">
+                <h3 className="font-mono text-sm text-gray-mid font-bold mb-3">DARK MONEY CONNECTIONS</h3>
+                <p className="font-body text-xs text-gray-mid mb-3">
+                  Outside spenders with connected 501(c)(4) nonprofit organizations. Source: ProPublica.
+                </p>
+                {rep.darkMoneyConnections!.map((dm, i) => (
+                  <div key={i} className="mb-3 pb-3 border-b border-border-light last:border-0 last:mb-0 last:pb-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`px-1.5 py-0.5 text-xs font-mono font-bold ${dm.support ? "bg-green-700 text-white" : "bg-status-red text-white"}`}>
+                        {dm.support ? "FOR" : "AGAINST"}
+                      </span>
+                      <span className="font-body text-sm font-bold">{dm.spenderName}</span>
+                      <span className="font-mono text-xs text-gray-mid ml-auto">{dm.spenderAmount}</span>
+                    </div>
+                    {dm.connectedNonprofits.map((np, j) => (
+                      <div key={j} className="ml-4 mt-1 p-2 bg-surface border border-border">
+                        <div className="font-mono text-xs font-bold">{np.name}</div>
+                        <div className="font-mono text-[10px] text-gray-mid mt-0.5">
+                          Revenue: ${np.totalRevenue.toLocaleString()} | Assets: ${np.totalAssets.toLocaleString()}
+                          {np.city && ` | ${np.city}, ${np.state}`}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+
             {rep.opensecrets && (
               <a
                 href={rep.opensecrets}
@@ -697,6 +797,75 @@ RULES:
               </a>
             )}
           </section>
+
+          {/* District Spending */}
+          {rep.districtSpending && rep.districtSpending.totalObligated > 0 && (
+            <section className="border-3 border-border p-6 bg-cream-dark">
+              <h2 className="font-headline text-2xl mb-4">
+                &#127970; Federal Spending in {rep.chamber === "Senate" ? rep.state : `${rep.stateAbbr}-${rep.district}`}
+              </h2>
+              <p className="font-body text-xs text-gray-mid mb-4">
+                Federal contracts and grants in this {rep.chamber === "Senate" ? "state" : "district"} (current fiscal year). Source: USAspending.gov.
+              </p>
+
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                <div className="bg-surface border-2 border-border p-3 text-center">
+                  <div className="font-headline text-lg">
+                    ${(rep.districtSpending.totalObligated / 1_000_000).toFixed(1)}M
+                  </div>
+                  <div className="font-mono text-[10px] text-gray-mid font-bold">TOTAL</div>
+                </div>
+                <div className="bg-surface border-2 border-border p-3 text-center">
+                  <div className="font-headline text-lg">{rep.districtSpending.contractCount}</div>
+                  <div className="font-mono text-[10px] text-gray-mid font-bold">CONTRACTS</div>
+                </div>
+                <div className="bg-surface border-2 border-border p-3 text-center">
+                  <div className="font-headline text-lg">{rep.districtSpending.grantCount}</div>
+                  <div className="font-mono text-[10px] text-gray-mid font-bold">GRANTS</div>
+                </div>
+              </div>
+
+              {rep.districtSpending.donorContractorOverlaps.length > 0 && (
+                <div className="mb-4 p-3 bg-yellow-light border-2 border-yellow">
+                  <h3 className="font-mono text-xs font-bold mb-1">DONOR-CONTRACTOR OVERLAP</h3>
+                  <p className="font-body text-xs text-gray-mid">
+                    These organizations appear in both top donors and federal contractors:
+                  </p>
+                  {rep.districtSpending.donorContractorOverlaps.map((name, i) => (
+                    <div key={i} className="font-mono text-sm font-bold mt-1">{name}</div>
+                  ))}
+                </div>
+              )}
+
+              {rep.districtSpending.topRecipients.length > 0 && (
+                <div className="mb-3">
+                  <h3 className="font-mono text-sm text-gray-mid font-bold mb-2">TOP RECIPIENTS</h3>
+                  {rep.districtSpending.topRecipients.slice(0, 7).map((r, i) => (
+                    <div key={i} className="flex justify-between py-1.5 border-b border-border-light last:border-0">
+                      <span className="font-body text-sm">{r.name}</span>
+                      <span className="font-mono text-xs text-gray-mid font-bold">
+                        ${(r.total / 1_000_000).toFixed(1)}M
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {rep.districtSpending.topAgencies.length > 0 && (
+                <div>
+                  <h3 className="font-mono text-sm text-gray-mid font-bold mb-2">TOP AGENCIES</h3>
+                  {rep.districtSpending.topAgencies.slice(0, 5).map((a, i) => (
+                    <div key={i} className="flex justify-between py-1.5 border-b border-border-light last:border-0">
+                      <span className="font-body text-sm">{a.name}</span>
+                      <span className="font-mono text-xs text-gray-mid font-bold">
+                        ${(a.total / 1_000_000).toFixed(1)}M
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
 
           {/* Research Links */}
           <section className="border-3 border-border p-6 bg-cream-dark">

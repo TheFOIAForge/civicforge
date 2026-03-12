@@ -5,7 +5,7 @@ export const issues: Issue[] = [
     id: "healthcare",
     slug: "healthcare",
     name: "Healthcare",
-    icon: "+",
+    icon: "\ud83e\ude7a",
     description: "Access to affordable healthcare, prescription drug pricing, Medicare and Medicaid, mental health services, and public health infrastructure.",
     explainer: "Healthcare policy in the U.S. operates across federal and state levels. The federal government runs Medicare (65+ and disabled), Medicaid (jointly with states, for low-income individuals), and the ACA marketplace. Congress controls drug pricing rules, hospital regulations, and public health funding. Your representatives vote on bills that directly affect your insurance premiums, drug costs, and what services are covered.",
     talkingPoints: [
@@ -25,7 +25,7 @@ export const issues: Issue[] = [
     id: "environment",
     slug: "environment",
     name: "Environment & Climate",
-    icon: "~",
+    icon: "\ud83c\udf3f",
     description: "Climate change action, clean energy transition, environmental regulations, air and water quality, conservation, and environmental justice.",
     explainer: "Environmental policy involves regulating emissions, funding clean energy, setting pollution standards, and managing public lands. The EPA sets and enforces environmental regulations. Congress funds clean energy research, approves drilling permits on federal land, and sets emissions targets. The Inflation Reduction Act was the largest climate investment in U.S. history, but many provisions face implementation challenges and political opposition.",
     talkingPoints: [
@@ -44,7 +44,7 @@ export const issues: Issue[] = [
     id: "housing",
     slug: "housing",
     name: "Housing",
-    icon: "#",
+    icon: "\ud83c\udfe0",
     description: "Affordable housing, rent costs, homelessness, housing discrimination, mortgage access, and zoning reform.",
     explainer: "Housing policy is split between federal programs (HUD, Section 8 vouchers, FHA loans, LIHTC tax credits) and local zoning laws. Congress controls funding for public housing, homeless assistance, and first-time homebuyer programs. The federal government also regulates mortgage lending through agencies like the CFPB. Your local representatives control zoning, which is often the biggest barrier to building more affordable housing.",
     talkingPoints: [
@@ -62,7 +62,7 @@ export const issues: Issue[] = [
     id: "immigration",
     slug: "immigration",
     name: "Immigration",
-    icon: ">",
+    icon: "\ud83c\uddfa\ud83c\uddf8",
     description: "Border security, immigration reform, DACA, asylum policy, visa systems, and refugee resettlement.",
     explainer: "Immigration policy is primarily a federal responsibility. Congress sets visa quotas, asylum rules, enforcement priorities, and pathways to citizenship. The President directs enforcement through executive orders and agency policy. The immigration court system has a massive backlog of over 3 million pending cases. Major reform efforts have stalled for decades due to disagreements over the balance between enforcement and legal pathways.",
     talkingPoints: [
@@ -81,7 +81,7 @@ export const issues: Issue[] = [
     id: "education",
     slug: "education",
     name: "Education",
-    icon: "A",
+    icon: "\ud83c\udf93",
     description: "K-12 funding, student loan debt, higher education costs, school choice, curriculum standards, and teacher pay.",
     explainer: "Education in the U.S. is primarily controlled at the state and local level — school boards, not Congress, make most day-to-day decisions. However, the federal government plays a significant role through funding (Title I for low-income schools), student loan policy, civil rights enforcement, and research grants. Congress sets the rules for federal student loans, Pell Grants, and programs like Head Start.",
     talkingPoints: [
@@ -99,7 +99,7 @@ export const issues: Issue[] = [
     id: "economy",
     slug: "economy",
     name: "Economy & Jobs",
-    icon: "$",
+    icon: "\ud83d\udcb0",
     description: "Wages, employment, inflation, taxes, trade, small business, and economic inequality.",
     explainer: "Economic policy involves taxes, spending, regulation, and trade. Congress sets tax rates and spending priorities through the annual budget process. The Federal Reserve (independent of Congress) sets interest rates and monetary policy. Key debates center on tax policy (who pays, how much), minimum wage, trade deals, antitrust enforcement, and the balance between growth and inequality.",
     talkingPoints: [
@@ -118,7 +118,7 @@ export const issues: Issue[] = [
     id: "civil-rights",
     slug: "civil-rights",
     name: "Civil Rights & Justice",
-    icon: "=",
+    icon: "\u2696\ufe0f",
     description: "Voting rights, police reform, criminal justice reform, LGBTQ+ rights, disability rights, and discrimination.",
     explainer: "Civil rights protections come from constitutional amendments, federal laws (Civil Rights Act, Voting Rights Act, ADA), and court decisions. Congress has the power to strengthen or weaken these protections through legislation. Current debates focus on voting access, police accountability, sentencing reform, LGBTQ+ anti-discrimination protections, and affirmative action after the Supreme Court's 2023 ruling.",
     talkingPoints: [
@@ -137,7 +137,7 @@ export const issues: Issue[] = [
     id: "defense",
     slug: "defense",
     name: "Defense & Foreign Policy",
-    icon: "*",
+    icon: "\ud83d\udee1\ufe0f",
     description: "Military spending, veterans affairs, foreign aid, NATO, trade agreements, and diplomatic relations.",
     explainer: "The U.S. has the world's largest military budget. Congress authorizes military operations, approves arms sales, ratifies treaties, and controls the defense budget through the annual National Defense Authorization Act (NDAA). The President is commander-in-chief but needs congressional authorization for sustained military action. Foreign aid is a tiny fraction of the federal budget (less than 1%) but is politically contentious.",
     talkingPoints: [

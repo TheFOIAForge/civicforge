@@ -67,6 +67,89 @@ export interface Controversy {
   description: string;
 }
 
+// ── Lobbying (Senate LDA) ──
+export interface LobbyingFiling {
+  filingId: string;
+  registrant: string;       // lobbying firm
+  client: string;            // who's paying
+  amount: number;
+  filingYear: number;
+  issueCodes: string[];
+  specificIssues: string[];
+  lobbyists: string[];
+  matchesDonor: boolean;     // client fuzzy-matches a top donor
+}
+
+// ── Dark Money (ProPublica 990s) ──
+export interface NonprofitInfo {
+  ein: string;
+  name: string;
+  city: string;
+  state: string;
+  totalRevenue: number;
+  totalExpenses: number;
+  totalAssets: number;
+  taxPeriod: string;
+}
+
+export interface DarkMoneyConnection {
+  spenderName: string;
+  spenderAmount: string;
+  support: boolean;
+  connectedNonprofits: NonprofitInfo[];
+}
+
+// ── Federal Register ──
+export interface FederalRegisterDocument {
+  documentNumber: string;
+  type: "RULE" | "PRORULE" | "NOTICE";
+  title: string;
+  abstract: string;
+  agencies: string[];
+  commentEndDate: string | null;
+  publicationDate: string;
+  htmlUrl: string;
+  pdfUrl: string;
+}
+
+// ── GAO Reports ──
+export interface GAOReport {
+  packageId: string;
+  title: string;
+  dateIssued: string;
+  summary: string;
+  pdfUrl: string;
+  govInfoUrl: string;
+}
+
+// ── Committee Hearings ──
+export interface CommitteeHearing {
+  title: string;
+  date: string;
+  chamber: "Senate" | "House" | "Joint";
+  committee: string;
+  url: string;
+}
+
+// ── USAspending ──
+export interface DistrictSpending {
+  recipientName: string;
+  awardAmount: number;
+  awardingAgency: string;
+  description: string;
+  awardType: string;
+}
+
+export interface DistrictSpendingSummary {
+  totalObligated: number;
+  contractCount: number;
+  grantCount: number;
+  topRecipients: Array<{ name: string; total: number }>;
+  topAgencies: Array<{ name: string; total: number }>;
+  awards: DistrictSpending[];
+  donorContractorOverlaps: string[];
+}
+
 export interface Representative {
   id: string;
   slug: string;
@@ -113,6 +196,12 @@ export interface Representative {
   controversies: Controversy[];
   votingRecord: VotingCategory[];
   keyVotes: KeyVote[];
+
+  // Deep data
+  lobbyingFilings?: LobbyingFiling[];
+  darkMoneyConnections?: DarkMoneyConnection[];
+  committeeHearings?: CommitteeHearing[];
+  districtSpending?: DistrictSpendingSummary;
 
   // Photo
   photoUrl?: string;

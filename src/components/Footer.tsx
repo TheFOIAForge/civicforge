@@ -4,7 +4,7 @@ export default function Footer() {
   return (
     <footer className="border-t-3 border-red bg-black text-white mt-auto">
       <div className="max-w-7xl mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <span className="font-headline text-2xl uppercase">
               Civic<span className="text-red">Forge</span>
@@ -20,9 +20,6 @@ export default function Footer() {
                 FOIAForge
               </a>
             </p>
-            <p className="mt-2 text-sm text-white/50 font-mono">
-              Democracy requires participation.
-            </p>
           </div>
           <div>
             <h4 className="font-headline text-base mb-4 text-white">Navigate</h4>
@@ -31,15 +28,6 @@ export default function Footer() {
               <Link href="/issues" className="text-base text-white/70 hover:text-white no-underline font-mono font-bold">Issues</Link>
               <Link href="/draft" className="text-base text-white/70 hover:text-white no-underline font-mono font-bold">Take Action</Link>
               <Link href="/campaigns" className="text-base text-white/70 hover:text-white no-underline font-mono font-bold">Campaigns</Link>
-            </div>
-          </div>
-          <div>
-            <h4 className="font-headline text-base mb-4 text-white">Data Sources</h4>
-            <div className="flex flex-col gap-2 font-mono text-sm text-white/70">
-              <span>Congress.gov API</span>
-              <span>U.S. Census Bureau</span>
-              <span>OpenFEC</span>
-              <span>LegiScan</span>
             </div>
           </div>
         </div>

@@ -39,4 +39,10 @@ export const TTL = {
   VOTES: 21600,            // 6 hours
   ADDRESS_LOOKUP: 300,     // 5 minutes
   BILLS: 3600,             // 1 hour
+  LOBBYING: 86400,         // 24 hours
+  NONPROFITS: 86400,       // 24 hours
+  FED_REGISTER: 3600,      // 1 hour
+  GAO: 21600,              // 6 hours
+  HEARINGS: 3600,          // 1 hour
+  SPENDING: 86400,         // 24 hours
 } as const;

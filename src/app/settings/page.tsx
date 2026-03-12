@@ -2,12 +2,21 @@
 
 import { useState, useEffect } from "react";
 
+interface ApiStatus {
+  name: string;
+  status: "up" | "down" | "no_key";
+  latencyMs: number;
+}
+
 export default function SettingsPage() {
   const [apiKey, setApiKey] = useState("");
   const [savedKey, setSavedKey] = useState("");
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<"success" | "error" | null>(null);
   const [testMessage, setTestMessage] = useState("");
+  const [apis, setApis] = useState<ApiStatus[]>([]);
+  const [apisLoading, setApisLoading] = useState(true);
+  const [apisTimestamp, setApisTimestamp] = useState("");
 
   useEffect(() => {
     const stored = localStorage.getItem("civicforge_api_key");
@@ -15,7 +24,22 @@ export default function SettingsPage() {
       setSavedKey(stored);
       setApiKey(stored);
     }
+    fetchApiStatus();
   }, []);
+
+  async function fetchApiStatus() {
+    setApisLoading(true);
+    try {
+      const res = await fetch("/api/health");
+      const data = await res.json();
+      setApis(data.apis);
+      setApisTimestamp(data.timestamp);
+    } catch {
+      setApis([]);
+    } finally {
+      setApisLoading(false);
+    }
+  }
 
   function handleSave() {
     const trimmed = apiKey.trim();
@@ -210,6 +234,82 @@ export default function SettingsPage() {
             </button>
           </div>
         </div>
+      </section>
+
+      {/* API Status */}
+      <section className="border-3 border-border p-6 bg-surface mt-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-headline text-3xl">API Status</h2>
+          <button
+            onClick={fetchApiStatus}
+            disabled={apisLoading}
+            className="px-4 py-2 font-mono text-sm border-2 border-border cursor-pointer hover:bg-black hover:text-white transition-colors font-bold"
+          >
+            {apisLoading ? "Checking..." : "Refresh"}
+          </button>
+        </div>
+        <p className="font-body text-base text-gray-mid mb-5">
+          Real-time status of the data sources powering CivicForge.
+        </p>
+
+        {apisLoading ? (
+          <div className="font-mono text-sm text-gray-mid animate-pulse">
+            Pinging APIs...
+          </div>
+        ) : (
+          <>
+            <div className="space-y-2">
+              {apis.map((api) => (
+                <div
+                  key={api.name}
+                  className="flex items-center justify-between border-2 border-border p-4"
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`inline-block w-3 h-3 rounded-full ${
+                        api.status === "up"
+                          ? "bg-green"
+                          : api.status === "no_key"
+                          ? "bg-yellow"
+                          : "bg-status-red"
+                      }`}
+                    />
+                    <span className="font-mono text-base font-bold">
+                      {api.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    {api.status === "up" && (
+                      <span className="font-mono text-xs text-gray-mid">
+                        {api.latencyMs}ms
+                      </span>
+                    )}
+                    <span
+                      className={`font-mono text-xs font-bold uppercase ${
+                        api.status === "up"
+                          ? "text-green"
+                          : api.status === "no_key"
+                          ? "text-yellow-dark"
+                          : "text-status-red"
+                      }`}
+                    >
+                      {api.status === "up"
+                        ? "Operational"
+                        : api.status === "no_key"
+                        ? "No Key"
+                        : "Down"}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {apisTimestamp && (
+              <p className="font-mono text-xs text-gray-mid mt-3">
+                Last checked: {new Date(apisTimestamp).toLocaleString()}
+              </p>
+            )}
+          </>
+        )}
       </section>
     </div>
   );

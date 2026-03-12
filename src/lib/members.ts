@@ -7,6 +7,10 @@ import {
 
 import { transformFinancials, type FECFinanceResult, type IndependentExpenditure } from "./transformers/openfec";
 import { getVotingStats } from "./voteview";
+import { getLobbyingForMember } from "./lda";
+import { getDarkMoneyConnections } from "./propublica-nonprofits";
+import { getHearingsForMember } from "./congress-hearings";
+import { getDistrictSpendingForMember } from "./usaspending";
 import congressLegislatorsData from "@/data/congress-legislators.json";
 
 // Cast the imported JSON to our expected type
@@ -442,11 +446,15 @@ export async function getEnrichedMember(
   // Extract bioguide ID from the bioguide URL (e.g. ".../P000197" → "P000197")
   const bioguideId = base.bioguide?.split("/").pop() || base.id;
 
-  // Fetch enrichments in parallel
-  const [congressData, financeData, votingStats] = await Promise.all([
+  // Fetch enrichments in parallel (core + deep data)
+  const [congressData, financeData, votingStats, lobbyData, darkMoneyData, hearingsData, spendingData] = await Promise.all([
     enrichMemberFromCongress(bioguideId),
     getMemberFinance(bioguideId),
     getVotingStats(bioguideId, base.chamber),
+    getLobbyingForMember(bioguideId).catch(() => []),
+    getDarkMoneyConnections(bioguideId).catch(() => []),
+    getHearingsForMember(bioguideId).catch(() => []),
+    getDistrictSpendingForMember(bioguideId).catch(() => null),
   ]);
 
   return {
@@ -471,5 +479,10 @@ export async function getEnrichedMember(
     partyLoyalty: votingStats.partyLoyalty || base.partyLoyalty,
     votesCast: votingStats.votesCast || base.votesCast,
     missedVotes: votingStats.missedVotes || base.missedVotes,
+    // Deep data enrichment
+    lobbyingFilings: lobbyData,
+    darkMoneyConnections: darkMoneyData,
+    committeeHearings: hearingsData,
+    districtSpending: spendingData || undefined,
   };
 }

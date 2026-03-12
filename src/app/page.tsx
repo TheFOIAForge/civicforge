@@ -92,9 +92,6 @@ export default function Home() {
             </button>
           </form>
 
-          <p className="mt-4 font-mono text-sm text-white/50">
-            Data sourced from Congress.gov, U.S. Census Bureau, and OpenFEC
-          </p>
         </div>
       </section>
 
@@ -239,12 +236,12 @@ export default function Home() {
                   <p className="font-mono text-sm text-red font-bold mt-1">{rep.leadershipRole}</p>
                 )}
                 <div className="mt-3 pt-3 border-t-2 border-border-light flex gap-4">
-                  <span className="font-mono text-xs text-gray-mid">
-                    <span className="font-bold">{rep.partyLoyalty}%</span> loyalty
-                  </span>
-                  <span className="font-mono text-xs text-gray-mid">
+                  {rep.partyLoyalty > 0 && <span className="font-mono text-xs text-gray-mid">
+                    <span className="font-bold">{rep.partyLoyalty}%</span> Party Loyalty
+                  </span>}
+                  {rep.billsIntroduced > 0 && <span className="font-mono text-xs text-gray-mid">
                     <span className="font-bold">{rep.billsIntroduced}</span> bills
-                  </span>
+                  </span>}
                 </div>
               </Link>
             ))}
