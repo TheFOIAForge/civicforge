@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import type { Representative } from "@/data/types";
+import type { Representative, ContactLogEntry, EmailServiceConfig } from "@/data/types";
 
 function partyColor(party: string) {
   if (party === "D") return "bg-dem text-white";
@@ -39,10 +39,22 @@ export default function RepProfilePage() {
   const [lobbyAnalysis, setLobbyAnalysis] = useState("");
   const [lobbyAnalysisLoading, setLobbyAnalysisLoading] = useState(false);
   const [expandedFilings, setExpandedFilings] = useState<Set<number>>(new Set());
+  const [latestDraft, setLatestDraft] = useState<ContactLogEntry | null>(null);
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailResult, setEmailResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   useEffect(() => {
     setHasApiKey(!!localStorage.getItem("civicforge_api_key"));
-  }, []);
+    // Load latest draft for this rep from contact log
+    const stored = localStorage.getItem("civicforge_contacts");
+    if (stored) {
+      const contacts: ContactLogEntry[] = JSON.parse(stored);
+      const repDrafts = contacts.filter((c) => c.repId === slug || c.repName?.toLowerCase().includes(slug.replace(/-/g, " ")));
+      if (repDrafts.length > 0) {
+        setLatestDraft(repDrafts[repDrafts.length - 1]);
+      }
+    }
+  }, [slug]);
 
   useEffect(() => {
     setEnriching(true);
@@ -64,10 +76,51 @@ export default function RepProfilePage() {
       .catch(() => { setLoading(false); setEnriching(false); });
   }, [slug]);
 
+  function openMailto() {
+    if (!rep) return;
+    const subject = latestDraft ? `Re: ${latestDraft.issue}` : `Message for ${rep.fullName}`;
+    const body = latestDraft?.content || "";
+    const mailto = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(mailto, "_self");
+  }
+
+  async function sendDirectEmail() {
+    if (!rep || !latestDraft?.content) return;
+    const configStr = localStorage.getItem("civicforge_email_config");
+    if (!configStr) return;
+    const config: EmailServiceConfig = JSON.parse(configStr);
+    setEmailSending(true);
+    setEmailResult(null);
+    try {
+      const res = await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: rep.email || "",
+          subject: `Re: ${latestDraft.issue}`,
+          body: latestDraft.content,
+          provider: config.provider,
+          apiKey: config.apiKey,
+          from: config.senderEmail,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setEmailResult({ ok: true, message: "Email sent successfully." });
+      } else {
+        setEmailResult({ ok: false, message: data.error || "Failed to send email." });
+      }
+    } catch (err) {
+      setEmailResult({ ok: false, message: err instanceof Error ? err.message : "Network error." });
+    } finally {
+      setEmailSending(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-        <p className="font-headline text-3xl animate-pulse">Loading profile...</p>
+        <p className="font-headline text-3xl motion-safe:animate-pulse">Loading profile...</p>
       </div>
     );
   }
@@ -93,6 +146,95 @@ export default function RepProfilePage() {
     ...rep.votingRecord.map((v) => v.yea + v.nay),
     1
   );
+
+  // ── Follow the Money: Connections ──
+  // Cross-reference lobbying filings, donors, and votes
+  type MoneyConnection = {
+    type: "lobby-vote" | "donor-lobby";
+    entity: string;
+    amount?: string;
+    bill?: string;
+    billTitle?: string;
+    vote?: "YEA" | "NAY" | "ABSTAIN";
+    lobbyClient?: string;
+    matchedBillCount?: number;
+    matchedBills?: Array<{ bill: string; title: string; vote: "YEA" | "NAY" | "ABSTAIN" }>;
+  };
+
+  const moneyConnections: MoneyConnection[] = [];
+
+  if (!enriching && rep.lobbyingFilings && rep.keyVotes) {
+    const voteLookup = new Map<string, { title: string; vote: "YEA" | "NAY" | "ABSTAIN" }>();
+    for (const kv of rep.keyVotes) {
+      // Normalize bill number: "H.R. 1234" -> "hr1234", "S. 456" -> "s456"
+      const normalized = kv.bill.replace(/[\s.]/g, "").toLowerCase();
+      voteLookup.set(normalized, { title: kv.title, vote: kv.vote });
+    }
+
+    // 1) Lobbying filing bills matched against key votes
+    for (const filing of rep.lobbyingFilings) {
+      for (const billNum of filing.billsLobbied || []) {
+        const normalizedBill = billNum.replace(/[\s.]/g, "").toLowerCase();
+        const matchedVote = voteLookup.get(normalizedBill);
+        if (matchedVote) {
+          moneyConnections.push({
+            type: "lobby-vote",
+            entity: filing.client,
+            amount: filing.amount > 0 ? `$${filing.amount.toLocaleString()}` : undefined,
+            bill: billNum,
+            billTitle: matchedVote.title,
+            vote: matchedVote.vote,
+          });
+        }
+      }
+    }
+
+    // 2) Top donors whose names fuzzy-match lobbying clients
+    for (const donor of rep.topDonors) {
+      const donorLower = donor.name.toLowerCase();
+      const matchingFilings = rep.lobbyingFilings.filter((f) => {
+        const clientLower = f.client.toLowerCase();
+        return (
+          clientLower.includes(donorLower) ||
+          donorLower.includes(clientLower) ||
+          // Match on significant substrings (3+ word orgs)
+          donorLower.split(/\s+/).filter((w) => w.length > 3).some((w) => clientLower.includes(w) && clientLower.length < donorLower.length * 2)
+        );
+      });
+
+      if (matchingFilings.length > 0) {
+        // Find bills from these filings that the member voted on
+        const matchedBills: Array<{ bill: string; title: string; vote: "YEA" | "NAY" | "ABSTAIN" }> = [];
+        for (const f of matchingFilings) {
+          for (const billNum of f.billsLobbied || []) {
+            const normalizedBill = billNum.replace(/[\s.]/g, "").toLowerCase();
+            const matchedVote = voteLookup.get(normalizedBill);
+            if (matchedVote) {
+              matchedBills.push({ bill: billNum, title: matchedVote.title, vote: matchedVote.vote });
+            }
+          }
+        }
+
+        moneyConnections.push({
+          type: "donor-lobby",
+          entity: donor.name,
+          amount: donor.amount,
+          lobbyClient: matchingFilings[0].client,
+          matchedBillCount: matchedBills.length,
+          matchedBills: matchedBills.length > 0 ? matchedBills : undefined,
+        });
+      }
+    }
+  }
+
+  // Deduplicate connections by entity+bill
+  const seenKeys = new Set<string>();
+  const uniqueConnections = moneyConnections.filter((c) => {
+    const key = `${c.type}-${c.entity}-${c.bill || ""}-${c.lobbyClient || ""}`;
+    if (seenKeys.has(key)) return false;
+    seenKeys.add(key);
+    return true;
+  });
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -208,13 +350,36 @@ export default function RepProfilePage() {
           <section className="border-3 border-border p-6 bg-surface">
             <h2 className="font-headline text-2xl mb-5">&#128203; Contact Information</h2>
 
+            {/* Quick action buttons */}
+            <div className="flex flex-wrap gap-2 mb-5">
+              {rep.contactForm && (
+                <a
+                  href={rep.contactForm}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-5 py-3 bg-red text-white font-headline uppercase text-sm no-underline hover:bg-red-dark transition-colors border-3 border-red hover:border-red-dark"
+                >
+                  Open Contact Form &#8594;
+                </a>
+              )}
+              <button
+                onClick={openMailto}
+                className="px-5 py-3 bg-black text-white font-headline uppercase text-sm cursor-pointer hover:bg-gray-dark transition-colors border-3 border-black hover:border-gray-dark"
+              >
+                &#9993; Email Client
+              </button>
+            </div>
+
             {rep.offices.map((office, i) => (
               <div key={i} className="mb-5 pb-5 border-b-2 border-border-light last:border-0 last:mb-0 last:pb-0">
                 <h3 className="font-mono text-sm text-gray-mid font-bold mb-2">{office.label.toUpperCase()}</h3>
                 <p className="font-body text-base">{office.street}</p>
                 <p className="font-body text-base">{office.city}, {office.state} {office.zip}</p>
-                <a href={`tel:${office.phone}`} className="font-mono text-base text-red no-underline hover:underline font-bold">
-                  {office.phone}
+                <a
+                  href={`tel:${office.phone}`}
+                  className="inline-flex items-center gap-2 mt-2 px-4 py-2 border-2 border-border font-mono text-sm text-black no-underline hover:bg-red hover:text-white hover:border-red transition-colors font-bold"
+                >
+                  &#128222; Call {office.phone}
                 </a>
               </div>
             ))}
@@ -294,9 +459,13 @@ export default function RepProfilePage() {
                 <h3 className="font-mono text-sm text-gray-mid font-bold mb-3">COMMITTEES</h3>
                 <div className="flex flex-wrap gap-2">
                   {rep.committees.map((c, i) => (
-                    <span key={i} className="px-3 py-2 border-2 border-border-light font-mono text-sm bg-cream-dark text-gray-dark font-bold">
+                    <Link
+                      key={i}
+                      href={`/committees/${c.toLowerCase().replace(/['']/g, "").replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`}
+                      className="px-3 py-2 border-2 border-border-light font-mono text-sm bg-cream-dark text-gray-dark font-bold no-underline hover:bg-red hover:text-white hover:border-red transition-colors"
+                    >
                       {c}
-                    </span>
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -351,7 +520,7 @@ export default function RepProfilePage() {
 
           {/* Deep Data Loading Skeleton */}
           {enriching && (
-            <section className="border-3 border-border p-6 bg-surface animate-pulse">
+            <section className="border-3 border-border p-6 bg-surface motion-safe:animate-pulse">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-5 h-5 border-2 border-border border-t-red animate-spin" style={{ borderRadius: '50%', animationDuration: '1s' }} />
                 <span className="font-mono text-sm text-gray-mid font-bold">LOADING LOBBYING, HEARINGS &amp; SPENDING DATA&hellip;</span>
@@ -407,7 +576,7 @@ export default function RepProfilePage() {
               )}
               {lobbyAnalysisLoading && (
                 <div className="mb-4 bg-surface border-2 border-border p-4 text-center">
-                  <p className="font-mono text-sm text-gray-mid animate-pulse">Analyzing lobbying patterns...</p>
+                  <p className="font-mono text-sm text-gray-mid motion-safe:animate-pulse">Analyzing lobbying patterns...</p>
                 </div>
               )}
               {lobbyAnalysis && (
@@ -513,6 +682,101 @@ export default function RepProfilePage() {
                 </div>
                 );
               })}
+            </section>
+          )}
+
+          {/* Follow the Money: Connections */}
+          {!enriching && (
+            <section className="border-3 border-border border-l-[6px] border-l-red p-6 bg-cream-dark">
+              <h2 className="font-headline text-2xl mb-2 flex items-center gap-2">
+                <svg className="w-6 h-6 text-red" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+                FOLLOW THE MONEY: CONNECTIONS
+              </h2>
+              <p className="font-mono text-xs text-gray-mid mb-4">
+                Auto-detected links between campaign donors, lobbying activity, and voting record.
+              </p>
+
+              {uniqueConnections.length > 0 ? (
+                <div className="space-y-3">
+                  {uniqueConnections.map((conn, i) => (
+                    <div key={i} className="bg-surface border-2 border-border p-4">
+                      {conn.type === "lobby-vote" && (
+                        <>
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap mb-1">
+                                <span className="px-2 py-0.5 font-mono text-[10px] font-bold bg-red/10 border border-red/30 text-red">LOBBY &rarr; VOTE</span>
+                                {conn.amount && (
+                                  <span className="font-mono text-xs text-gray-mid font-bold">{conn.amount} spent</span>
+                                )}
+                              </div>
+                              <div className="font-headline text-base">{conn.entity}</div>
+                              <div className="font-body text-sm text-gray-mid mt-1">
+                                Lobbied on <span className="font-mono text-xs font-bold text-red">{conn.bill}</span>
+                                {conn.billTitle && <> ({conn.billTitle})</>}
+                              </div>
+                            </div>
+                            <div className="shrink-0">
+                              <span className={`px-3 py-1.5 font-mono text-sm font-bold ${
+                                conn.vote === "YEA" ? "bg-green text-white" :
+                                conn.vote === "NAY" ? "bg-status-red text-white" :
+                                "bg-gray-mid text-white"
+                              }`}>
+                                {rep.lastName} voted {conn.vote}
+                              </span>
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {conn.type === "donor-lobby" && (
+                        <>
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <span className="px-2 py-0.5 font-mono text-[10px] font-bold bg-yellow border border-yellow text-black">DONOR &rarr; LOBBY</span>
+                            {conn.amount && (
+                              <span className="font-mono text-xs text-gray-mid font-bold">{conn.amount}</span>
+                            )}
+                          </div>
+                          <div className="font-headline text-base">
+                            Top donor <span className="text-red">{conn.entity}</span>
+                          </div>
+                          <div className="font-body text-sm text-gray-mid mt-1">
+                            Lobbying client: {conn.lobbyClient}
+                            {conn.matchedBillCount && conn.matchedBillCount > 0 && conn.matchedBills && (
+                              <span className="font-mono text-xs"> &mdash; lobbied on {conn.matchedBillCount} bill{conn.matchedBillCount > 1 ? "s" : ""} that {rep.lastName} voted on</span>
+                            )}
+                          </div>
+                          {conn.matchedBills && conn.matchedBills.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {conn.matchedBills.map((mb, j) => (
+                                <span key={j} className={`px-2 py-1 font-mono text-[10px] font-bold ${
+                                  mb.vote === "YEA" ? "bg-green/10 border border-green/30 text-green" :
+                                  mb.vote === "NAY" ? "bg-status-red/10 border border-status-red/30 text-status-red" :
+                                  "bg-gray-mid/10 border border-gray-mid/30 text-gray-mid"
+                                }`}>
+                                  {mb.bill}: {mb.vote}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-surface border-2 border-border-light p-4 text-center">
+                  <p className="font-body text-sm text-gray-mid">
+                    No direct connections found between campaign donors and lobbying activity for {rep.fullName}.
+                  </p>
+                </div>
+              )}
+
+              <p className="font-mono text-[10px] text-gray-mid mt-4 leading-relaxed">
+                DISCLAIMER: Correlation does not imply causation. These connections are automatically detected and may not represent direct influence.
+              </p>
             </section>
           )}
 
@@ -624,14 +888,111 @@ export default function RepProfilePage() {
           )}
         </div>
 
-        {/* Right column: Money + Links */}
+        {/* Right column: Contact + Money + Links */}
         <div className="space-y-6">
+          {/* Sticky Contact This Rep Card */}
+          <section className="border-3 border-red p-6 bg-surface lg:sticky lg:top-4 z-10">
+            <h2 className="font-headline text-2xl mb-4">&#9993; Contact This Rep</h2>
+
+            {/* Contact Form / Email buttons */}
+            <div className="space-y-3 mb-5">
+              {rep.contactForm && (
+                <a
+                  href={rep.contactForm}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full px-5 py-4 bg-red text-white font-headline uppercase text-base text-center no-underline hover:bg-red-dark transition-colors border-3 border-red hover:border-red-dark"
+                >
+                  Open Contact Form &#8594;
+                </a>
+              )}
+
+              <button
+                onClick={openMailto}
+                className="w-full px-5 py-4 bg-black text-white font-headline uppercase text-base text-center cursor-pointer hover:bg-gray-dark transition-colors border-3 border-black hover:border-gray-dark"
+              >
+                {latestDraft ? "Send Your Letter via Email" : "Open Email Client"}
+              </button>
+
+              {latestDraft?.content && (() => {
+                const configStr = typeof window !== "undefined" ? localStorage.getItem("civicforge_email_config") : null;
+                return configStr ? (
+                  <button
+                    onClick={sendDirectEmail}
+                    disabled={emailSending}
+                    className={`w-full px-5 py-4 font-headline uppercase text-base text-center cursor-pointer transition-colors border-3 ${
+                      emailSending
+                        ? "bg-gray-mid text-white border-gray-mid"
+                        : "bg-green text-white border-green hover:bg-black hover:border-black"
+                    }`}
+                  >
+                    {emailSending ? "Sending..." : "Send Directly via Email Service"}
+                  </button>
+                ) : null;
+              })()}
+
+              {emailResult && (
+                <div className={`p-3 font-mono text-sm font-bold border-2 ${
+                  emailResult.ok
+                    ? "border-green bg-green-light text-green"
+                    : "border-status-red bg-status-red-light text-status-red"
+                }`}>
+                  {emailResult.ok ? "\u2705" : "\u274C"} {emailResult.message}
+                </div>
+              )}
+            </div>
+
+            {/* Call buttons for each office */}
+            <div className="space-y-2 mb-5">
+              <h3 className="font-mono text-sm text-gray-mid font-bold">CALL THIS OFFICE</h3>
+              {rep.offices.map((office, i) => (
+                <a
+                  key={i}
+                  href={`tel:${office.phone}`}
+                  className="flex items-center justify-between w-full px-4 py-3 border-2 border-border font-mono text-sm no-underline text-black hover:bg-red hover:text-white hover:border-red transition-colors font-bold"
+                >
+                  <span>{office.label}</span>
+                  <span>&#128222; {office.phone}</span>
+                </a>
+              ))}
+            </div>
+
+            {/* Office Addresses */}
+            <div className="space-y-3">
+              <h3 className="font-mono text-sm text-gray-mid font-bold">OFFICE ADDRESSES</h3>
+              {rep.offices.map((office, i) => (
+                <div key={i} className="p-3 border-2 border-border-light bg-cream">
+                  <p className="font-mono text-xs text-gray-mid font-bold mb-1">{office.label.toUpperCase()}</p>
+                  <p className="font-body text-sm">{office.street}</p>
+                  <p className="font-body text-sm">{office.city}, {office.state} {office.zip}</p>
+                </div>
+              ))}
+            </div>
+
+            {latestDraft && (
+              <div className="mt-4 pt-4 border-t-2 border-border-light">
+                <p className="font-mono text-xs text-gray-mid font-bold">LATEST DRAFT</p>
+                <p className="font-mono text-sm mt-1">
+                  Re: {latestDraft.issue} ({latestDraft.date})
+                </p>
+              </div>
+            )}
+
+            {!rep.contactForm && (
+              <div className="mt-4 p-3 bg-yellow-light border-2 border-yellow">
+                <p className="font-mono text-xs font-bold text-gray-mid">
+                  NOTE: Members of Congress do not publish direct email addresses. Use the &quot;Open Email Client&quot; button to compose a message, then paste it into the official contact form on their website.
+                </p>
+              </div>
+            )}
+          </section>
+
           {/* Follow the Money */}
           <section className="border-3 border-border p-6 bg-cream-dark">
             <h2 className="font-headline text-2xl mb-4">&#128176; Follow the Money</h2>
 
             {enriching && (
-              <div className="space-y-4 animate-pulse">
+              <div className="space-y-4 motion-safe:animate-pulse">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-4 h-4 bg-border animate-spin" style={{ animationDuration: '2s' }} />
                   <span className="font-mono text-sm text-gray-mid font-bold">LOADING LIVE FEC DATA&hellip;</span>
@@ -659,6 +1020,177 @@ export default function RepProfilePage() {
             )}
 
             {!enriching && <>
+
+            {/* AI Analysis — prominent at top */}
+            <div className="mb-5">
+              {aiMessages.length === 0 && !aiLoading && (
+                hasApiKey ? (
+                  <button
+                    onClick={() => {
+                      const apiKey = localStorage.getItem("civicforge_api_key");
+                      if (!apiKey || !rep) return;
+                      setAiLoading(true);
+
+                      const cycleBreakdown = (rep.financeCycles || [])
+                        .map((c) => `${c.cycle === "all" ? "All Time" : c.cycle}: ${c.totalFundraising} raised, ${c.smallDollarPct}% small dollar, ${c.outsideSpending.length} outside spenders`)
+                        .join("\n");
+
+                      const outsideDetail = (rep.outsideSpending || [])
+                        .map((s) => `${s.support ? "FOR" : "AGAINST"}: ${s.name} (${s.amount})`)
+                        .join("\n");
+
+                      const donorDetail = rep.topDonors.map((d) => `${d.name}: ${d.amount}`).join(", ");
+                      const occDetail = rep.topIndustries.map((d) => `${d.name}: ${d.amount}`).join(", ");
+
+                      const systemPrompt = `You are a nonpartisan campaign finance analyst. Given the following FEC data for ${rep.fullName} (${rep.party === "D" ? "Democrat" : rep.party === "R" ? "Republican" : "Independent"}-${rep.stateAbbr}), explain the key takeaways in plain language.
+
+DATA:
+${cycleBreakdown}
+
+OUTSIDE SPENDING (ALL TIME):
+${outsideDetail || "None recorded"}
+
+TOP DONOR EMPLOYERS: ${donorDetail || "None"}
+DONOR OCCUPATIONS: ${occDetail || "None"}
+
+OpenSecrets profile: ${rep.opensecrets || "N/A"}
+
+RULES:
+- Be factual and cite specific dollar amounts
+- Explain what the data means for voters (the "so what")
+- Note anything unusual (high small-dollar %, heavy opposition spending, etc.)
+- Keep it under 300 words
+- No partisan framing — present facts and let the reader decide
+- Do not use phrases like "let that sink in", "make no mistake", or "imagine"
+- Write clearly and directly like a journalist`;
+
+                      fetch("https://api.anthropic.com/v1/messages", {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                          "x-api-key": apiKey,
+                          "anthropic-version": "2023-06-01",
+                          "anthropic-dangerous-direct-browser-access": "true",
+                        },
+                        body: JSON.stringify({
+                          model: "claude-sonnet-4-20250514",
+                          max_tokens: 1000,
+                          system: systemPrompt,
+                          messages: [{ role: "user", content: "Analyze this campaign finance data and give me the key takeaways." }],
+                        }),
+                      })
+                        .then((r) => r.json())
+                        .then((data) => {
+                          const text = data.content?.[0]?.text || "Unable to generate summary.";
+                          setAiMessages([
+                            { role: "user", content: "Analyze this campaign finance data and give me the key takeaways." },
+                            { role: "assistant", content: text },
+                          ]);
+                          setAiLoading(false);
+                        })
+                        .catch(() => {
+                          setAiMessages([
+                            { role: "user", content: "Analyze this campaign finance data." },
+                            { role: "assistant", content: "Failed to generate summary. Please check your API key in Settings." },
+                          ]);
+                          setAiLoading(false);
+                        });
+                    }}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-black text-white font-mono text-sm text-center cursor-pointer hover:bg-red transition-colors font-bold border-3 border-black hover:border-red"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                    ANALYZE ALL CAMPAIGN FINANCE WITH AI
+                  </button>
+                ) : (
+                  <Link
+                    href="/settings"
+                    className="block px-4 py-3 bg-surface text-gray-mid font-mono text-sm text-center no-underline border-2 border-border hover:bg-hover transition-colors font-bold"
+                  >
+                    SET API KEY IN SETTINGS TO ENABLE AI ANALYSIS
+                  </Link>
+                )
+              )}
+
+              {aiLoading && (
+                <div className="bg-surface border-2 border-border p-4 text-center">
+                  <p className="font-mono text-sm text-gray-mid motion-safe:animate-pulse">Analyzing campaign finance data...</p>
+                </div>
+              )}
+
+              {aiMessages.length > 0 && !aiLoading && (
+                <div className="space-y-3">
+                  {aiMessages.filter((m) => m.role === "assistant").map((m, i) => (
+                    <div key={i} className="bg-surface border-2 border-border p-4">
+                      <p className="font-body text-sm leading-relaxed whitespace-pre-wrap">{m.content}</p>
+                    </div>
+                  ))}
+
+                  {/* Follow-up input */}
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const apiKey = localStorage.getItem("civicforge_api_key");
+                      if (!apiKey || !followUp.trim() || aiLoading) return;
+                      const newMessages = [...aiMessages, { role: "user", content: followUp.trim() }];
+                      setAiMessages(newMessages);
+                      setFollowUp("");
+                      setAiLoading(true);
+
+                      const cycleBreakdown = (rep.financeCycles || [])
+                        .map((c) => `${c.cycle === "all" ? "All Time" : c.cycle}: ${c.totalFundraising} raised, ${c.smallDollarPct}% small dollar`)
+                        .join("\n");
+                      const outsideDetail = (rep.outsideSpending || []).map((s) => `${s.support ? "FOR" : "AGAINST"}: ${s.name} (${s.amount})`).join("\n");
+                      const systemPrompt = `You are a nonpartisan campaign finance analyst discussing FEC data for ${rep.fullName} (${rep.party === "D" ? "Democrat" : rep.party === "R" ? "Republican" : "Independent"}-${rep.stateAbbr}). Cycle data:\n${cycleBreakdown}\nOutside spending:\n${outsideDetail || "None"}\nTop employers: ${rep.topDonors.map((d) => `${d.name}: ${d.amount}`).join(", ") || "None"}\nOccupations: ${rep.topIndustries.map((d) => `${d.name}: ${d.amount}`).join(", ") || "None"}\n\nRules: Be factual, cite numbers, no partisan framing, write clearly like a journalist. Keep answers concise.`;
+
+                      fetch("https://api.anthropic.com/v1/messages", {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                          "x-api-key": apiKey,
+                          "anthropic-version": "2023-06-01",
+                          "anthropic-dangerous-direct-browser-access": "true",
+                        },
+                        body: JSON.stringify({
+                          model: "claude-sonnet-4-20250514",
+                          max_tokens: 1000,
+                          system: systemPrompt,
+                          messages: newMessages.map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
+                        }),
+                      })
+                        .then((r) => r.json())
+                        .then((data) => {
+                          const text = data.content?.[0]?.text || "Unable to respond.";
+                          setAiMessages([...newMessages, { role: "assistant", content: text }]);
+                          setAiLoading(false);
+                        })
+                        .catch(() => {
+                          setAiMessages([...newMessages, { role: "assistant", content: "Failed to respond. Please try again." }]);
+                          setAiLoading(false);
+                        });
+                    }}
+                    className="flex gap-2"
+                  >
+                    <input
+                      type="text"
+                      value={followUp}
+                      onChange={(e) => setFollowUp(e.target.value)}
+                      placeholder="Ask a follow-up question..."
+                      className="flex-1 px-3 py-2 border-2 border-border bg-surface font-mono text-sm focus:outline-none focus:border-red"
+                    />
+                    <button
+                      type="submit"
+                      disabled={aiLoading || !followUp.trim()}
+                      className="px-4 py-2 bg-black text-white font-mono text-sm font-bold cursor-pointer hover:bg-red transition-colors disabled:opacity-50"
+                    >
+                      ASK
+                    </button>
+                  </form>
+                </div>
+              )}
+            </div>
+
             {/* Cycle tabs */}
             {(rep.financeCycles || []).length > 0 && (
               <div className="flex flex-wrap gap-1 mb-5">
@@ -748,177 +1280,23 @@ export default function RepProfilePage() {
               </div>
             )}
 
-            {/* AI Summary */}
-            <div className="mb-5 border-t-2 border-border-light pt-5">
-              {aiMessages.length === 0 && !aiLoading && (
-                hasApiKey ? (
-                  <button
-                    onClick={() => {
-                      const apiKey = localStorage.getItem("civicforge_api_key");
-                      if (!apiKey || !rep) return;
-                      setAiLoading(true);
-
-                      const cycleBreakdown = (rep.financeCycles || [])
-                        .map((c) => `${c.cycle === "all" ? "All Time" : c.cycle}: ${c.totalFundraising} raised, ${c.smallDollarPct}% small dollar, ${c.outsideSpending.length} outside spenders`)
-                        .join("\n");
-
-                      const outsideDetail = (rep.outsideSpending || [])
-                        .map((s) => `${s.support ? "FOR" : "AGAINST"}: ${s.name} (${s.amount})`)
-                        .join("\n");
-
-                      const donorDetail = rep.topDonors.map((d) => `${d.name}: ${d.amount}`).join(", ");
-                      const occDetail = rep.topIndustries.map((d) => `${d.name}: ${d.amount}`).join(", ");
-
-                      const systemPrompt = `You are a nonpartisan campaign finance analyst. Given the following FEC data for ${rep.fullName} (${rep.party === "D" ? "Democrat" : rep.party === "R" ? "Republican" : "Independent"}-${rep.stateAbbr}), explain the key takeaways in plain language.
-
-DATA:
-${cycleBreakdown}
-
-OUTSIDE SPENDING (ALL TIME):
-${outsideDetail || "None recorded"}
-
-TOP DONOR EMPLOYERS: ${donorDetail || "None"}
-DONOR OCCUPATIONS: ${occDetail || "None"}
-
-OpenSecrets profile: ${rep.opensecrets || "N/A"}
-
-RULES:
-- Be factual and cite specific dollar amounts
-- Explain what the data means for voters (the "so what")
-- Note anything unusual (high small-dollar %, heavy opposition spending, etc.)
-- Keep it under 300 words
-- No partisan framing — present facts and let the reader decide
-- Do not use phrases like "let that sink in", "make no mistake", or "imagine"
-- Write clearly and directly like a journalist`;
-
-                      fetch("https://api.anthropic.com/v1/messages", {
-                        method: "POST",
-                        headers: {
-                          "Content-Type": "application/json",
-                          "x-api-key": apiKey,
-                          "anthropic-version": "2023-06-01",
-                          "anthropic-dangerous-direct-browser-access": "true",
-                        },
-                        body: JSON.stringify({
-                          model: "claude-sonnet-4-20250514",
-                          max_tokens: 1000,
-                          system: systemPrompt,
-                          messages: [{ role: "user", content: "Analyze this campaign finance data and give me the key takeaways." }],
-                        }),
-                      })
-                        .then((r) => r.json())
-                        .then((data) => {
-                          const text = data.content?.[0]?.text || "Unable to generate summary.";
-                          setAiMessages([
-                            { role: "user", content: "Analyze this campaign finance data and give me the key takeaways." },
-                            { role: "assistant", content: text },
-                          ]);
-                          setAiLoading(false);
-                        })
-                        .catch(() => {
-                          setAiMessages([
-                            { role: "user", content: "Analyze this campaign finance data." },
-                            { role: "assistant", content: "Failed to generate summary. Please check your API key in Settings." },
-                          ]);
-                          setAiLoading(false);
-                        });
-                    }}
-                    className="w-full px-4 py-3 bg-black text-white font-mono text-sm text-center cursor-pointer hover:bg-red transition-colors font-bold"
-                  >
-                    GENERATE AI SUMMARY
-                  </button>
-                ) : (
-                  <Link
-                    href="/settings"
-                    className="block px-4 py-3 bg-surface text-gray-mid font-mono text-sm text-center no-underline border-2 border-border hover:bg-hover transition-colors font-bold"
-                  >
-                    SET API KEY IN SETTINGS TO ENABLE AI SUMMARY
-                  </Link>
-                )
-              )}
-
-              {aiLoading && (
-                <div className="bg-surface border-2 border-border p-4 text-center">
-                  <p className="font-mono text-sm text-gray-mid animate-pulse">Analyzing campaign finance data...</p>
-                </div>
-              )}
-
-              {aiMessages.length > 0 && !aiLoading && (
-                <div className="space-y-3">
-                  {aiMessages.filter((m) => m.role === "assistant").map((m, i) => (
-                    <div key={i} className="bg-surface border-2 border-border p-4">
-                      <p className="font-body text-sm leading-relaxed whitespace-pre-wrap">{m.content}</p>
-                    </div>
-                  ))}
-
-                  {/* Follow-up input */}
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      const apiKey = localStorage.getItem("civicforge_api_key");
-                      if (!apiKey || !followUp.trim() || aiLoading) return;
-                      const newMessages = [...aiMessages, { role: "user", content: followUp.trim() }];
-                      setAiMessages(newMessages);
-                      setFollowUp("");
-                      setAiLoading(true);
-
-                      const cycleBreakdown = (rep.financeCycles || [])
-                        .map((c) => `${c.cycle === "all" ? "All Time" : c.cycle}: ${c.totalFundraising} raised, ${c.smallDollarPct}% small dollar`)
-                        .join("\n");
-                      const outsideDetail = (rep.outsideSpending || []).map((s) => `${s.support ? "FOR" : "AGAINST"}: ${s.name} (${s.amount})`).join("\n");
-                      const systemPrompt = `You are a nonpartisan campaign finance analyst discussing FEC data for ${rep.fullName} (${rep.party === "D" ? "Democrat" : rep.party === "R" ? "Republican" : "Independent"}-${rep.stateAbbr}). Cycle data:\n${cycleBreakdown}\nOutside spending:\n${outsideDetail || "None"}\nTop employers: ${rep.topDonors.map((d) => `${d.name}: ${d.amount}`).join(", ") || "None"}\nOccupations: ${rep.topIndustries.map((d) => `${d.name}: ${d.amount}`).join(", ") || "None"}\n\nRules: Be factual, cite numbers, no partisan framing, write clearly like a journalist. Keep answers concise.`;
-
-                      fetch("https://api.anthropic.com/v1/messages", {
-                        method: "POST",
-                        headers: {
-                          "Content-Type": "application/json",
-                          "x-api-key": apiKey,
-                          "anthropic-version": "2023-06-01",
-                          "anthropic-dangerous-direct-browser-access": "true",
-                        },
-                        body: JSON.stringify({
-                          model: "claude-sonnet-4-20250514",
-                          max_tokens: 1000,
-                          system: systemPrompt,
-                          messages: newMessages.map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
-                        }),
-                      })
-                        .then((r) => r.json())
-                        .then((data) => {
-                          const text = data.content?.[0]?.text || "Unable to respond.";
-                          setAiMessages([...newMessages, { role: "assistant", content: text }]);
-                          setAiLoading(false);
-                        })
-                        .catch(() => {
-                          setAiMessages([...newMessages, { role: "assistant", content: "Failed to respond. Please try again." }]);
-                          setAiLoading(false);
-                        });
-                    }}
-                    className="flex gap-2"
-                  >
-                    <input
-                      type="text"
-                      value={followUp}
-                      onChange={(e) => setFollowUp(e.target.value)}
-                      placeholder="Ask a follow-up question..."
-                      className="flex-1 px-3 py-2 border-2 border-border bg-surface font-mono text-sm focus:outline-none focus:border-red"
-                    />
-                    <button
-                      type="submit"
-                      disabled={aiLoading || !followUp.trim()}
-                      className="px-4 py-2 bg-black text-white font-mono text-sm font-bold cursor-pointer hover:bg-red transition-colors disabled:opacity-50"
-                    >
-                      ASK
-                    </button>
-                  </form>
-                </div>
-              )}
-            </div>
-
             {/* Dark Money Connections */}
             {(rep.darkMoneyConnections || []).length > 0 && (
               <div className="mb-5 border-t-2 border-border-light pt-5">
                 <h3 className="font-mono text-sm text-gray-mid font-bold mb-3">DARK MONEY CONNECTIONS</h3>
+                <div className="p-3 bg-surface border-2 border-border-light mb-4">
+                  <p className="font-body text-sm text-gray-mid mb-2">
+                    Dark money refers to political spending by nonprofits (501(c)(4)s) that aren&apos;t required to disclose their donors. These organizations can spend unlimited amounts on elections without revealing who funds them.
+                  </p>
+                  <a
+                    href="https://www.opensecrets.org/dark-money"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono text-xs text-red font-bold hover:underline"
+                  >
+                    LEARN MORE &rarr;
+                  </a>
+                </div>
                 <p className="font-body text-xs text-gray-mid mb-3">
                   Outside spenders with connected 501(c)(4) nonprofit organizations. Source: ProPublica.
                 </p>
@@ -1026,6 +1404,28 @@ RULES:
               )}
             </section>
           )}
+
+          {/* FOIA — Request Records */}
+          <section className="border-3 border-red bg-red-light p-6">
+            <div className="flex items-start gap-4">
+              <span className="text-3xl shrink-0">&#128451;</span>
+              <div className="flex-1">
+                <h2 className="font-headline text-xl normal-case mb-2">Request Government Records</h2>
+                <p className="font-body text-sm text-gray-mid leading-relaxed mb-3">
+                  Use FOIA Forge to file a Freedom of Information Act request for records related to {rep.fullName}&apos;s committees, votes, or agencies they oversee.
+                </p>
+                <a
+                  href={`https://www.thefoiaforge.org/new-request`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-red text-white font-mono text-xs font-bold no-underline hover:bg-black transition-colors"
+                >
+                  FILE A FOIA REQUEST
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                </a>
+              </div>
+            </div>
+          </section>
 
           {/* Research Links */}
           <section className="border-3 border-border p-6 bg-cream-dark">

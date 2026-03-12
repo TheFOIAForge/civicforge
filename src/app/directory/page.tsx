@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState, useMemo, useEffect } from "react";
 import { US_STATES } from "@/data/states";
 import type { Representative } from "@/data/types";
+import CongressInfoGraphics from "@/components/CongressInfoGraphics";
 
 function partyBg(party: string) {
   if (party === "D") return "bg-dem";
@@ -63,13 +64,17 @@ export default function DirectoryPage() {
         SEARCH BY NAME, FILTER BY STATE, CHAMBER, OR PARTY
       </p>
 
+      {/* Congressional Spotlight Infographics */}
+      <CongressInfoGraphics />
+
       {/* Filters */}
-      <div className="border-3 border-border p-5 mb-8 bg-cream-dark">
+      <div className="border-3 border-border p-5 mb-8 bg-cream-dark" role="search" aria-label="Filter members of Congress">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
-            <label className="font-mono text-sm text-gray-mid block mb-2 font-bold">SEARCH</label>
+            <label htmlFor="dir-search" className="font-mono text-sm text-gray-mid block mb-2 font-bold">SEARCH</label>
             <input
-              type="text"
+              id="dir-search"
+              type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Name or state..."
@@ -77,8 +82,9 @@ export default function DirectoryPage() {
             />
           </div>
           <div>
-            <label className="font-mono text-sm text-gray-mid block mb-2 font-bold">STATE</label>
+            <label htmlFor="dir-state" className="font-mono text-sm text-gray-mid block mb-2 font-bold">STATE</label>
             <select
+              id="dir-state"
               value={stateFilter}
               onChange={(e) => setStateFilter(e.target.value)}
               className="w-full px-4 py-3 border-2 border-border bg-surface font-mono text-base focus:outline-none focus:border-red"
@@ -92,8 +98,9 @@ export default function DirectoryPage() {
             </select>
           </div>
           <div>
-            <label className="font-mono text-sm text-gray-mid block mb-2 font-bold">CHAMBER</label>
+            <label htmlFor="dir-chamber" className="font-mono text-sm text-gray-mid block mb-2 font-bold">CHAMBER</label>
             <select
+              id="dir-chamber"
               value={chamberFilter}
               onChange={(e) => setChamberFilter(e.target.value)}
               className="w-full px-4 py-3 border-2 border-border bg-surface font-mono text-base focus:outline-none focus:border-red"
@@ -104,8 +111,9 @@ export default function DirectoryPage() {
             </select>
           </div>
           <div>
-            <label className="font-mono text-sm text-gray-mid block mb-2 font-bold">PARTY</label>
+            <label htmlFor="dir-party" className="font-mono text-sm text-gray-mid block mb-2 font-bold">PARTY</label>
             <select
+              id="dir-party"
               value={partyFilter}
               onChange={(e) => setPartyFilter(e.target.value)}
               className="w-full px-4 py-3 border-2 border-border bg-surface font-mono text-base focus:outline-none focus:border-red"
@@ -134,7 +142,7 @@ export default function DirectoryPage() {
 
       {/* Results count */}
       {loading ? (
-        <p className="font-mono text-sm text-gray-mid mb-4 font-bold animate-pulse">
+        <p className="font-mono text-sm text-gray-mid mb-4 font-bold motion-safe:animate-pulse" aria-live="polite" aria-busy="true">
           LOADING MEMBERS OF CONGRESS...
         </p>
       ) : (
@@ -155,7 +163,7 @@ export default function DirectoryPage() {
               <div className={`w-12 h-12 ${partyBg(rep.party)} flex items-center justify-center shrink-0 overflow-hidden relative`}>
                 <span className="font-headline text-lg text-white">{rep.firstName[0]}{rep.lastName[0]}</span>
                 {rep.photoUrl && (
-                  <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                  <img src={rep.photoUrl} alt={rep.fullName} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                 )}
               </div>
               <div>
@@ -164,7 +172,7 @@ export default function DirectoryPage() {
                     {rep.party === "D" ? "DEM" : rep.party === "R" ? "GOP" : "IND"}
                   </span>
                   <span className="font-mono text-xs text-gray-mid font-bold">{rep.chamber}</span>
-                  {rep.isLeadership && <span className="text-red text-lg">&#9733;</span>}
+                  {rep.isLeadership && <span className="text-red text-lg" aria-label="Leadership role" title="Leadership role">&#9733;</span>}
                 </div>
               </div>
             </div>

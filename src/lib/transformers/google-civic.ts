@@ -1,3 +1,4 @@
+// TODO: Not yet integrated — kept for planned Google Civic integration
 // Transforms Google Civic Information API response into bioguide-matchable data
 
 export interface CivicOfficial {

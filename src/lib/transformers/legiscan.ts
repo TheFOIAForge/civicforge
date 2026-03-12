@@ -1,3 +1,4 @@
+// TODO: Not yet integrated — kept for planned LegiScan integration
 import type { VotingCategory, KeyVote } from "@/data/types";
 
 // LegiScan roll call vote response

@@ -290,7 +290,7 @@ export default function MindPalacePage() {
             <div className="mb-4">
               <div className="border-3 border-red bg-black text-white p-4 inline-block">
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-red animate-pulse" />
+                  <div className="w-2 h-2 bg-red motion-safe:animate-pulse" />
                   <span className="font-mono text-sm uppercase tracking-wider font-bold">
                     {phase === "planning" && "Analyzing question..."}
                     {phase === "fetching" &&

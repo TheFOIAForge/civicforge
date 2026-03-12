@@ -114,16 +114,35 @@ export interface FederalRegisterDocument {
   publicationDate: string;
   htmlUrl: string;
   pdfUrl: string;
+  regulationsGovUrl: string;
 }
 
 // ── GAO Reports ──
 export interface GAOReport {
   packageId: string;
+  reportNumber: string;
   title: string;
   dateIssued: string;
   summary: string;
   pdfUrl: string;
   govInfoUrl: string;
+  category?: string;
+}
+
+// ── Congressional Committees ──
+export interface Committee {
+  systemCode: string;
+  name: string;
+  slug: string;
+  chamber: "Senate" | "House" | "Joint";
+  url: string;
+  chair?: string;
+  rankingMember?: string;
+  subcommittees: { name: string; systemCode: string }[];
+  members: { name: string; bioguideId: string; party: string; role: string; slug?: string }[];
+  jurisdiction?: string;
+  recentHearings: CommitteeHearing[];
+  websiteUrl?: string;
 }
 
 // ── Committee Hearings ──
@@ -243,6 +262,23 @@ export interface Issue {
   legislation: Legislation[];
 }
 
+// ── Vote Lookup ──
+export interface RecentRollCallVote {
+  congress: number;
+  chamber: "House" | "Senate";
+  date: string;
+  question: string;
+  result: string;
+  billNumber?: string;
+  billTitle?: string;
+  yea: number;
+  nay: number;
+  notVoting: number;
+  url?: string;
+}
+
+export type ContactDeliveryStatus = "drafted" | "emailed" | "called" | "mailed";
+
 export interface ContactLogEntry {
   id: string;
   repId: string;
@@ -253,6 +289,16 @@ export interface ContactLogEntry {
   status: "sent" | "awaiting_response" | "response_received" | "follow_up_needed";
   notes: string;
   content?: string;
+  deliveryStatus?: ContactDeliveryStatus;
+  emailedAt?: string;
+  calledAt?: string;
+  mailedAt?: string;
+}
+
+export interface EmailServiceConfig {
+  provider: "resend" | "sendgrid";
+  apiKey: string;
+  senderEmail: string;
 }
 
 export interface Campaign {

@@ -53,13 +53,25 @@ export default function CampaignsPage() {
     save(campaigns.filter((c) => c.id !== id));
   }
 
-  function getShareUrl(campaign: Campaign) {
-    const base = typeof window !== "undefined" ? window.location.origin : "";
-    return `${base}/campaigns?join=${campaign.id}`;
+  function getCampaignSummary(campaign: Campaign) {
+    const targetReps = allReps.filter((r) => campaign.targetRepIds.includes(r.id));
+    const lines = [
+      `Campaign: ${campaign.title}`,
+      `Issue: ${campaign.issue}`,
+      `Created: ${campaign.createdAt}`,
+      "",
+      "Letter Template:",
+      campaign.letterTemplate,
+    ];
+    if (targetReps.length > 0) {
+      lines.push("", "Target Representatives:");
+      targetReps.forEach((r) => lines.push(`  - ${r.fullName} (${r.party}) — ${r.state}`));
+    }
+    return lines.join("\n");
   }
 
-  function handleCopyLink(campaign: Campaign) {
-    navigator.clipboard.writeText(getShareUrl(campaign));
+  function handleCopyDetails(campaign: Campaign) {
+    navigator.clipboard.writeText(getCampaignSummary(campaign));
     setCopied(campaign.id);
     setTimeout(() => setCopied(null), 2000);
   }
@@ -74,8 +86,14 @@ export default function CampaignsPage() {
     <div className="max-w-6xl mx-auto px-4 py-8">
       <h1 className="font-headline text-5xl md:text-6xl mb-2">Campaigns</h1>
       <p className="font-mono text-sm text-gray-mid mb-8 font-bold">
-        CREATE SHAREABLE GROUP ACTIONS — ONE PERSON IS GOOD, 500 IS BETTER
+        ORGANIZE YOUR ADVOCACY — CREATE CAMPAIGNS AND SHARE DETAILS WITH OTHERS
       </p>
+
+      <div className="mb-6 p-4 border-2 border-border-light bg-surface">
+        <p className="font-mono text-xs text-gray-mid">
+          <span className="font-bold">NOTE:</span> Campaigns are saved to your browser only (localStorage). Use &quot;Copy Campaign Details&quot; to share campaign information with others via email or messaging.
+        </p>
+      </div>
 
       {!creating && (
         <button
@@ -177,7 +195,7 @@ export default function CampaignsPage() {
           <span className="text-5xl block mb-4">{"\u{1F4E3}"}</span>
           <h2 className="font-headline text-3xl mb-3">No campaigns yet</h2>
           <p className="font-body text-lg text-gray-mid">
-            Create a campaign to mobilize others around an issue. Share a link and let people send personalized letters to their own reps.
+            Create a campaign to organize your advocacy efforts. Copy campaign details to share with others via email or messaging.
           </p>
         </div>
       ) : (
@@ -204,10 +222,11 @@ export default function CampaignsPage() {
                     </div>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => handleCopyLink(campaign)}
+                        onClick={() => handleCopyDetails(campaign)}
                         className="px-5 py-2 bg-black text-white font-mono text-sm cursor-pointer hover:bg-red transition-colors font-bold"
+                        title="Copies campaign details as text. Campaigns are stored locally and cannot be shared via URL."
                       >
-                        {copied === campaign.id ? "Copied!" : "Copy Share Link"}
+                        {copied === campaign.id ? "Copied!" : "Copy Campaign Details"}
                       </button>
                       <button
                         onClick={() => handleDelete(campaign.id)}

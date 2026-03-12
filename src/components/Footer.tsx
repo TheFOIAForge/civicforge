@@ -1,18 +1,33 @@
 import Link from "next/link";
 
-const navLinks = [
+const researchLinks = [
   { href: "/directory", label: "Members of Congress" },
+  { href: "/committees", label: "Committees" },
+  { href: "/bills", label: "Legislation" },
   { href: "/issues", label: "Key Issues" },
-  { href: "/draft", label: "Write Congress" },
-  { href: "/federal-register", label: "Federal Register" },
-  { href: "/gao-reports", label: "Oversight Reports" },
+  { href: "/votes", label: "Vote Lookup" },
+  { href: "/compare", label: "Compare Reps" },
 ];
 
-const toolLinks = [
+const watchdogLinks = [
+  { href: "/federal-register", label: "Federal Register" },
+  { href: "/gao-reports", label: "GAO Oversight" },
+];
+
+const actionLinks = [
   { href: "/mind-palace", label: "Mind Palace AI" },
-  { href: "/campaigns", label: "Campaigns" },
+  { href: "/my-reps", label: "My Representatives" },
+  { href: "/draft", label: "Write Congress" },
   { href: "/contacts", label: "My Letters" },
-  { href: "/settings", label: "Settings & API Keys" },
+  { href: "/campaigns", label: "My Campaigns" },
+  { href: "/alerts", label: "Alerts" },
+  { href: "/settings", label: "Settings" },
+];
+
+const foiaLinks = [
+  { href: "https://www.thefoiaforge.org/new-request", label: "File a Request" },
+  { href: "https://www.thefoiaforge.org/my-cases", label: "My FOIA Cases" },
+  { href: "https://www.thefoiaforge.org/agencies", label: "Agency Directory" },
 ];
 
 const dataSources = [
@@ -32,7 +47,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Brand */}
-          <div className="md:col-span-1">
+          <div>
             <Link href="/" className="no-underline">
               <span className="font-headline text-3xl uppercase text-white">
                 Civic<span className="text-red">Forge</span>
@@ -55,13 +70,27 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Navigate */}
+          {/* Research + Watchdog */}
           <div>
             <h4 className="font-mono text-xs font-bold text-white/40 uppercase tracking-widest mb-4">
-              Navigate
+              Research
             </h4>
             <div className="flex flex-col gap-2">
-              {navLinks.map((link) => (
+              {researchLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm text-white/70 hover:text-white no-underline font-mono font-bold transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+            <h4 className="font-mono text-xs font-bold text-white/40 uppercase tracking-widest mb-3 mt-6">
+              Watchdog
+            </h4>
+            <div className="flex flex-col gap-2">
+              {watchdogLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -73,13 +102,13 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Tools */}
+          {/* Take Action + Records (FOIA) */}
           <div>
             <h4 className="font-mono text-xs font-bold text-white/40 uppercase tracking-widest mb-4">
-              Tools
+              Take Action
             </h4>
             <div className="flex flex-col gap-2">
-              {toolLinks.map((link) => (
+              {actionLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -87,6 +116,25 @@ export default function Footer() {
                 >
                   {link.label}
                 </Link>
+              ))}
+            </div>
+            <h4 className="font-mono text-xs font-bold text-white/40 uppercase tracking-widest mb-3 mt-6">
+              Records (FOIA)
+            </h4>
+            <div className="flex flex-col gap-2">
+              {foiaLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-white/70 hover:text-white no-underline font-mono font-bold transition-colors inline-flex items-center gap-1"
+                >
+                  {link.label}
+                  <svg width="10" height="10" className="text-white/30 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
               ))}
             </div>
           </div>
@@ -112,16 +160,39 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="font-mono text-xs text-white/40">
-            &copy; {new Date().getFullYear()} CivicForge. All data is publicly sourced.
-          </p>
-          <div className="flex items-center gap-4">
-            <span className="font-mono text-xs text-white/40">
-              BYOK &mdash; Your API keys stay in your browser
-            </span>
-            <span className="inline-block w-2 h-2 bg-green animate-pulse" title="Open source" />
+        {/* Support CTA */}
+        <div className="mt-10 pt-6 border-t border-white/10">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+            <div>
+              <p className="font-mono text-xs text-white/60 font-bold mb-1">
+                CIVICFORGE IS FREE AND OPEN SOURCE
+              </p>
+              <p className="font-body text-sm text-white/40">
+                If this tool has helped you engage with your government, consider supporting the project.
+              </p>
+            </div>
+            <Link
+              href="/support"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-red text-white font-mono text-xs font-bold no-underline hover:bg-white hover:text-black transition-colors shrink-0"
+            >
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+              </svg>
+              SUPPORT THIS PROJECT
+            </Link>
+          </div>
+
+          {/* Copyright */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="font-mono text-xs text-white/40">
+              &copy; {new Date().getFullYear()} CivicForge. All data is publicly sourced.
+            </p>
+            <div className="flex items-center gap-4">
+              <span className="font-mono text-xs text-white/40">
+                BYOK &mdash; Your API keys stay in your browser
+              </span>
+              <span className="inline-block w-2 h-2 bg-green motion-safe:animate-pulse" title="Open source" aria-hidden="true" />
+            </div>
           </div>
         </div>
       </div>

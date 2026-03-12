@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { issues } from "@/data/issues";
 import type { Representative } from "@/data/types";
+import { useMyReps } from "@/lib/my-reps-context";
 
 function partyBg(party: string) {
   if (party === "D") return "bg-dem";
@@ -34,12 +35,27 @@ const issueSvgPath: Record<string, string> = {
   defense: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
 };
 
+interface FeedItem {
+  id: string;
+  type: string;
+  title: string;
+  subtitle: string;
+  date: string;
+  urgency: "high" | "medium" | "low";
+  url?: string;
+  actionLabel?: string;
+  actionUrl?: string;
+}
+
 export default function Home() {
   const [address, setAddress] = useState("");
   const [results, setResults] = useState<Representative[] | null>(null);
   const [lookupLoading, setLookupLoading] = useState(false);
   const [leadership, setLeadership] = useState<Representative[]>([]);
   const [featured, setFeatured] = useState<Representative[]>([]);
+  const [feed, setFeed] = useState<FeedItem[]>([]);
+  const [feedLoading, setFeedLoading] = useState(true);
+  const { myReps, saveRep, hasSavedReps } = useMyReps();
 
   useEffect(() => {
     fetch("/api/members?leadership=true")
@@ -50,6 +66,11 @@ export default function Home() {
       .then((r) => r.json())
       .then(setFeatured)
       .catch(() => {});
+    fetch("/api/feed")
+      .then((r) => r.json())
+      .then(setFeed)
+      .catch(() => setFeed([]))
+      .finally(() => setFeedLoading(false));
   }, []);
 
   function handleLookup(e: React.FormEvent) {
@@ -69,6 +90,28 @@ export default function Home() {
       });
   }
 
+  function handleSaveReps() {
+    if (results) {
+      results.forEach((rep) => saveRep(rep));
+    }
+  }
+
+  const urgencyColor = (u: string) => {
+    if (u === "high") return "border-red bg-red-light";
+    if (u === "medium") return "border-yellow bg-yellow-light";
+    return "border-border bg-surface";
+  };
+
+  const typeIcon = (type: string) => {
+    switch (type) {
+      case "comment_closing": return "COMMENT";
+      case "gao_report": return "GAO";
+      case "new_rule": return "RULE";
+      case "bill_action": return "BILL";
+      default: return "UPDATE";
+    }
+  };
+
   return (
     <div>
       {/* Hero */}
@@ -86,13 +129,17 @@ export default function Home() {
 
           <form
             onSubmit={handleLookup}
+            role="search"
+            aria-label="Find your representatives"
             className="mt-8 flex flex-col sm:flex-row gap-0 max-w-2xl mx-auto"
           >
+            <label htmlFor="address-lookup" className="sr-only">Enter your ZIP code or full address</label>
             <input
-              type="text"
+              id="address-lookup"
+              type="search"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              placeholder="Enter your ZIP code or state"
+              placeholder="Enter your ZIP code or full address"
               className="flex-1 px-5 py-4 bg-white text-black border-2 border-white font-mono text-base placeholder:text-gray-light focus:outline-none focus:border-red"
             />
             <button
@@ -108,9 +155,9 @@ export default function Home() {
 
       {/* Lookup results */}
       {lookupLoading && (
-        <section className="border-b-3 border-border px-4 py-10 bg-red-light">
+        <section className="border-b-3 border-border px-4 py-10 bg-red-light" aria-live="polite" aria-busy="true">
           <div className="max-w-6xl mx-auto text-center">
-            <p className="font-headline text-2xl animate-pulse">Looking up your representatives...</p>
+            <p className="font-headline text-2xl motion-safe:animate-pulse">Looking up your representatives...</p>
           </div>
         </section>
       )}
@@ -125,7 +172,15 @@ export default function Home() {
       {results && !lookupLoading && results.length > 0 && (
         <section className="border-b-3 border-border px-4 py-10 bg-red-light">
           <div className="max-w-6xl mx-auto">
-            <h2 className="font-headline text-3xl mb-6">Your Representatives</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-headline text-3xl">Your Representatives</h2>
+              <button
+                onClick={handleSaveReps}
+                className="px-4 py-2 bg-black text-white font-mono text-sm font-bold cursor-pointer hover:bg-red transition-colors"
+              >
+                SAVE AS MY REPS
+              </button>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {results.map((rep) => (
                 <Link
@@ -133,11 +188,10 @@ export default function Home() {
                   href={`/directory/${rep.slug}`}
                   className="no-underline text-black border-2 border-border bg-surface p-5 hover:bg-hover transition-colors group"
                 >
-                  {/* Avatar */}
                   <div className={`w-16 h-16 ${partyBg(rep.party)} flex items-center justify-center mb-3 overflow-hidden relative`}>
                     <span className="font-headline text-2xl text-white">{rep.firstName[0]}{rep.lastName[0]}</span>
                     {rep.photoUrl && (
-                      <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                      <img src={rep.photoUrl} alt={rep.fullName} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                     )}
                   </div>
                   <span className={`inline-block px-2 py-1 text-xs font-mono font-bold ${partyBg(rep.party)} text-white`}>
@@ -159,6 +213,150 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      {/* My Representatives (saved) */}
+      {hasSavedReps && !results && (
+        <section className="px-4 py-10 border-b-3 border-red bg-red-light">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="font-headline text-3xl">My Representatives</h2>
+                <p className="font-mono text-xs text-gray-mid mt-1 font-bold">YOUR SAVED REPS — PERSONALIZED ACROSS CIVICFORGE</p>
+              </div>
+              <Link
+                href="/draft"
+                className="px-4 py-2 bg-red text-white font-mono text-sm font-bold no-underline hover:bg-black transition-colors"
+              >
+                WRITE TO THEM
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {myReps.map((rep) => (
+                <Link
+                  key={rep.id}
+                  href={`/directory/${rep.slug}`}
+                  className="no-underline text-black border-3 border-border bg-surface p-5 hover:border-red transition-colors group"
+                >
+                  <div className={`w-14 h-14 ${partyBg(rep.party)} flex items-center justify-center mb-3 overflow-hidden relative`}>
+                    <span className="font-headline text-xl text-white">{rep.firstName[0]}{rep.lastName[0]}</span>
+                    {rep.photoUrl && (
+                      <img src={rep.photoUrl} alt={rep.fullName} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`px-2 py-0.5 text-xs font-mono font-bold ${partyBg(rep.party)} text-white`}>
+                      {rep.party === "D" ? "DEM" : rep.party === "R" ? "GOP" : "IND"}
+                    </span>
+                    <span className="font-mono text-xs text-gray-mid font-bold">{rep.chamber}</span>
+                  </div>
+                  <h3 className="font-headline text-lg normal-case group-hover:text-red">{rep.fullName}</h3>
+                  <p className="font-mono text-xs text-gray-mid mt-1">
+                    {rep.title} — {rep.state}
+                  </p>
+                  <div className="mt-2 pt-2 border-t border-border-light flex gap-3">
+                    {rep.partyLoyalty > 0 && (
+                      <span className="font-mono text-[10px] text-gray-mid">
+                        <span className="font-bold">{rep.partyLoyalty}%</span> loyal
+                      </span>
+                    )}
+                    {rep.totalFundraising && (
+                      <span className="font-mono text-[10px] text-gray-mid">
+                        {rep.totalFundraising}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Live Feed — What's Happening Now */}
+      <section className="px-4 py-12 border-b-3 border-border bg-cream-dark">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-end gap-4 mb-6">
+            <h2 className="font-headline text-4xl md:text-5xl">What&apos;s Happening Now</h2>
+            <div className="hidden md:block h-1 flex-1 bg-border mb-3" />
+          </div>
+          <p className="font-mono text-sm text-gray-mid mb-8 -mt-2 font-bold">
+            LIVE UPDATES — COMMENT DEADLINES, NEW REPORTS, AND REGULATORY ACTIONS
+          </p>
+
+          {feedLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3" aria-live="polite" aria-busy="true" aria-label="Loading updates">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="border-2 border-border p-4 bg-surface motion-safe:animate-pulse">
+                  <div className="h-3 bg-border-light w-16 mb-2" />
+                  <div className="h-5 bg-border-light w-3/4 mb-1" />
+                  <div className="h-3 bg-border-light w-1/2" />
+                </div>
+              ))}
+              <span className="sr-only">Loading live updates...</span>
+            </div>
+          ) : feed.length === 0 ? (
+            <div className="border-2 border-border p-6 bg-surface text-center">
+              <p className="font-mono text-sm text-gray-mid">No recent updates available.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {feed.map((item) => (
+                <div
+                  key={item.id}
+                  className={`border-2 p-4 ${urgencyColor(item.urgency)} transition-colors`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`px-2 py-0.5 font-mono text-[10px] font-bold ${
+                      item.urgency === "high"
+                        ? "bg-red text-white"
+                        : item.urgency === "medium"
+                          ? "bg-yellow text-black"
+                          : "bg-black text-white"
+                    }`}>
+                      {typeIcon(item.type)}
+                    </span>
+                    <span className="font-mono text-[10px] text-gray-mid">
+                      {new Date(item.date).toLocaleDateString()}
+                    </span>
+                    {item.urgency === "high" && (
+                      <span className="font-mono text-[10px] text-red font-bold motion-safe:animate-pulse">URGENT</span>
+                    )}
+                  </div>
+                  <h4 className="font-headline text-base normal-case leading-tight mb-1">
+                    {item.url ? (
+                      <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-black hover:text-red transition-colors">
+                        {item.title}
+                      </a>
+                    ) : item.title}
+                  </h4>
+                  <p className="font-mono text-xs text-gray-mid">{item.subtitle}</p>
+                  {item.actionLabel && item.actionUrl && (
+                    <div className="mt-2">
+                      <a
+                        href={item.actionUrl}
+                        target={item.actionUrl.startsWith("http") ? "_blank" : undefined}
+                        rel={item.actionUrl.startsWith("http") ? "noopener noreferrer" : undefined}
+                        className="font-mono text-xs font-bold text-red hover:underline no-underline"
+                      >
+                        {item.actionLabel} &rarr;
+                      </a>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-6 flex gap-4">
+            <Link href="/federal-register" className="font-mono text-xs font-bold text-red no-underline hover:underline">
+              ALL COMMENT PERIODS &rarr;
+            </Link>
+            <Link href="/gao-reports" className="font-mono text-xs font-bold text-red no-underline hover:underline">
+              ALL GAO REPORTS &rarr;
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* Congressional Leadership */}
       <section className="px-4 py-16 border-b-3 border-border">
@@ -185,11 +383,10 @@ export default function Home() {
                       {rep.party === "D" ? "DEMOCRAT" : "REPUBLICAN"}
                     </span>
                   </div>
-                  {/* Photo */}
                   <div className="w-20 h-20 bg-black/20 flex items-center justify-center mb-4 overflow-hidden relative">
                     <span className="font-headline text-4xl text-white">{rep.firstName[0]}{rep.lastName[0]}</span>
                     {rep.photoUrl && (
-                      <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                      <img src={rep.photoUrl} alt={rep.fullName} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                     )}
                   </div>
                   <h3 className="font-headline text-2xl normal-case text-white">{rep.fullName}</h3>
@@ -227,7 +424,7 @@ export default function Home() {
                   <div className={`w-14 h-14 ${partyBg(rep.party)} flex items-center justify-center shrink-0 overflow-hidden relative`}>
                     <span className="font-headline text-xl text-white">{rep.firstName[0]}{rep.lastName[0]}</span>
                     {rep.photoUrl && (
-                      <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                      <img src={rep.photoUrl} alt={rep.fullName} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                     )}
                   </div>
                   <div>
@@ -268,7 +465,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Issues - redesigned tiles */}
+      {/* Issues */}
       <section className="px-4 py-16 border-b-3 border-border">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-end gap-4 mb-8">
@@ -279,7 +476,7 @@ export default function Home() {
             LEARN THE FACTS. FIND YOUR VOICE. TAKE ACTION.
           </p>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-0 border-2 border-border">
-            {issues.map((issue, i) => {
+            {issues.map((issue) => {
               const accent = issueColor[issue.id] || "#1a1a2e";
               return (
                 <Link
@@ -287,15 +484,13 @@ export default function Home() {
                   href={`/issues/${issue.slug}`}
                   className="no-underline text-black bg-surface hover:bg-hover transition-all group relative overflow-hidden border-b-2 border-r-2 border-border"
                 >
-                  {/* Accent top bar */}
                   <div className="h-1.5 w-full" style={{ backgroundColor: accent }} />
                   <div className="p-5 md:p-6">
-                    {/* Icon */}
                     <div
                       className="w-12 h-12 flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
                       style={{ backgroundColor: accent }}
                     >
-                      <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                      <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" d={issueSvgPath[issue.id] || "M12 6v12m-6-6h12"} />
                       </svg>
                     </div>

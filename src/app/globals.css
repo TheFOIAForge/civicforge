@@ -95,3 +95,140 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--color-red);
   color: white;
 }
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Global focus-visible styles for interactive elements */
+@layer base {
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--color-red);
+    outline-offset: 2px;
+  }
+}
+
+/* ─── Print styles ─── */
+@media print {
+  /* Hide navigation, footer, and non-content UI */
+  header,
+  footer,
+  nav,
+  aside,
+  [data-print-hide] {
+    display: none !important;
+  }
+
+  /* Reset backgrounds and colors for ink-friendly output */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+
+  /* Remove decorative borders and shadows */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Make links show their URL */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #666;
+    font-family: "Courier New", monospace;
+  }
+
+  /* Don't show URL for internal nav links */
+  nav a::after,
+  [data-print-hide] a::after {
+    content: none !important;
+  }
+
+  /* Printable content area — clean white, max width */
+  [data-print-content] {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: white !important;
+  }
+
+  /* Letter/output — clean, readable, no background colors */
+  [data-print-letter] {
+    border: none !important;
+    background: white !important;
+    padding: 0 !important;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 12pt;
+    line-height: 1.6;
+    color: black !important;
+    white-space: pre-wrap;
+  }
+
+  /* Print header with rep info */
+  [data-print-header] {
+    border-bottom: 2pt solid black !important;
+    padding-bottom: 12pt !important;
+    margin-bottom: 18pt !important;
+    background: white !important;
+  }
+
+  /* Hide all interactive elements: buttons, forms, inputs */
+  button,
+  select,
+  input,
+  textarea,
+  form,
+  [role="search"] {
+    display: none !important;
+  }
+
+  /* But show print-visible buttons if explicitly marked */
+  [data-print-show] {
+    display: block !important;
+  }
+
+  /* Page breaks */
+  h1, h2, h3 {
+    page-break-after: avoid;
+  }
+
+  .page-break-before {
+    page-break-before: always;
+  }
+
+  /* Ensure images don't overflow */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Contact log entries — clean borders for print */
+  [data-print-entry] {
+    border: 1pt solid #ccc !important;
+    padding: 8pt !important;
+    margin-bottom: 12pt !important;
+    page-break-inside: avoid;
+    background: white !important;
+  }
+}

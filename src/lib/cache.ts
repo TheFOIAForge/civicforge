@@ -45,4 +45,5 @@ export const TTL = {
   GAO: 21600,              // 6 hours
   HEARINGS: 3600,          // 1 hour
   SPENDING: 86400,         // 24 hours
+  COMMITTEES: 3600,        // 1 hour
 } as const;

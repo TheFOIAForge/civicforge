@@ -1,0 +1,28 @@
+{
+  "name": "CivicForge — They Work For You",
+  "short_name": "CivicForge",
+  "description": "Find your representatives, draft AI-powered letters, track contacts, and hold Congress accountable. A project of FOIAForge.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F0E8",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["government", "news", "politics"],
+  "lang": "en-US",
+  "dir": "ltr"
+}

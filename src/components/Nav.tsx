@@ -2,22 +2,96 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useMyReps } from "@/lib/my-reps-context";
 
-const links = [
-  { href: "/directory", label: "Members of Congress" },
-  { href: "/issues", label: "Key Issues" },
-  { href: "/draft", label: "Write Congress" },
-  { href: "/federal-register", label: "Federal Register" },
-  { href: "/gao-reports", label: "Oversight Reports" },
-  { href: "/campaigns", label: "Campaigns" },
-  { href: "/contacts", label: "My Letters" },
-  { href: "/settings", label: "Settings" },
+interface NavSection {
+  label: string;
+  links: { href: string; label: string; sub?: boolean }[];
+}
+
+const sections: NavSection[] = [
+  {
+    label: "Research",
+    links: [
+      { href: "/directory", label: "Members of Congress" },
+      { href: "/committees", label: "Committees", sub: true },
+      { href: "/compare", label: "Compare Reps", sub: true },
+      { href: "/bills", label: "Legislation" },
+      { href: "/votes", label: "Vote Lookup", sub: true },
+      { href: "/issues", label: "Key Issues" },
+    ],
+  },
+  {
+    label: "Watchdog",
+    links: [
+      { href: "/federal-register", label: "Federal Register" },
+      { href: "/gao-reports", label: "GAO Oversight" },
+    ],
+  },
+  {
+    label: "Take Action",
+    links: [
+      { href: "/my-reps", label: "My Representatives" },
+      { href: "/draft", label: "Write Congress" },
+      { href: "/contacts", label: "My Letters", sub: true },
+      { href: "/campaigns", label: "My Campaigns" },
+      { href: "/alerts", label: "Alerts" },
+      { href: "/support", label: "Support This Project", sub: true },
+    ],
+  },
 ];
 
 export default function Nav() {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { myReps } = useMyReps();
+  const sidebarRef = useRef<HTMLElement>(null);
+  const toggleButtonRef = useRef<HTMLButtonElement>(null);
+
+  const closeSidebar = useCallback(() => {
+    setSidebarOpen(false);
+    // Return focus to the toggle button when sidebar closes
+    setTimeout(() => toggleButtonRef.current?.focus(), 0);
+  }, []);
+
+  // Focus trap for sidebar
+  useEffect(() => {
+    if (!sidebarOpen) return;
+
+    const sidebar = sidebarRef.current;
+    if (!sidebar) return;
+
+    // Focus the close button when sidebar opens
+    const closeBtn = sidebar.querySelector<HTMLButtonElement>('[aria-label="Close sidebar"]');
+    closeBtn?.focus();
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        closeSidebar();
+        return;
+      }
+
+      if (e.key === "Tab" && sidebar) {
+        const focusable = sidebar.querySelectorAll<HTMLElement>(
+          'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last?.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [sidebarOpen, closeSidebar]);
 
   return (
     <>
@@ -27,19 +101,51 @@ export default function Nav() {
           <div className="flex items-center justify-between h-14">
             <div className="flex items-center gap-4">
               <button
+                ref={toggleButtonRef}
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="text-white p-1 font-headline text-xl hover:text-red transition-colors"
-                aria-label="Toggle sidebar"
+                className="text-white p-1 font-headline text-xl hover:text-red transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                aria-label={sidebarOpen ? "Close navigation menu" : "Open navigation menu"}
+                aria-expanded={sidebarOpen}
+                aria-controls="sidebar-nav"
               >
                 ☰
               </button>
-              <Link href="/" className="no-underline text-white hover:text-white/80">
+              <Link href="/" className="no-underline text-white hover:text-white/80 focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black">
                 <span className="font-headline text-2xl tracking-tight uppercase">
                   Civic<span className="text-red">Forge</span>
                 </span>
                 <span className="block font-mono text-[10px] text-white/40 uppercase tracking-widest -mt-1">
                   A project of FOIAForge
                 </span>
+              </Link>
+            </div>
+
+            {/* Quick-access top bar icons */}
+            <div className="flex items-center gap-3">
+              {myReps.length > 0 && (
+                <span className="font-mono text-[10px] text-white/40 hidden sm:block">
+                  {myReps.length} REP{myReps.length !== 1 ? "S" : ""} SAVED
+                </span>
+              )}
+              <Link
+                href="/alerts"
+                className="text-white/60 hover:text-white no-underline transition-colors relative focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                aria-label="Alerts"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+              </Link>
+              <Link
+                href="/settings"
+                className="text-white/60 hover:text-white no-underline transition-colors focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                aria-label="Settings"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
               </Link>
             </div>
           </div>
@@ -50,21 +156,29 @@ export default function Nav() {
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-50"
-          onClick={() => setSidebarOpen(false)}
+          onClick={closeSidebar}
+          onKeyDown={(e) => { if (e.key === "Escape") closeSidebar(); }}
+          aria-hidden="true"
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full w-72 bg-black text-white z-50 transform transition-transform duration-200 ease-out ${
+        ref={sidebarRef}
+        id="sidebar-nav"
+        role="dialog"
+        aria-modal={sidebarOpen}
+        aria-label="Site navigation"
+        className={`fixed top-0 left-0 h-full w-72 bg-black text-white z-50 transform transition-transform duration-200 ease-out overflow-y-auto ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
+        {...(!sidebarOpen && { "aria-hidden": true, tabIndex: -1 })}
       >
         <div className="flex items-center justify-between px-5 h-14 border-b-3 border-red">
           <Link
             href="/"
-            onClick={() => setSidebarOpen(false)}
-            className="no-underline text-white hover:text-white/80"
+            onClick={closeSidebar}
+            className="no-underline text-white hover:text-white/80 focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           >
             <span className="font-headline text-2xl tracking-tight uppercase">
               Civic<span className="text-red">Forge</span>
@@ -74,45 +188,103 @@ export default function Nav() {
             </span>
           </Link>
           <button
-            onClick={() => setSidebarOpen(false)}
-            className="text-white p-1 font-headline text-xl hover:text-red transition-colors"
+            onClick={closeSidebar}
+            className="text-white p-1 font-headline text-xl hover:text-red transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             aria-label="Close sidebar"
           >
             ✕
           </button>
         </div>
 
-        <nav className="py-2">
+        <nav aria-label="Main navigation" className="py-2">
           {/* Mind Palace — highlighted feature */}
           <Link
             href="/mind-palace"
-            onClick={() => setSidebarOpen(false)}
-            className={`flex items-center gap-2 no-underline px-5 py-4 font-mono text-sm uppercase tracking-wider font-bold transition-colors border-l-4 mb-1 ${
+            onClick={closeSidebar}
+            className={`flex items-center gap-2 no-underline px-5 py-4 font-mono text-[17px] uppercase tracking-wider font-bold transition-colors border-l-4 mb-1 focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
               pathname === "/mind-palace"
                 ? "bg-red text-white border-white"
                 : "bg-red/80 text-white border-red hover:bg-red"
             }`}
+            aria-current={pathname === "/mind-palace" ? "page" : undefined}
           >
-            <span className="px-1.5 py-0.5 bg-white text-red text-[10px] font-bold tracking-widest">AI</span>
+            <span className="px-1.5 py-0.5 bg-white text-red text-[10px] font-bold tracking-widest" aria-hidden="true">AI</span>
             Mind Palace
           </Link>
 
-          <div className="border-b border-white/10 mb-1" />
-
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setSidebarOpen(false)}
-              className={`flex items-center no-underline px-5 py-3.5 font-mono text-sm uppercase tracking-wider font-bold transition-colors border-l-4 ${
-                pathname === link.href
-                  ? "bg-red/20 text-red border-red"
-                  : "text-white/80 border-transparent hover:bg-white/5 hover:text-white hover:border-white/30"
-              }`}
-            >
-              {link.label}
-            </Link>
+          {sections.map((section) => (
+            <div key={section.label} role="group" aria-labelledby={`nav-section-${section.label}`}>
+              <div className="px-5 pt-5 pb-1.5">
+                <span id={`nav-section-${section.label}`} className="font-mono text-[13px] font-bold text-white/30 uppercase tracking-[0.2em]">
+                  {section.label}
+                </span>
+              </div>
+              {section.links.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={closeSidebar}
+                  aria-current={pathname === link.href ? "page" : undefined}
+                  className={`flex items-center no-underline font-mono uppercase tracking-wider font-bold transition-colors border-l-4 focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
+                    link.sub ? "px-8 py-2.5 text-[15px]" : "px-5 py-3.5 text-[17px]"
+                  } ${
+                    pathname === link.href
+                      ? "bg-red/20 text-red border-red"
+                      : link.sub
+                        ? "text-white/50 border-transparent hover:bg-white/5 hover:text-white/80 hover:border-white/20"
+                        : "text-white/80 border-transparent hover:bg-white/5 hover:text-white hover:border-white/30"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
           ))}
+
+          {/* FOIAForge — Records section */}
+          <div role="group" aria-labelledby="nav-section-Records">
+            <div className="px-5 pt-5 pb-1.5 border-t border-white/10 mt-2">
+              <span id="nav-section-Records" className="font-mono text-[13px] font-bold text-white/30 uppercase tracking-[0.2em]">
+                Records (FOIA)
+              </span>
+            </div>
+            <a
+              href="https://www.thefoiaforge.org/new-request"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={closeSidebar}
+              className="flex items-center gap-2 no-underline font-mono uppercase tracking-wider font-bold transition-colors border-l-4 px-5 py-3.5 text-[17px] text-white/80 border-transparent hover:bg-white/5 hover:text-white hover:border-white/30 focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            >
+              File a Request
+              <svg width="12" height="12" className="text-white/30 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+            <a
+              href="https://www.thefoiaforge.org/my-cases"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={closeSidebar}
+              className="flex items-center gap-2 no-underline font-mono uppercase tracking-wider font-bold transition-colors border-l-4 px-8 py-2.5 text-[15px] text-white/50 border-transparent hover:bg-white/5 hover:text-white/80 hover:border-white/20 focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            >
+              My FOIA Cases
+              <svg width="12" height="12" className="text-white/30 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+            <a
+              href="https://www.thefoiaforge.org/agencies"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={closeSidebar}
+              className="flex items-center gap-2 no-underline font-mono uppercase tracking-wider font-bold transition-colors border-l-4 px-8 py-2.5 text-[15px] text-white/50 border-transparent hover:bg-white/5 hover:text-white/80 hover:border-white/20 focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            >
+              Agency Directory
+              <svg width="12" height="12" className="text-white/30 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          </div>
         </nav>
       </aside>
     </>

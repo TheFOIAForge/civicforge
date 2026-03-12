@@ -40,6 +40,7 @@ export async function getOpenCommentPeriods(
         publicationDate: doc.publication_date || "",
         htmlUrl: doc.html_url || "",
         pdfUrl: doc.pdf_url || "",
+        regulationsGovUrl: `https://www.regulations.gov/document/${doc.document_number || ""}`,
       })
     );
 
@@ -78,6 +79,7 @@ export async function getRecentRules(limit = 20): Promise<FederalRegisterDocumen
       publicationDate: doc.publication_date || "",
       htmlUrl: doc.html_url || "",
       pdfUrl: doc.pdf_url || "",
+      regulationsGovUrl: `https://www.regulations.gov/document/${doc.document_number || ""}`,
     }));
 
     cache.set(cacheKey, results, TTL.FED_REGISTER);

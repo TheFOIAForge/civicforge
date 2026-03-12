@@ -18,11 +18,26 @@ export default function SettingsPage() {
   const [apisLoading, setApisLoading] = useState(true);
   const [apisTimestamp, setApisTimestamp] = useState("");
 
+  // Email service state
+  const [emailProvider, setEmailProvider] = useState<"resend" | "sendgrid">("resend");
+  const [emailApiKey, setEmailApiKey] = useState("");
+  const [senderEmail, setSenderEmail] = useState("");
+  const [emailSaved, setEmailSaved] = useState(false);
+
   useEffect(() => {
     const stored = localStorage.getItem("civicforge_api_key");
     if (stored) {
       setSavedKey(stored);
       setApiKey(stored);
+    }
+    // Load email config
+    const emailConfig = localStorage.getItem("civicforge_email_config");
+    if (emailConfig) {
+      const config = JSON.parse(emailConfig);
+      setEmailProvider(config.provider || "resend");
+      setEmailApiKey(config.apiKey || "");
+      setSenderEmail(config.senderEmail || "");
+      setEmailSaved(true);
     }
     fetchApiStatus();
   }, []);
@@ -126,12 +141,14 @@ export default function SettingsPage() {
         )}
 
         <div className="mb-5">
-          <label className="font-mono text-sm text-gray-mid block mb-2 font-bold">API KEY</label>
+          <label htmlFor="settings-apikey" className="font-mono text-sm text-gray-mid block mb-2 font-bold">API KEY</label>
           <input
+            id="settings-apikey"
             type="password"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             placeholder="sk-ant-api03-..."
+            aria-required="true"
             className="w-full px-4 py-3 border-2 border-border font-mono text-base focus:outline-none focus:border-red bg-cream"
           />
         </div>
@@ -163,7 +180,7 @@ export default function SettingsPage() {
         </div>
 
         {testResult && (
-          <div className={`mt-5 p-4 border-2 font-mono text-base font-bold ${
+          <div role="alert" className={`mt-5 p-4 border-2 font-mono text-base font-bold ${
             testResult === "success"
               ? "border-green bg-green-light text-green"
               : "border-status-red bg-status-red-light text-status-red"
@@ -189,10 +206,108 @@ export default function SettingsPage() {
           </ol>
           <div className="mt-4 p-4 bg-yellow-light border-2 border-yellow">
             <p className="font-mono text-sm font-bold text-gray-mid">
-              {"\u{1F4B0}"} TYPICAL COST: $0.01–0.05 per letter generated using Claude Sonnet.
-              A typical user would spend less than $1/month.
+              TYPICAL COST: Each AI-drafted message costs roughly $0.01–0.05 via Claude Sonnet.
+              Most users spend less than $1/month.
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* Email Service (Optional) */}
+      <section className="border-3 border-border p-6 bg-surface mb-6">
+        <h2 className="font-headline text-3xl mb-4">&#9993; Email Service (Optional)</h2>
+        <p className="font-body text-base text-gray-mid mb-5">
+          Enter your email service API key to send letters directly from CivicForge
+          without opening your email client. Your key is stored only in your
+          browser&apos;s localStorage.
+        </p>
+
+        {emailSaved && (
+          <div className="mb-5 p-4 bg-green-light border-2 border-green">
+            <p className="font-mono text-sm text-green font-bold mb-1">{"\u{2705}"} EMAIL SERVICE CONFIGURED</p>
+            <p className="font-mono text-base text-gray-mid">
+              {emailProvider.toUpperCase()} &middot; {senderEmail}
+            </p>
+          </div>
+        )}
+
+        <div className="space-y-4 mb-5">
+          <div>
+            <label className="font-mono text-sm text-gray-mid block mb-2 font-bold">PROVIDER</label>
+            <select
+              value={emailProvider}
+              onChange={(e) => setEmailProvider(e.target.value as "resend" | "sendgrid")}
+              className="w-full sm:w-auto px-4 py-3 border-2 border-border font-mono text-base bg-cream focus:outline-none focus:border-red"
+            >
+              <option value="resend">Resend</option>
+              <option value="sendgrid">SendGrid</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="font-mono text-sm text-gray-mid block mb-2 font-bold">API KEY</label>
+            <input
+              type="password"
+              value={emailApiKey}
+              onChange={(e) => setEmailApiKey(e.target.value)}
+              placeholder={emailProvider === "resend" ? "re_..." : "SG..."}
+              className="w-full px-4 py-3 border-2 border-border font-mono text-base focus:outline-none focus:border-red bg-cream"
+            />
+          </div>
+
+          <div>
+            <label className="font-mono text-sm text-gray-mid block mb-2 font-bold">SENDER EMAIL</label>
+            <input
+              type="email"
+              value={senderEmail}
+              onChange={(e) => setSenderEmail(e.target.value)}
+              placeholder="you@yourdomain.com"
+              className="w-full px-4 py-3 border-2 border-border font-mono text-base focus:outline-none focus:border-red bg-cream"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => {
+              const config = {
+                provider: emailProvider,
+                apiKey: emailApiKey.trim(),
+                senderEmail: senderEmail.trim(),
+              };
+              localStorage.setItem("civicforge_email_config", JSON.stringify(config));
+              setEmailSaved(true);
+            }}
+            disabled={!emailApiKey.trim() || !senderEmail.trim()}
+            className={`px-6 py-3 font-headline uppercase text-base cursor-pointer transition-colors border-3 ${
+              !emailApiKey.trim() || !senderEmail.trim()
+                ? "bg-gray-mid text-white border-gray-mid"
+                : "bg-red text-white border-red hover:bg-red-dark hover:border-red-dark"
+            }`}
+          >
+            Save Email Config
+          </button>
+          {emailSaved && (
+            <button
+              onClick={() => {
+                localStorage.removeItem("civicforge_email_config");
+                setEmailApiKey("");
+                setSenderEmail("");
+                setEmailSaved(false);
+              }}
+              className="px-6 py-3 font-headline uppercase text-base border-3 border-border cursor-pointer hover:bg-status-red hover:text-white hover:border-status-red transition-colors"
+            >
+              Remove Config
+            </button>
+          )}
+        </div>
+
+        <div className="mt-5 p-4 bg-yellow-light border-2 border-yellow">
+          <p className="font-mono text-sm font-bold text-gray-mid">
+            NOTE: You need a verified domain with your email provider. Resend offers a free
+            tier (100 emails/day). SendGrid offers 100 emails/day free. Your API key never
+            leaves your browser except when sending through our server-side relay.
+          </p>
         </div>
       </section>
 
@@ -253,7 +368,7 @@ export default function SettingsPage() {
         </p>
 
         {apisLoading ? (
-          <div className="font-mono text-sm text-gray-mid animate-pulse">
+          <div className="font-mono text-sm text-gray-mid motion-safe:animate-pulse">
             Pinging APIs...
           </div>
         ) : (
