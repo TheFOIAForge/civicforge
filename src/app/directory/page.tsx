@@ -3,7 +3,7 @@
 import Link from "next/link";
 /* eslint-disable @next/next/no-img-element */
 import { useState, useMemo, useEffect } from "react";
-import { US_STATES } from "@/data/representatives";
+import { US_STATES } from "@/data/states";
 import type { Representative } from "@/data/types";
 
 function partyBg(party: string) {
@@ -177,9 +177,9 @@ export default function DirectoryPage() {
               <p className="font-mono text-sm text-red font-bold mt-1">{rep.leadershipRole}</p>
             )}
             <div className="mt-3 pt-3 border-t-2 border-border-light flex gap-4 font-mono text-xs text-gray-mid">
-              <span><span className="font-bold">{rep.partyLoyalty}%</span> loyalty</span>
-              <span><span className="font-bold">{rep.billsIntroduced}</span> bills</span>
-              <span><span className="font-bold">{rep.totalFundraising}</span></span>
+              {rep.partyLoyalty > 0 && <span><span className="font-bold">{rep.partyLoyalty}%</span> Party Loyalty</span>}
+              {rep.billsIntroduced > 0 && <span><span className="font-bold">{rep.billsIntroduced}</span> bills</span>}
+              {rep.totalFundraising && rep.totalFundraising !== "$0" && <span><span className="font-bold">{rep.totalFundraising}</span></span>}
             </div>
           </Link>
         ))}

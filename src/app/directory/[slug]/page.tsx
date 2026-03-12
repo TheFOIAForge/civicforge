@@ -465,7 +465,13 @@ export default function RepProfilePage() {
                     </div>
                     <div className="bg-surface border-2 border-border p-4 text-center">
                       <div className="font-headline text-2xl text-black">{cycle.smallDollarPct}%</div>
-                      <div className="font-mono text-xs text-gray-mid font-bold mt-1">Small Dollar</div>
+                      <div className="font-mono text-xs text-gray-mid font-bold mt-1 group/tip relative inline-flex items-center gap-1 cursor-help">
+                        Small Dollar
+                        <span className="text-gray-mid/60 text-[10px]">&#9432;</span>
+                        <span className="invisible group-hover/tip:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 bg-black text-white text-[11px] font-normal leading-tight p-2 z-10">
+                          Percentage of total individual contributions that are $200 or less (per FEC definition). Higher % suggests broader grassroots support.
+                        </span>
+                      </div>
                     </div>
                   </div>
 

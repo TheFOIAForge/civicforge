@@ -6,6 +6,7 @@ import {
 } from "./transformers/github-legislators";
 
 import { transformFinancials, type FECFinanceResult, type IndependentExpenditure } from "./transformers/openfec";
+import { getVotingStats } from "./voteview";
 import congressLegislatorsData from "@/data/congress-legislators.json";
 
 // Cast the imported JSON to our expected type
@@ -244,11 +245,22 @@ export async function enrichMemberFromCongress(
     const memberData = await memberRes.json();
     const member = memberData.member;
 
-    // Fetch sponsored legislation
-    const billsRes = await fetch(
-      `https://api.congress.gov/v3/member/${bioguideId}/sponsored-legislation?api_key=${apiKey}&format=json&limit=10`
-    );
-    const billsData = billsRes.ok ? await billsRes.json() : { sponsoredLegislation: [] };
+    // Fetch ALL sponsored legislation (paginate through all pages)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const allBills: any[] = [];
+    let offset = 0;
+    const pageSize = 250;
+    while (true) {
+      const billsRes = await fetch(
+        `https://api.congress.gov/v3/member/${bioguideId}/sponsored-legislation?api_key=${apiKey}&format=json&limit=${pageSize}&offset=${offset}`
+      );
+      if (!billsRes.ok) break;
+      const billsData = await billsRes.json();
+      const page = billsData.sponsoredLegislation || [];
+      allBills.push(...page);
+      if (page.length < pageSize) break; // last page
+      offset += pageSize;
+    }
 
     // Photo URL from depiction
     const photoUrl = member?.depiction?.imageUrl || undefined;
@@ -256,12 +268,12 @@ export async function enrichMemberFromCongress(
     // Rich biography from structured data
     const bio = buildBio(member);
 
-    // Count bills that became law
-    const allBills = billsData.sponsoredLegislation || [];
+    // Count bills that became law (scan all pages)
     const enactedCount = allBills.filter(
-      (b: { latestAction?: { text?: string } }) =>
-        b.latestAction?.text?.toLowerCase().includes("became public law") ||
-        b.latestAction?.text?.toLowerCase().includes("signed by president")
+      (b: { latestAction?: { text?: string } | null }) => {
+        const text = b.latestAction?.text?.toLowerCase() || "";
+        return text.includes("became public law") || text.includes("signed by president");
+      }
     ).length;
 
     const enrichment: Partial<Representative> = {
@@ -431,10 +443,10 @@ export async function getEnrichedMember(
   const bioguideId = base.bioguide?.split("/").pop() || base.id;
 
   // Fetch enrichments in parallel
-  const [congressData, financeData, voteData] = await Promise.all([
+  const [congressData, financeData, votingStats] = await Promise.all([
     enrichMemberFromCongress(bioguideId),
     getMemberFinance(bioguideId),
-    getMemberVotes(bioguideId),
+    getVotingStats(bioguideId, base.chamber),
   ]);
 
   return {
@@ -455,11 +467,9 @@ export async function getEnrichedMember(
     topDonors: financeData.topDonors,
     topIndustries: financeData.topIndustries,
     outsideSpending: financeData.outsideSpending,
-    // LegiScan enrichment
-    votingRecord: voteData.votingRecord.length ? voteData.votingRecord : base.votingRecord,
-    keyVotes: voteData.keyVotes.length ? voteData.keyVotes : base.keyVotes,
-    partyLoyalty: voteData.partyLoyalty || base.partyLoyalty,
-    votesCast: voteData.votesCast || base.votesCast,
-    missedVotes: voteData.missedVotes || base.missedVotes,
+    // Voteview enrichment
+    partyLoyalty: votingStats.partyLoyalty || base.partyLoyalty,
+    votesCast: votingStats.votesCast || base.votesCast,
+    missedVotes: votingStats.missedVotes || base.missedVotes,
   };
 }
