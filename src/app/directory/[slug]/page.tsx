@@ -36,6 +36,9 @@ export default function RepProfilePage() {
   const [aiLoading, setAiLoading] = useState(false);
   const [followUp, setFollowUp] = useState("");
   const [hasApiKey, setHasApiKey] = useState(false);
+  const [lobbyAnalysis, setLobbyAnalysis] = useState("");
+  const [lobbyAnalysisLoading, setLobbyAnalysisLoading] = useState(false);
+  const [expandedFilings, setExpandedFilings] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     setHasApiKey(!!localStorage.getItem("civicforge_api_key"));
@@ -371,40 +374,145 @@ export default function RepProfilePage() {
               <p className="font-body text-sm text-gray-mid mb-4">
                 Lobbying filings that reference this member or their legislation. Source: Senate LDA.
               </p>
-              {rep.lobbyingFilings!.map((filing, i) => (
+
+              {/* AI Analysis button */}
+              {hasApiKey && !lobbyAnalysis && !lobbyAnalysisLoading && (
+                <button
+                  onClick={() => {
+                    const apiKey = localStorage.getItem("civicforge_api_key");
+                    if (!apiKey || !rep?.lobbyingFilings) return;
+                    setLobbyAnalysisLoading(true);
+                    const filingsSummary = rep.lobbyingFilings.map((f) =>
+                      `Client: ${f.client}${f.clientDescription ? ` (${f.clientDescription})` : ""} | Firm: ${f.registrant} | $${f.amount.toLocaleString()} (${f.filingYear}) | Issues: ${f.issueLabels?.join(", ") || f.issueCodes.join(", ") || "N/A"} | Lobbying on: ${f.specificIssues[0]?.slice(0, 300) || "N/A"} | Bills: ${f.billsLobbied?.join(", ") || "None"} | Donor match: ${f.matchesDonor ? "YES" : "no"}`
+                    ).join("\n\n");
+                    fetch("https://api.anthropic.com/v1/messages", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+                      body: JSON.stringify({
+                        model: "claude-sonnet-4-20250514",
+                        max_tokens: 1200,
+                        system: `You are an investigative journalist analyzing lobbying filings for ${rep.fullName} (${rep.party === "D" ? "Democrat" : rep.party === "R" ? "Republican" : "Independent"}-${rep.stateAbbr}, ${rep.title}). Committees: ${rep.committees.join(", ")}.\n\nRules:\n- Identify the key industries and interests lobbying this member\n- Flag any donor-lobbyist overlaps (marked "Donor match: YES")\n- Explain what the lobbying activity tells us about who wants this member's attention and why\n- Note any patterns (same lobbying firm representing multiple clients, concentration in one sector)\n- Be factual, cite specific dollar amounts and client names\n- Keep it under 250 words\n- No partisan framing — present facts\n- Do not use phrases like "let that sink in" or "make no mistake"`,
+                        messages: [{ role: "user", content: `Analyze these ${rep.lobbyingFilings.length} lobbying filings:\n\n${filingsSummary}` }],
+                      }),
+                    })
+                      .then((r) => r.json())
+                      .then((data) => { setLobbyAnalysis(data.content?.[0]?.text || "Unable to analyze."); setLobbyAnalysisLoading(false); })
+                      .catch(() => { setLobbyAnalysis("Failed to generate analysis. Check your API key."); setLobbyAnalysisLoading(false); });
+                  }}
+                  className="w-full mb-4 px-4 py-3 bg-black text-white font-mono text-sm text-center cursor-pointer hover:bg-red transition-colors font-bold flex items-center justify-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                  ANALYZE ALL LOBBYING ACTIVITY WITH AI
+                </button>
+              )}
+              {lobbyAnalysisLoading && (
+                <div className="mb-4 bg-surface border-2 border-border p-4 text-center">
+                  <p className="font-mono text-sm text-gray-mid animate-pulse">Analyzing lobbying patterns...</p>
+                </div>
+              )}
+              {lobbyAnalysis && (
+                <div className="mb-5 bg-surface border-2 border-border p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-1.5 py-0.5 bg-red text-white text-[10px] font-mono font-bold">AI</span>
+                    <span className="font-mono text-xs text-gray-mid font-bold">LOBBYING ANALYSIS</span>
+                  </div>
+                  <p className="font-body text-sm leading-relaxed whitespace-pre-wrap">{lobbyAnalysis}</p>
+                </div>
+              )}
+
+              {rep.lobbyingFilings!.map((filing, i) => {
+                const isExpanded = expandedFilings.has(i);
+                return (
                 <div key={i} className={`mb-4 pb-4 border-b-2 border-border-light last:border-0 last:mb-0 last:pb-0 ${filing.matchesDonor ? "bg-yellow-light/50 -mx-2 px-2 py-2" : ""}`}>
                   <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div className="font-headline text-base">{filing.client}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-headline text-base">{filing.client}</span>
+                        {filing.matchesDonor && (
+                          <span className="px-2 py-0.5 bg-yellow font-mono text-[10px] font-bold text-black">
+                            MATCHES DONOR
+                          </span>
+                        )}
+                      </div>
+                      {filing.clientDescription && (
+                        <div className="font-body text-xs text-gray-mid mt-0.5 italic">{filing.clientDescription}</div>
+                      )}
                       <div className="font-mono text-xs text-gray-mid mt-0.5">
                         via {filing.registrant} ({filing.filingYear})
                       </div>
                     </div>
-                    <div className="text-right shrink-0">
+                    <div className="text-right shrink-0 flex flex-col items-end gap-1">
                       {filing.amount > 0 && (
                         <span className="font-mono text-sm font-bold">
                           ${filing.amount.toLocaleString()}
                         </span>
                       )}
-                      {filing.matchesDonor && (
-                        <div className="mt-1 px-2 py-0.5 bg-yellow font-mono text-[10px] font-bold text-black">
-                          MATCHES DONOR
-                        </div>
+                      {filing.filingUrl && (
+                        <a href={filing.filingUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-[10px] text-red no-underline hover:underline">
+                          VIEW FILING &rarr;
+                        </a>
                       )}
                     </div>
                   </div>
-                  {filing.specificIssues.length > 0 && (
-                    <div className="mt-2 font-body text-sm text-gray-mid">
-                      {filing.specificIssues[0].slice(0, 200)}
+
+                  {/* Issue area badges */}
+                  {(filing.issueLabels || []).length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {filing.issueLabels.map((label, j) => (
+                        <span key={j} className="px-2 py-0.5 font-mono text-[10px] font-bold bg-cream-dark border border-border text-gray-dark">
+                          {label}
+                        </span>
+                      ))}
                     </div>
                   )}
+
+                  {/* Bills lobbied on */}
+                  {(filing.billsLobbied || []).length > 0 && (
+                    <div className="mt-1.5 flex flex-wrap gap-1">
+                      {filing.billsLobbied.map((bill, j) => (
+                        <a
+                          key={j}
+                          href={`https://www.congress.gov/search?q=${encodeURIComponent(bill)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2 py-0.5 font-mono text-[10px] font-bold bg-red/10 border border-red/30 text-red no-underline hover:bg-red/20"
+                        >
+                          {bill}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Expandable details */}
+                  {filing.specificIssues.length > 0 && (
+                    <>
+                      <div className="mt-2 font-body text-sm text-gray-mid">
+                        {isExpanded ? filing.specificIssues.join(" | ") : filing.specificIssues[0].slice(0, 150)}
+                        {!isExpanded && filing.specificIssues[0].length > 150 && "..."}
+                      </div>
+                      {(filing.specificIssues[0].length > 150 || filing.specificIssues.length > 1) && (
+                        <button
+                          onClick={() => {
+                            const next = new Set(expandedFilings);
+                            if (isExpanded) next.delete(i); else next.add(i);
+                            setExpandedFilings(next);
+                          }}
+                          className="mt-1 font-mono text-[10px] text-red cursor-pointer hover:underline bg-transparent border-0 p-0"
+                        >
+                          {isExpanded ? "SHOW LESS" : "SHOW MORE"}
+                        </button>
+                      )}
+                    </>
+                  )}
+
                   {filing.lobbyists.length > 0 && (
-                    <div className="mt-1 font-mono text-xs text-gray-mid">
-                      Lobbyists: {filing.lobbyists.slice(0, 3).join(", ")}
+                    <div className="mt-1.5 font-mono text-xs text-gray-mid">
+                      Lobbyists: {filing.lobbyists.slice(0, 5).join(", ")}{filing.lobbyists.length > 5 ? ` +${filing.lobbyists.length - 5} more` : ""}
                     </div>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </section>
           )}
 

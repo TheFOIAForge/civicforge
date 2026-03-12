@@ -70,12 +70,16 @@ export interface Controversy {
 // ── Lobbying (Senate LDA) ──
 export interface LobbyingFiling {
   filingId: string;
-  registrant: string;       // lobbying firm
+  filingUrl: string;         // direct link to Senate LDA filing
+  registrant: string;        // lobbying firm
   client: string;            // who's paying
+  clientDescription: string; // what the client does
   amount: number;
   filingYear: number;
   issueCodes: string[];
+  issueLabels: string[];     // human-readable issue area names
   specificIssues: string[];
+  billsLobbied: string[];    // bill numbers mentioned in activities
   lobbyists: string[];
   matchesDonor: boolean;     // client fuzzy-matches a top donor
 }
