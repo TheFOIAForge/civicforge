@@ -12,15 +12,26 @@ function partyBg(party: string) {
   return "bg-ind";
 }
 
-const issueAccent: Record<string, string> = {
-  healthcare: "border-l-status-red",
-  environment: "border-l-teal",
-  housing: "border-l-orange",
-  immigration: "border-l-red",
-  education: "border-l-purple",
-  economy: "border-l-yellow",
-  "civil-rights": "border-l-gray-dark",
-  defense: "border-l-border",
+const issueColor: Record<string, string> = {
+  healthcare: "#c62828",
+  environment: "#2e7d32",
+  housing: "#e65100",
+  immigration: "#1565c0",
+  education: "#6a1b9a",
+  economy: "#f9a825",
+  "civil-rights": "#37474f",
+  defense: "#1a1a2e",
+};
+
+const issueSvgPath: Record<string, string> = {
+  healthcare: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z",
+  environment: "M12 3v1m0 16v1m8.66-13.66l-.71.71M4.05 19.95l-.71.71M21 12h-1M4 12H3m16.95 7.95l-.71-.71M4.76 4.76l-.71-.71M16 12a4 4 0 11-8 0 4 4 0 018 0z",
+  housing: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
+  immigration: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+  education: "M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222",
+  economy: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+  "civil-rights": "M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3",
+  defense: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
 };
 
 export default function Home() {
@@ -257,7 +268,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Issues - white cards with colored left border */}
+      {/* Issues - redesigned tiles */}
       <section className="px-4 py-16 border-b-3 border-border">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-end gap-4 mb-8">
@@ -267,22 +278,45 @@ export default function Home() {
           <p className="font-mono text-sm text-gray-mid mb-8 -mt-4">
             LEARN THE FACTS. FIND YOUR VOICE. TAKE ACTION.
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {issues.map((issue) => (
-              <Link
-                key={issue.id}
-                href={`/issues/${issue.slug}`}
-                className={`no-underline text-black border-2 border-border bg-surface p-5 hover:bg-hover transition-colors border-l-4 ${
-                  issueAccent[issue.id] || "border-l-border"
-                }`}
-              >
-                <span className="text-4xl block mb-3">{issue.icon}</span>
-                <h3 className="font-headline text-lg normal-case">{issue.name}</h3>
-                <p className="font-mono text-xs mt-2 text-gray-mid">
-                  {issue.legislation.length} active {issue.legislation.length === 1 ? "bill" : "bills"}
-                </p>
-              </Link>
-            ))}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-0 border-2 border-border">
+            {issues.map((issue, i) => {
+              const accent = issueColor[issue.id] || "#1a1a2e";
+              return (
+                <Link
+                  key={issue.id}
+                  href={`/issues/${issue.slug}`}
+                  className="no-underline text-black bg-surface hover:bg-hover transition-all group relative overflow-hidden border-b-2 border-r-2 border-border"
+                >
+                  {/* Accent top bar */}
+                  <div className="h-1.5 w-full" style={{ backgroundColor: accent }} />
+                  <div className="p-5 md:p-6">
+                    {/* Icon */}
+                    <div
+                      className="w-12 h-12 flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
+                      style={{ backgroundColor: accent }}
+                    >
+                      <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d={issueSvgPath[issue.id] || "M12 6v12m-6-6h12"} />
+                      </svg>
+                    </div>
+                    <h3 className="font-headline text-base md:text-lg normal-case leading-tight group-hover:text-red transition-colors">
+                      {issue.name}
+                    </h3>
+                    <p className="font-body text-sm text-gray-mid mt-2 line-clamp-2 hidden sm:block">
+                      {issue.description.split(",").slice(0, 2).join(",")}.
+                    </p>
+                    <div className="mt-4 flex items-center justify-between">
+                      <span className="font-mono text-[11px] font-bold text-gray-mid uppercase">
+                        {issue.legislation.length} {issue.legislation.length === 1 ? "bill" : "bills"}
+                      </span>
+                      <span className="font-headline text-xs text-black/40 group-hover:text-red group-hover:translate-x-1 transition-all">
+                        &rarr;
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
