@@ -236,6 +236,9 @@ export interface Representative {
   ballotpedia: string;
   congressGov: string;
 
+  // Interest group ratings
+  interestGroupRatings?: InterestGroupRating[];
+
   // Feature flags
   featured?: boolean;
   isLeadership?: boolean;
@@ -293,6 +296,11 @@ export interface ContactLogEntry {
   emailedAt?: string;
   calledAt?: string;
   mailedAt?: string;
+  // Outcome tracking
+  billId?: string;
+  billNumber?: string;
+  outcomeChecked?: string;
+  outcome?: ContactOutcome;
 }
 
 export interface EmailServiceConfig {
@@ -309,4 +317,60 @@ export interface Campaign {
   targetRepIds: string[];
   createdAt: string;
   joinCount: number;
+}
+
+// ── User Vote Tracking (Scorecard) ──
+export interface UserVote {
+  billId: string;
+  billTitle: string;
+  userPosition: "YEA" | "NAY";
+  date: string;
+  category?: string;
+}
+
+// ── Interest Group Ratings ──
+export interface InterestGroupRating {
+  group: string;
+  score: number | string;
+  year: number;
+  icon: string;
+  lean: "left" | "right" | "center";
+}
+
+// ── Contact Outcome Tracking ──
+export interface ContactOutcome {
+  type: "vote" | "committee_action" | "signed" | "no_action";
+  description: string;
+  date: string;
+  repVote?: "YEA" | "NAY" | "ABSTAIN";
+}
+
+// ── Urgency Engine ──
+export interface UrgentAction {
+  id: string;
+  type: string;
+  title: string;
+  subtitle: string;
+  deadline: string;
+  billId?: string;
+  chamber?: string;
+  actionLabel: string;
+  actionUrl: string;
+  priority: number;
+}
+
+// ── Engagement Stats ──
+export interface EngagementStats {
+  totalActions: number;
+  lettersSent: number;
+  callsMade: number;
+  socialPosts: number;
+  uniqueRepsContacted: number;
+  uniqueIssues: number;
+  currentStreak: number;
+  longestStreak: number;
+  thisMonth: number;
+  lastAction?: string;
+  mostContactedRep?: { name: string; count: number };
+  topIssue?: { name: string; count: number };
 }

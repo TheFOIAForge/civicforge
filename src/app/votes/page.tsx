@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useMyReps } from "@/lib/my-reps-context";
+import { useScorecard } from "@/lib/scorecard-context";
 import type { RecentRollCallVote } from "@/data/types";
 
 /* ── Interfaces ── */
@@ -162,6 +163,7 @@ function getCrossPartyVoters(votes: RollCallVote[]): RollCallVote[] {
 
 export default function VotesPage() {
   const { myReps } = useMyReps();
+  const { addVote, removeVote, hasVoted } = useScorecard();
   const [billInput, setBillInput] = useState("");
   const [congress, setCongress] = useState("119");
   const [result, setResult] = useState<BillResult | null>(null);
@@ -649,7 +651,7 @@ export default function VotesPage() {
               )}
 
               {/* Write about this bill CTA */}
-              <div className="mt-4 pt-4 border-t-2 border-border-light">
+              <div className="mt-4 pt-4 border-t-2 border-border-light flex flex-wrap items-center gap-4">
                 <Link
                   href={`/draft?issue=${encodeURIComponent(`${result.bill.number}: ${result.bill.title}`)}`}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-red text-white font-mono text-xs font-bold no-underline hover:bg-black transition-colors"
@@ -659,6 +661,43 @@ export default function VotesPage() {
                   </svg>
                   WRITE TO CONGRESS ABOUT THIS BILL
                 </Link>
+
+                {/* Scorecard YEA/NAY buttons */}
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[10px] text-gray-mid font-bold">YOUR POSITION:</span>
+                  <button
+                    onClick={() => {
+                      if (hasVoted(result.bill.number) === "YEA") {
+                        removeVote(result.bill.number);
+                      } else {
+                        addVote(result.bill.number, result.bill.title, "YEA");
+                      }
+                    }}
+                    className={`px-3 py-1.5 font-mono text-xs font-bold border-2 cursor-pointer transition-colors ${
+                      hasVoted(result.bill.number) === "YEA"
+                        ? "bg-green text-white border-green"
+                        : "bg-surface text-green border-green hover:bg-green-light"
+                    }`}
+                  >
+                    YEA
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (hasVoted(result.bill.number) === "NAY") {
+                        removeVote(result.bill.number);
+                      } else {
+                        addVote(result.bill.number, result.bill.title, "NAY");
+                      }
+                    }}
+                    className={`px-3 py-1.5 font-mono text-xs font-bold border-2 cursor-pointer transition-colors ${
+                      hasVoted(result.bill.number) === "NAY"
+                        ? "bg-status-red text-white border-status-red"
+                        : "bg-surface text-status-red border-status-red hover:bg-status-red-light"
+                    }`}
+                  >
+                    NAY
+                  </button>
+                </div>
               </div>
             </div>
           </div>

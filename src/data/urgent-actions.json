@@ -1,0 +1,55 @@
+[
+  {
+    "id": "fed-reg-epa-2026",
+    "type": "comment_deadline",
+    "title": "EPA Clean Water Standards — Comment Period Closing",
+    "subtitle": "Public comment deadline approaching — make your voice heard on federal water quality regulations",
+    "deadline": "2026-03-20T23:59:59Z",
+    "actionLabel": "SUBMIT COMMENT",
+    "actionUrl": "/federal-register?openComment=EPA-HQ-OW-2024-0001",
+    "priority": 1,
+    "documentId": "EPA-HQ-OW-2024-0001"
+  },
+  {
+    "id": "vote-hr-4421-2026",
+    "type": "floor_vote",
+    "title": "H.R. 4421 — Affordable Insulin Act Floor Vote",
+    "subtitle": "House floor vote scheduled — contact your representative before they cast their vote",
+    "deadline": "2026-03-18T17:00:00Z",
+    "actionLabel": "CALL YOUR REP",
+    "actionUrl": "/draft?context=H.R.%204421%20Affordable%20Insulin%20Act%20—%20Floor%20vote%20scheduled%20March%2018",
+    "priority": 2
+  },
+  {
+    "id": "fed-reg-doe-efficiency-2026",
+    "type": "comment_deadline",
+    "title": "DOE Appliance Efficiency Standards — Public Input",
+    "subtitle": "Department of Energy seeking comments on new energy efficiency requirements for household appliances",
+    "deadline": "2026-04-05T23:59:59Z",
+    "actionLabel": "SUBMIT COMMENT",
+    "actionUrl": "/federal-register?openComment=DOE-HQ-EE-2024-0042",
+    "priority": 3,
+    "documentId": "DOE-HQ-EE-2024-0042"
+  },
+  {
+    "id": "vote-s-2187-border",
+    "type": "floor_vote",
+    "title": "S. 2187 — Border Security & Immigration Reform Vote",
+    "subtitle": "Senate vote on comprehensive immigration reform — tell your senator where you stand",
+    "deadline": "2026-03-25T17:00:00Z",
+    "actionLabel": "CALL YOUR SENATOR",
+    "actionUrl": "/draft?context=S.%202187%20Border%20Security%20and%20Immigration%20Reform%20—%20Senate%20vote%20March%2025",
+    "priority": 4
+  },
+  {
+    "id": "fed-reg-fcc-broadband-2026",
+    "type": "comment_deadline",
+    "title": "FCC Broadband Access Rules — Comment Period Open",
+    "subtitle": "New rules proposed for rural broadband expansion and net neutrality protections",
+    "deadline": "2026-04-15T23:59:59Z",
+    "actionLabel": "SUBMIT COMMENT",
+    "actionUrl": "/federal-register?openComment=FCC-2024-0088",
+    "priority": 5,
+    "documentId": "FCC-2024-0088"
+  }
+]

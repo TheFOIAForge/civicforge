@@ -25,13 +25,13 @@ export default function SettingsPage() {
   const [emailSaved, setEmailSaved] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem("civicforge_api_key");
+    const stored = localStorage.getItem("citizenforge_api_key");
     if (stored) {
       setSavedKey(stored);
       setApiKey(stored);
     }
     // Load email config
-    const emailConfig = localStorage.getItem("civicforge_email_config");
+    const emailConfig = localStorage.getItem("citizenforge_email_config");
     if (emailConfig) {
       const config = JSON.parse(emailConfig);
       setEmailProvider(config.provider || "resend");
@@ -58,13 +58,13 @@ export default function SettingsPage() {
 
   function handleSave() {
     const trimmed = apiKey.trim();
-    localStorage.setItem("civicforge_api_key", trimmed);
+    localStorage.setItem("citizenforge_api_key", trimmed);
     setSavedKey(trimmed);
     setTestResult(null);
   }
 
   function handleRemove() {
-    localStorage.removeItem("civicforge_api_key");
+    localStorage.removeItem("citizenforge_api_key");
     setApiKey("");
     setSavedKey("");
     setTestResult(null);
@@ -108,11 +108,11 @@ export default function SettingsPage() {
   }
 
   function handleClearContacts() {
-    localStorage.removeItem("civicforge_contacts");
+    localStorage.removeItem("citizenforge_contacts");
   }
 
   function handleClearCampaigns() {
-    localStorage.removeItem("civicforge_campaigns");
+    localStorage.removeItem("citizenforge_campaigns");
   }
 
   const masked = savedKey ? savedKey.slice(0, 10) + "..." + savedKey.slice(-4) : "";
@@ -128,7 +128,7 @@ export default function SettingsPage() {
       <section className="border-3 border-border p-6 bg-surface mb-6">
         <h2 className="font-headline text-3xl mb-4">{"\u{1F511}"} Anthropic API Key</h2>
         <p className="font-body text-base text-gray-mid mb-5">
-          CivicForge uses your own Anthropic API key to power AI letter drafting,
+          CitizenForge uses your own Anthropic API key to power AI letter drafting,
           call scripts, and social posts. Your key is stored only in your
           browser&apos;s localStorage — it never touches our servers.
         </p>
@@ -217,7 +217,7 @@ export default function SettingsPage() {
       <section className="border-3 border-border p-6 bg-surface mb-6">
         <h2 className="font-headline text-3xl mb-4">&#9993; Email Service (Optional)</h2>
         <p className="font-body text-base text-gray-mid mb-5">
-          Enter your email service API key to send letters directly from CivicForge
+          Enter your email service API key to send letters directly from CitizenForge
           without opening your email client. Your key is stored only in your
           browser&apos;s localStorage.
         </p>
@@ -275,7 +275,7 @@ export default function SettingsPage() {
                 apiKey: emailApiKey.trim(),
                 senderEmail: senderEmail.trim(),
               };
-              localStorage.setItem("civicforge_email_config", JSON.stringify(config));
+              localStorage.setItem("citizenforge_email_config", JSON.stringify(config));
               setEmailSaved(true);
             }}
             disabled={!emailApiKey.trim() || !senderEmail.trim()}
@@ -290,7 +290,7 @@ export default function SettingsPage() {
           {emailSaved && (
             <button
               onClick={() => {
-                localStorage.removeItem("civicforge_email_config");
+                localStorage.removeItem("citizenforge_email_config");
                 setEmailApiKey("");
                 setSenderEmail("");
                 setEmailSaved(false);
@@ -364,7 +364,7 @@ export default function SettingsPage() {
           </button>
         </div>
         <p className="font-body text-base text-gray-mid mb-5">
-          Real-time status of the data sources powering CivicForge.
+          Real-time status of the data sources powering CitizenForge.
         </p>
 
         {apisLoading ? (

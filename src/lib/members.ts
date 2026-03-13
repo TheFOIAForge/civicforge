@@ -1,4 +1,4 @@
-import type { Representative } from "@/data/types";
+import type { Representative, InterestGroupRating } from "@/data/types";
 import { cache, TTL } from "./cache";
 import {
   transformAllLegislators,
@@ -12,6 +12,7 @@ import { getDarkMoneyConnections } from "./propublica-nonprofits";
 import { getHearingsForMember } from "./congress-hearings";
 import { getDistrictSpendingForMember } from "./usaspending";
 import congressLegislatorsData from "@/data/congress-legislators.json";
+import interestGroupRatingsData from "@/data/interest-group-ratings.json";
 
 // Cast the imported JSON to our expected type
 const rawLegislators = congressLegislatorsData as unknown as RawLegislatorEntry[];
@@ -457,6 +458,10 @@ export async function getEnrichedMember(
     getDistrictSpendingForMember(bioguideId).catch(() => null),
   ]);
 
+  // Interest group ratings lookup
+  const ratingsEntry = (interestGroupRatingsData as Record<string, { ratings: InterestGroupRating[] }>)[bioguideId];
+  const interestGroupRatings = ratingsEntry?.ratings || [];
+
   return {
     ...base,
     // Congress.gov enrichment
@@ -484,5 +489,7 @@ export async function getEnrichedMember(
     darkMoneyConnections: darkMoneyData,
     committeeHearings: hearingsData,
     districtSpending: spendingData || undefined,
+    // Interest group ratings
+    interestGroupRatings: interestGroupRatings.length > 0 ? interestGroupRatings : base.interestGroupRatings,
   };
 }

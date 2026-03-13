@@ -1,6 +1,6 @@
 {
-  "name": "CivicForge — They Work For You",
-  "short_name": "CivicForge",
+  "name": "CitizenForge — They Work For You",
+  "short_name": "CitizenForge",
   "description": "Find your representatives, draft AI-powered letters, track contacts, and hold Congress accountable. A project of FOIAForge.",
   "start_url": "/",
   "display": "standalone",

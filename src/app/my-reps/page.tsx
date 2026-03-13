@@ -23,7 +23,7 @@ export default function MyRepsPage() {
   // Check for stored address
   const [storedAddress, setStoredAddress] = useState("");
   useEffect(() => {
-    const addr = localStorage.getItem("civicforge_address");
+    const addr = localStorage.getItem("citizenforge_address");
     if (addr) setStoredAddress(addr);
   }, []);
 
@@ -41,7 +41,7 @@ export default function MyRepsPage() {
         if (data.length > 0) {
           setLookupResults(data);
           // Save the address
-          localStorage.setItem("civicforge_address", input);
+          localStorage.setItem("citizenforge_address", input);
           setStoredAddress(input);
         } else {
           setLookupError("No representatives found. Try a full address with ZIP code.");
@@ -63,7 +63,7 @@ export default function MyRepsPage() {
     <div className="max-w-5xl mx-auto px-4 py-8">
       <h1 className="font-headline text-5xl md:text-6xl mb-2">My Representatives</h1>
       <p className="font-mono text-sm text-gray-mid mb-8 font-bold">
-        SAVE YOUR REPS FOR QUICK ACCESS ACROSS CIVICFORGE
+        SAVE YOUR REPS FOR QUICK ACCESS ACROSS CITIZENFORGE
       </p>
 
       {/* Saved Reps */}
@@ -206,7 +206,7 @@ export default function MyRepsPage() {
             <h2 className="font-headline text-2xl mb-3">No Representatives Saved Yet</h2>
             <p className="font-body text-base text-gray-mid mb-6 leading-relaxed">
               Enter your address below to find and save your elected officials.
-              Your saved reps appear across CivicForge — in the drafting tool,
+              Your saved reps appear across CitizenForge — in the drafting tool,
               vote lookup, and more.
             </p>
           </div>

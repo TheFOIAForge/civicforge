@@ -1,0 +1,202 @@
+{
+  "S000033": {
+    "ratings": [
+      { "group": "ACLU", "score": 94, "year": 2024, "icon": "⚖️", "lean": "left" },
+      { "group": "NRA", "score": "F", "year": 2024, "icon": "🎯", "lean": "right" },
+      { "group": "Sierra Club", "score": 95, "year": 2024, "icon": "🌲", "lean": "left" },
+      { "group": "Heritage Action", "score": 4, "year": 2024, "icon": "🏛️", "lean": "right" },
+      { "group": "League of Conservation Voters", "score": 97, "year": 2024, "icon": "🌍", "lean": "left" },
+      { "group": "U.S. Chamber of Commerce", "score": 22, "year": 2024, "icon": "💼", "lean": "right" }
+    ]
+  },
+  "W000817": {
+    "ratings": [
+      { "group": "ACLU", "score": 91, "year": 2024, "icon": "⚖️", "lean": "left" },
+      { "group": "NRA", "score": "F", "year": 2024, "icon": "🎯", "lean": "right" },
+      { "group": "Sierra Club", "score": 90, "year": 2024, "icon": "🌲", "lean": "left" },
+      { "group": "Heritage Action", "score": 3, "year": 2024, "icon": "🏛️", "lean": "right" },
+      { "group": "League of Conservation Voters", "score": 95, "year": 2024, "icon": "🌍", "lean": "left" },
+      { "group": "U.S. Chamber of Commerce", "score": 25, "year": 2024, "icon": "💼", "lean": "right" }
+    ]
+  },
+  "C001098": {
+    "ratings": [
+      { "group": "ACLU", "score": 0, "year": 2024, "icon": "⚖️", "lean": "left" },
+      { "group": "NRA", "score": "A+", "year": 2024, "icon": "🎯", "lean": "right" },
+      { "group": "Sierra Club", "score": 2, "year": 2024, "icon": "🌲", "lean": "left" },
+      { "group": "Heritage Action", "score": 96, "year": 2024, "icon": "🏛️", "lean": "right" },
+      { "group": "League of Conservation Voters", "score": 1, "year": 2024, "icon": "🌍", "lean": "left" },
+      { "group": "U.S. Chamber of Commerce", "score": 89, "year": 2024, "icon": "💼", "lean": "right" }
+    ]
+  },
+  "O000172": {
+    "ratings": [
+      { "group": "ACLU", "score": 97, "year": 2024, "icon": "⚖️", "lean": "left" },
+      { "group": "NRA", "score": "F", "year": 2024, "icon": "🎯", "lean": "right" },
+      { "group": "Sierra Club", "score": 98, "year": 2024, "icon": "🌲", "lean": "left" },
+      { "group": "Heritage Action", "score": 2, "year": 2024, "icon": "🏛️", "lean": "right" },
+      { "group": "League of Conservation Voters", "score": 99, "year": 2024, "icon": "🌍", "lean": "left" },
+      { "group": "U.S. Chamber of Commerce", "score": 18, "year": 2024, "icon": "💼", "lean": "right" }
+    ]
+  },
+  "J000289": {
+    "ratings": [
+      { "group": "ACLU", "score": 5, "year": 2024, "icon": "⚖️", "lean": "left" },
+      { "group": "NRA", "score": "A+", "year": 2024, "icon": "🎯", "lean": "right" },
+      { "group": "Sierra Club", "score": 1, "year": 2024, "icon": "🌲", "lean": "left" },
+      { "group": "Heritage Action", "score": 100, "year": 2024, "icon": "🏛️", "lean": "right" },
+      { "group": "League of Conservation Voters", "score": 2, "year": 2024, "icon": "🌍", "lean": "left" },
+      { "group": "U.S. Chamber of Commerce", "score": 85, "year": 2024, "icon": "💼", "lean": "right" }
+    ]
+  },
+  "M000355": {
+    "ratings": [
+      { "group": "ACLU", "score": 8, "year": 2024, "icon": "⚖️", "lean": "left" },
+      { "group": "NRA", "score": "A", "year": 2024, "icon": "🎯", "lean": "right" },
+      { "group": "Sierra Club", "score": 5, "year": 2024, "icon": "🌲", "lean": "left" },
+      { "group": "Heritage Action", "score": 52, "year": 2024, "icon": "🏛️", "lean": "right" },
+      { "group": "League of Conservation Voters", "score": 7, "year": 2024, "icon": "🌍", "lean": "left" },
+      { "group": "U.S. Chamber of Commerce", "score": 82, "year": 2024, "icon": "💼", "lean": "right" }
+    ]
+  },
+  "P000197": {
+    "ratings": [
+      { "group": "ACLU", "score": 88, "year": 2024, "icon": "⚖️", "lean": "left" },
+      { "group": "NRA", "score": "F", "year": 2024, "icon": "🎯", "lean": "right" },
+      { "group": "Sierra Club", "score": 85, "year": 2024, "icon": "🌲", "lean": "left" },
+      { "group": "Heritage Action", "score": 5, "year": 2024, "icon": "🏛️", "lean": "right" },
+      { "group": "League of Conservation Voters", "score": 92, "year": 2024, "icon": "🌍", "lean": "left" },
+      { "group": "U.S. Chamber of Commerce", "score": 42, "year": 2024, "icon": "💼", "lean": "right" }
+    ]
+  },
+  "F000479": {
+    "ratings": [
+      { "group": "ACLU", "score": 86, "year": 2024, "icon": "⚖️", "lean": "left" },
+      { "group": "NRA", "score": "F", "year": 2024, "icon": "🎯", "lean": "right" },
+      { "group": "Sierra Club", "score": 80, "year": 2024, "icon": "🌲", "lean": "left" },
+      { "group": "Heritage Action", "score": 8, "year": 2024, "icon": "🏛️", "lean": "right" },
+      { "group": "League of Conservation Voters", "score": 85, "year": 2024, "icon": "🌍", "lean": "left" },
+      { "group": "U.S. Chamber of Commerce", "score": 30, "year": 2024, "icon": "💼", "lean": "right" }
+    ]
+  },
+  "M001153": {
+    "ratings": [
+      { "group": "ACLU", "score": 45, "year": 2024, "icon": "⚖️", "lean": "left" },
+      { "group": "NRA", "score": "C", "year": 2024, "icon": "🎯", "lean": "right" },
+      { "group": "Sierra Club", "score": 38, "year": 2024, "icon": "🌲", "lean": "left" },
+      { "group": "Heritage Action", "score": 28, "year": 2024, "icon": "🏛️", "lean": "right" },
+      { "group": "League of Conservation Voters", "score": 44, "year": 2024, "icon": "🌍", "lean": "left" },
+      { "group": "U.S. Chamber of Commerce", "score": 68, "year": 2024, "icon": "💼", "lean": "right" }
+    ]
+  },
+  "C001130": {
+    "ratings": [
+      { "group": "ACLU", "score": 90, "year": 2024, "icon": "⚖️", "lean": "left" },
+      { "group": "NRA", "score": "F", "year": 2024, "icon": "🎯", "lean": "right" },
+      { "group": "Sierra Club", "score": 88, "year": 2024, "icon": "🌲", "lean": "left" },
+      { "group": "Heritage Action", "score": 4, "year": 2024, "icon": "🏛️", "lean": "right" },
+      { "group": "League of Conservation Voters", "score": 93, "year": 2024, "icon": "🌍", "lean": "left" },
+      { "group": "U.S. Chamber of Commerce", "score": 24, "year": 2024, "icon": "💼", "lean": "right" }
+    ]
+  },
+  "W000790": {
+    "ratings": [
+      { "group": "ACLU", "score": 89, "year": 2024, "icon": "⚖️", "lean": "left" },
+      { "group": "NRA", "score": "F", "year": 2024, "icon": "🎯", "lean": "right" },
+      { "group": "Sierra Club", "score": 87, "year": 2024, "icon": "🌲", "lean": "left" },
+      { "group": "Heritage Action", "score": 3, "year": 2024, "icon": "🏛️", "lean": "right" },
+      { "group": "League of Conservation Voters", "score": 92, "year": 2024, "icon": "🌍", "lean": "left" },
+      { "group": "U.S. Chamber of Commerce", "score": 28, "year": 2024, "icon": "💼", "lean": "right" }
+    ]
+  },
+  "L000583": {
+    "ratings": [
+      { "group": "ACLU", "score": 7, "year": 2024, "icon": "⚖️", "lean": "left" },
+      { "group": "NRA", "score": "A", "year": 2024, "icon": "🎯", "lean": "right" },
+      { "group": "Sierra Club", "score": 3, "year": 2024, "icon": "🌲", "lean": "left" },
+      { "group": "Heritage Action", "score": 91, "year": 2024, "icon": "🏛️", "lean": "right" },
+      { "group": "League of Conservation Voters", "score": 4, "year": 2024, "icon": "🌍", "lean": "left" },
+      { "group": "U.S. Chamber of Commerce", "score": 86, "year": 2024, "icon": "💼", "lean": "right" }
+    ]
+  },
+  "J000299": {
+    "ratings": [
+      { "group": "ACLU", "score": 3, "year": 2024, "icon": "⚖️", "lean": "left" },
+      { "group": "NRA", "score": "A+", "year": 2024, "icon": "🎯", "lean": "right" },
+      { "group": "Sierra Club", "score": 0, "year": 2024, "icon": "🌲", "lean": "left" },
+      { "group": "Heritage Action", "score": 97, "year": 2024, "icon": "🏛️", "lean": "right" },
+      { "group": "League of Conservation Voters", "score": 2, "year": 2024, "icon": "🌍", "lean": "left" },
+      { "group": "U.S. Chamber of Commerce", "score": 88, "year": 2024, "icon": "💼", "lean": "right" }
+    ]
+  },
+  "T000250": {
+    "ratings": [
+      { "group": "ACLU", "score": 10, "year": 2024, "icon": "⚖️", "lean": "left" },
+      { "group": "NRA", "score": "A", "year": 2024, "icon": "🎯", "lean": "right" },
+      { "group": "Sierra Club", "score": 8, "year": 2024, "icon": "🌲", "lean": "left" },
+      { "group": "Heritage Action", "score": 72, "year": 2024, "icon": "🏛️", "lean": "right" },
+      { "group": "League of Conservation Voters", "score": 9, "year": 2024, "icon": "🌍", "lean": "left" },
+      { "group": "U.S. Chamber of Commerce", "score": 84, "year": 2024, "icon": "💼", "lean": "right" }
+    ]
+  },
+  "S000148": {
+    "ratings": [
+      { "group": "ACLU", "score": 84, "year": 2024, "icon": "⚖️", "lean": "left" },
+      { "group": "NRA", "score": "F", "year": 2024, "icon": "🎯", "lean": "right" },
+      { "group": "Sierra Club", "score": 78, "year": 2024, "icon": "🌲", "lean": "left" },
+      { "group": "Heritage Action", "score": 6, "year": 2024, "icon": "🏛️", "lean": "right" },
+      { "group": "League of Conservation Voters", "score": 82, "year": 2024, "icon": "🌍", "lean": "left" },
+      { "group": "U.S. Chamber of Commerce", "score": 45, "year": 2024, "icon": "💼", "lean": "right" }
+    ]
+  },
+  "J000294": {
+    "ratings": [
+      { "group": "ACLU", "score": 90, "year": 2024, "icon": "⚖️", "lean": "left" },
+      { "group": "NRA", "score": "F", "year": 2024, "icon": "🎯", "lean": "right" },
+      { "group": "Sierra Club", "score": 86, "year": 2024, "icon": "🌲", "lean": "left" },
+      { "group": "Heritage Action", "score": 4, "year": 2024, "icon": "🏛️", "lean": "right" },
+      { "group": "League of Conservation Voters", "score": 91, "year": 2024, "icon": "🌍", "lean": "left" },
+      { "group": "U.S. Chamber of Commerce", "score": 38, "year": 2024, "icon": "💼", "lean": "right" }
+    ]
+  },
+  "C001035": {
+    "ratings": [
+      { "group": "ACLU", "score": 50, "year": 2024, "icon": "⚖️", "lean": "left" },
+      { "group": "NRA", "score": "D", "year": 2024, "icon": "🎯", "lean": "right" },
+      { "group": "Sierra Club", "score": 42, "year": 2024, "icon": "🌲", "lean": "left" },
+      { "group": "Heritage Action", "score": 22, "year": 2024, "icon": "🏛️", "lean": "right" },
+      { "group": "League of Conservation Voters", "score": 48, "year": 2024, "icon": "🌍", "lean": "left" },
+      { "group": "U.S. Chamber of Commerce", "score": 65, "year": 2024, "icon": "💼", "lean": "right" }
+    ]
+  },
+  "M000133": {
+    "ratings": [
+      { "group": "ACLU", "score": 96, "year": 2024, "icon": "⚖️", "lean": "left" },
+      { "group": "NRA", "score": "F", "year": 2024, "icon": "🎯", "lean": "right" },
+      { "group": "Sierra Club", "score": 97, "year": 2024, "icon": "🌲", "lean": "left" },
+      { "group": "Heritage Action", "score": 2, "year": 2024, "icon": "🏛️", "lean": "right" },
+      { "group": "League of Conservation Voters", "score": 98, "year": 2024, "icon": "🌍", "lean": "left" },
+      { "group": "U.S. Chamber of Commerce", "score": 20, "year": 2024, "icon": "💼", "lean": "right" }
+    ]
+  },
+  "G000386": {
+    "ratings": [
+      { "group": "ACLU", "score": 12, "year": 2024, "icon": "⚖️", "lean": "left" },
+      { "group": "NRA", "score": "A", "year": 2024, "icon": "🎯", "lean": "right" },
+      { "group": "Sierra Club", "score": 10, "year": 2024, "icon": "🌲", "lean": "left" },
+      { "group": "Heritage Action", "score": 68, "year": 2024, "icon": "🏛️", "lean": "right" },
+      { "group": "League of Conservation Voters", "score": 11, "year": 2024, "icon": "🌍", "lean": "left" },
+      { "group": "U.S. Chamber of Commerce", "score": 78, "year": 2024, "icon": "💼", "lean": "right" }
+    ]
+  },
+  "R000595": {
+    "ratings": [
+      { "group": "ACLU", "score": 14, "year": 2024, "icon": "⚖️", "lean": "left" },
+      { "group": "NRA", "score": "A", "year": 2024, "icon": "🎯", "lean": "right" },
+      { "group": "Sierra Club", "score": 6, "year": 2024, "icon": "🌲", "lean": "left" },
+      { "group": "Heritage Action", "score": 78, "year": 2024, "icon": "🏛️", "lean": "right" },
+      { "group": "League of Conservation Voters", "score": 8, "year": 2024, "icon": "🌍", "lean": "left" },
+      { "group": "U.S. Chamber of Commerce", "score": 80, "year": 2024, "icon": "💼", "lean": "right" }
+    ]
+  }
+}

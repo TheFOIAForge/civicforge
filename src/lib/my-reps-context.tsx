@@ -23,7 +23,7 @@ const MyRepsContext = createContext<MyRepsContextType>({
   hasSavedReps: false,
 });
 
-const STORAGE_KEY = "civicforge_my_reps";
+const STORAGE_KEY = "citizenforge_my_reps";
 
 export function MyRepsProvider({ children }: { children: ReactNode }) {
   const [myReps, setMyReps] = useState<Representative[]>([]);

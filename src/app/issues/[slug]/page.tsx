@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { getIssueBySlug } from "@/data/issues";
+import { useScorecard } from "@/lib/scorecard-context";
 import type { Representative, Legislation } from "@/data/types";
 
 const issueEmoji: Record<string, string> = {
@@ -75,6 +76,7 @@ function BillSkeleton() {
 export default function IssueDetailPage() {
   const params = useParams();
   const issue = getIssueBySlug(params.slug as string);
+  const { addVote, removeVote, hasVoted } = useScorecard();
   const [featuredReps, setFeaturedReps] = useState<Representative[]>([]);
   const [allMembers, setAllMembers] = useState<Representative[]>([]);
   const [billAI, setBillAI] = useState<BillAIState | null>(null);
@@ -89,7 +91,7 @@ export default function IssueDetailPage() {
   const searchKeyword = issueSearchKeywords[slug] || slug;
 
   useEffect(() => {
-    setHasApiKey(!!localStorage.getItem("civicforge_api_key"));
+    setHasApiKey(!!localStorage.getItem("citizenforge_api_key"));
     fetch("/api/members?featured=true")
       .then((r) => r.json())
       .then((reps: Representative[]) => setFeaturedReps(reps.slice(0, 4)))
@@ -156,7 +158,7 @@ export default function IssueDetailPage() {
       prev ? { ...prev, phase: "loading", selectedMember: member } : null
     );
 
-    const apiKey = localStorage.getItem("civicforge_api_key");
+    const apiKey = localStorage.getItem("citizenforge_api_key");
     if (!apiKey) {
       setBillAI((prev) =>
         prev ? { ...prev, phase: "error", analysis: "No API key found. Add your key in Settings." } : null
@@ -197,7 +199,7 @@ ${lobbying || "None found"}
       // Continue with basic data
     }
 
-    const systemPrompt = `You are an investigative government accountability analyst for CivicForge. You cross-reference bill data with campaign finance, lobbying disclosures, and committee assignments to reveal connections the average citizen would miss.
+    const systemPrompt = `You are an investigative government accountability analyst for CitizenForge. You cross-reference bill data with campaign finance, lobbying disclosures, and committee assignments to reveal connections the average citizen would miss.
 
 BILL DATA:
 - Bill: ${bill.billNumber} — "${bill.title}"
@@ -379,6 +381,51 @@ RULES:
                       Sponsor: {bill.sponsor}
                     </p>
                     <p className="font-body text-base text-gray-mid mt-2">{bill.summary}</p>
+
+                    {/* Scorecard YEA/NAY buttons */}
+                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border-light">
+                      <span className="font-mono text-[10px] text-gray-mid font-bold">YOUR POSITION:</span>
+                      <button
+                        onClick={() => {
+                          if (hasVoted(bill.billNumber) === "YEA") {
+                            removeVote(bill.billNumber);
+                          } else {
+                            addVote(bill.billNumber, bill.title, "YEA", issue?.name);
+                          }
+                        }}
+                        className={`px-3 py-1.5 font-mono text-xs font-bold border-2 cursor-pointer transition-colors ${
+                          hasVoted(bill.billNumber) === "YEA"
+                            ? "bg-green text-white border-green"
+                            : "bg-surface text-green border-green hover:bg-green-light"
+                        }`}
+                      >
+                        YEA
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (hasVoted(bill.billNumber) === "NAY") {
+                            removeVote(bill.billNumber);
+                          } else {
+                            addVote(bill.billNumber, bill.title, "NAY", issue?.name);
+                          }
+                        }}
+                        className={`px-3 py-1.5 font-mono text-xs font-bold border-2 cursor-pointer transition-colors ${
+                          hasVoted(bill.billNumber) === "NAY"
+                            ? "bg-status-red text-white border-status-red"
+                            : "bg-surface text-status-red border-status-red hover:bg-status-red-light"
+                        }`}
+                      >
+                        NAY
+                      </button>
+                      {hasVoted(bill.billNumber) && (
+                        <Link
+                          href="/scorecard"
+                          className="font-mono text-[10px] text-red no-underline font-bold hover:text-black transition-colors ml-2"
+                        >
+                          VIEW SCORECARD
+                        </Link>
+                      )}
+                    </div>
 
                     {/* AI Analysis Panel — inline under this bill */}
                     {billAI && billAI.billId === bill.id && (

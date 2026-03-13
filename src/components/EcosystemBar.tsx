@@ -15,7 +15,7 @@ export default function EcosystemBar() {
         </a>
         <span className="text-white/20 font-mono text-sm">|</span>
         <span className="px-4 py-1 font-mono text-xs font-bold tracking-wider text-white border-b-2 border-red">
-          CIVICFORGE
+          CITIZENFORGE
         </span>
       </div>
     </div>

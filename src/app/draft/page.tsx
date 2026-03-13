@@ -34,10 +34,18 @@ function partyBg(party: string) {
   return "bg-ind";
 }
 
+const US_STATES = [
+  "AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS",
+  "KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY",
+  "NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY",
+];
+
 function DraftInner() {
   const searchParams = useSearchParams();
   const { myReps, hasSavedReps } = useMyReps();
   const outputRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const [allReps, setAllReps] = useState<Representative[]>([]);
   const [mode, setMode] = useState<Mode>(
@@ -54,6 +62,11 @@ function DraftInner() {
   const [copied, setCopied] = useState(false);
   const [showAllReps, setShowAllReps] = useState(false);
   const [repSearch, setRepSearch] = useState("");
+  const [chamberFilter, setChamberFilter] = useState<"All" | "Senate" | "House">("All");
+  const [partyFilter, setPartyFilter] = useState<"All" | "D" | "R" | "I">("All");
+  const [stateFilter, setStateFilter] = useState<string>("All");
+  const [showResults, setShowResults] = useState(false);
+  const [highlightIdx, setHighlightIdx] = useState(-1);
 
   // Load all reps
   useEffect(() => {
@@ -71,29 +84,65 @@ function DraftInner() {
       .catch(() => {});
   }, [searchParams]);
 
-  // Auto-select first saved rep if none selected and no URL param
+  // Close search results on outside click
   useEffect(() => {
-    if (!selectedRep && hasSavedReps && !searchParams.get("rep")) {
-      // Don't auto-select, let user choose
+    function handleClick(e: MouseEvent) {
+      if (resultsRef.current && !resultsRef.current.contains(e.target as Node)) {
+        setShowResults(false);
+      }
     }
-  }, [hasSavedReps, selectedRep, searchParams]);
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
   const selectedIssue = selectedIssueSlug ? getIssueBySlug(selectedIssueSlug) : undefined;
 
-  // Filter reps for search
-  const filteredReps = repSearch
-    ? allReps.filter((r) =>
-        r.fullName.toLowerCase().includes(repSearch.toLowerCase()) ||
-        r.state.toLowerCase().includes(repSearch.toLowerCase())
-      )
-    : allReps;
+  // Has any filter active?
+  const hasFilters = chamberFilter !== "All" || partyFilter !== "All" || stateFilter !== "All" || repSearch.length >= 2;
+
+  // Filter reps with all criteria
+  const filteredReps = allReps.filter((r) => {
+    if (chamberFilter !== "All" && r.chamber !== chamberFilter) return false;
+    if (partyFilter !== "All" && r.party !== partyFilter) return false;
+    if (stateFilter !== "All" && r.stateAbbr !== stateFilter) return false;
+    if (repSearch.length >= 2) {
+      const q = repSearch.toLowerCase();
+      return r.fullName.toLowerCase().includes(q) || r.state.toLowerCase().includes(q) || r.stateAbbr.toLowerCase() === q;
+    }
+    return true;
+  });
 
   // Reps not in saved list
   const otherReps = filteredReps.filter((r) => !myReps.some((mr) => mr.id === r.id));
 
+  // Results to show in dropdown (capped)
+  const dropdownReps = (hasSavedReps ? otherReps : filteredReps).slice(0, 30);
+
+  // Keyboard navigation for search results
+  function handleSearchKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightIdx(i => Math.min(i + 1, dropdownReps.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightIdx(i => Math.max(i - 1, 0));
+    } else if (e.key === "Enter" && highlightIdx >= 0 && dropdownReps[highlightIdx]) {
+      e.preventDefault();
+      setSelectedRep(dropdownReps[highlightIdx]);
+      setShowResults(false);
+      setRepSearch("");
+      setShowAllReps(false);
+    } else if (e.key === "Escape") {
+      setShowResults(false);
+    }
+  }
+
+  // Reset active filter count for display
+  const activeFilterCount = [chamberFilter !== "All", partyFilter !== "All", stateFilter !== "All"].filter(Boolean).length;
+
   function getApiKey(): string | null {
     if (typeof window === "undefined") return null;
-    return localStorage.getItem("civicforge_api_key");
+    return localStorage.getItem("citizenforge_api_key");
   }
 
   async function handleGenerate() {
@@ -155,8 +204,8 @@ function DraftInner() {
 
       // Auto-log to contact tracker
       try {
-        const logs = JSON.parse(localStorage.getItem("civicforge_contacts") || "[]");
-        logs.push({
+        const logs = JSON.parse(localStorage.getItem("citizenforge_contacts") || "[]");
+        const logEntry: Record<string, unknown> = {
           id: Date.now().toString(),
           repId: selectedRep.id,
           repName: selectedRep.fullName,
@@ -166,8 +215,14 @@ function DraftInner() {
           status: "sent",
           notes: concern.slice(0, 100),
           content: text.slice(0, 500),
-        });
-        localStorage.setItem("civicforge_contacts", JSON.stringify(logs));
+        };
+        // Attach bill info if available
+        if (selectedIssue?.legislation && selectedIssue.legislation.length > 0) {
+          logEntry.billNumber = selectedIssue.legislation[0].billNumber;
+          logEntry.billId = selectedIssue.legislation[0].id;
+        }
+        logs.push(logEntry);
+        localStorage.setItem("citizenforge_contacts", JSON.stringify(logs));
       } catch {
         // Silently fail on storage errors
       }
@@ -284,55 +339,147 @@ function DraftInner() {
               </div>
             )}
 
-            {/* Other reps — collapsible search */}
-            {!hasSavedReps || showAllReps ? (
-              <div className={hasSavedReps ? "border-t border-border-light pt-4" : ""}>
-                {hasSavedReps && (
-                  <p className="font-mono text-[10px] text-gray-mid font-bold mb-2">OTHER MEMBERS OF CONGRESS</p>
-                )}
-                <input
-                  type="search"
-                  value={repSearch}
-                  onChange={(e) => setRepSearch(e.target.value)}
-                  placeholder="Search by name or state..."
-                  className="w-full px-4 py-3 border-2 border-border bg-cream font-mono text-sm placeholder:text-gray-light focus:outline-none focus:border-red mb-3"
-                />
-                <div className="max-h-48 overflow-y-auto border-2 border-border bg-surface">
-                  {(hasSavedReps ? otherReps : filteredReps).slice(0, 50).map((rep) => (
+            {/* Search + filters — always visible */}
+            <div ref={resultsRef} className={hasSavedReps ? "border-t border-border-light pt-4" : ""}>
+              {hasSavedReps && (
+                <p className="font-mono text-[10px] text-gray-mid font-bold mb-2">ALL MEMBERS OF CONGRESS</p>
+              )}
+
+              {/* Filter pills row */}
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                {/* Chamber filter */}
+                <div className="flex border-2 border-border divide-x-2 divide-border">
+                  {(["All", "Senate", "House"] as const).map((c) => (
                     <button
-                      key={rep.id}
-                      onClick={() => { setSelectedRep(rep); setShowAllReps(false); setRepSearch(""); }}
-                      className={`w-full flex items-center gap-3 px-4 py-2.5 text-left cursor-pointer transition-colors border-b border-border-light last:border-0 ${
-                        selectedRep?.id === rep.id ? "bg-red-light" : "hover:bg-hover"
+                      key={c}
+                      onClick={() => { setChamberFilter(c); setShowResults(true); setHighlightIdx(-1); }}
+                      className={`px-3 py-1.5 font-mono text-[11px] font-bold uppercase cursor-pointer transition-colors ${
+                        chamberFilter === c ? "bg-black text-white" : "bg-surface text-gray-mid hover:bg-hover"
                       }`}
                     >
-                      <span className={`w-6 h-6 ${partyBg(rep.party)} flex items-center justify-center shrink-0`}>
-                        <span className="font-headline text-[10px] text-white">{rep.firstName[0]}{rep.lastName[0]}</span>
-                      </span>
-                      <span className="font-mono text-sm flex-1">
-                        {rep.fullName} <span className="text-gray-mid">({rep.party}) — {rep.title}, {rep.state}</span>
-                      </span>
+                      {c}
                     </button>
                   ))}
                 </div>
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowAllReps(true)}
-                className="font-mono text-xs text-gray-mid font-bold cursor-pointer hover:text-red transition-colors underline"
-              >
-                SEARCH ALL MEMBERS OF CONGRESS &rarr;
-              </button>
-            )}
 
-            {!hasSavedReps && (
-              <p className="mt-3 font-mono text-[10px] text-gray-mid">
-                <Link href="/my-reps" className="text-red no-underline font-bold hover:text-black transition-colors">
-                  Save your reps
-                </Link>{" "}
-                for one-tap access here.
-              </p>
-            )}
+                {/* Party filter */}
+                <div className="flex border-2 border-border divide-x-2 divide-border">
+                  {(["All", "D", "R", "I"] as const).map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => { setPartyFilter(p); setShowResults(true); setHighlightIdx(-1); }}
+                      className={`px-3 py-1.5 font-mono text-[11px] font-bold uppercase cursor-pointer transition-colors ${
+                        partyFilter === p
+                          ? p === "D" ? "text-white" : p === "R" ? "text-white" : p === "I" ? "text-white" : "bg-black text-white"
+                          : "bg-surface text-gray-mid hover:bg-hover"
+                      }`}
+                      style={
+                        partyFilter === p
+                          ? p === "D" ? { backgroundColor: "#1a3a6b" }
+                          : p === "R" ? { backgroundColor: "#C1272D" }
+                          : p === "I" ? { backgroundColor: "#6b5b3e" }
+                          : undefined
+                          : undefined
+                      }
+                    >
+                      {p === "D" ? "DEM" : p === "R" ? "GOP" : p === "I" ? "IND" : "ALL"}
+                    </button>
+                  ))}
+                </div>
+
+                {/* State filter */}
+                <select
+                  value={stateFilter}
+                  onChange={(e) => { setStateFilter(e.target.value); setShowResults(true); setHighlightIdx(-1); }}
+                  className="px-3 py-1.5 font-mono text-[11px] font-bold uppercase border-2 border-border bg-surface cursor-pointer"
+                >
+                  <option value="All">All States</option>
+                  {US_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+
+                {/* Clear filters */}
+                {activeFilterCount > 0 && (
+                  <button
+                    onClick={() => { setChamberFilter("All"); setPartyFilter("All"); setStateFilter("All"); }}
+                    className="px-2 py-1.5 font-mono text-[10px] text-red font-bold cursor-pointer hover:underline"
+                  >
+                    CLEAR FILTERS ({activeFilterCount})
+                  </button>
+                )}
+              </div>
+
+              {/* Search input */}
+              <div className="relative">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={repSearch}
+                  onChange={(e) => { setRepSearch(e.target.value); setShowResults(true); setHighlightIdx(-1); }}
+                  onFocus={() => setShowResults(true)}
+                  onKeyDown={handleSearchKeyDown}
+                  placeholder="Search by name or state..."
+                  className="w-full px-4 py-3 border-3 border-border bg-cream font-mono text-sm placeholder:text-gray-light focus:outline-none focus:border-red"
+                />
+
+                {/* Filtered count badge */}
+                {hasFilters && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[10px] text-gray-mid font-bold pointer-events-none">
+                    {filteredReps.length} FOUND
+                  </span>
+                )}
+
+                {/* Dropdown results */}
+                {showResults && hasFilters && dropdownReps.length > 0 && (
+                  <div className="absolute z-40 left-0 right-0 top-full mt-1 border-3 border-border bg-white max-h-72 overflow-y-auto shadow-lg">
+                    {dropdownReps.map((rep, idx) => (
+                      <button
+                        key={rep.id}
+                        onClick={() => {
+                          setSelectedRep(rep);
+                          setShowResults(false);
+                          setRepSearch("");
+                        }}
+                        onMouseEnter={() => setHighlightIdx(idx)}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-left cursor-pointer transition-colors border-b border-border-light last:border-0 ${
+                          idx === highlightIdx ? "bg-cream-dark" : "hover:bg-hover"
+                        }`}
+                      >
+                        <span className={`w-7 h-7 ${partyBg(rep.party)} flex items-center justify-center shrink-0 overflow-hidden relative`}>
+                          <span className="font-headline text-[10px] text-white">{rep.firstName[0]}{rep.lastName[0]}</span>
+                          {rep.photoUrl && (
+                            <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                          )}
+                        </span>
+                        <span className="font-mono text-sm font-bold flex-1">{rep.fullName}</span>
+                        <span className="font-mono text-[11px] text-gray-mid">
+                          {rep.party === "D" ? "DEM" : rep.party === "R" ? "GOP" : "IND"} · {rep.stateAbbr} · {rep.chamber}
+                        </span>
+                      </button>
+                    ))}
+                    {filteredReps.length > 30 && (
+                      <div className="px-4 py-2 font-mono text-[10px] text-gray-mid text-center bg-cream-dark">
+                        Showing 30 of {filteredReps.length} — type to narrow results
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {showResults && hasFilters && dropdownReps.length === 0 && (
+                  <div className="absolute z-40 left-0 right-0 top-full mt-1 border-3 border-border bg-white p-4">
+                    <p className="font-mono text-sm text-gray-mid text-center">No representatives found. Try different filters.</p>
+                  </div>
+                )}
+              </div>
+
+              {!hasSavedReps && (
+                <p className="mt-3 font-mono text-[10px] text-gray-mid">
+                  <Link href="/my-reps" className="text-red no-underline font-bold hover:text-black transition-colors">
+                    Save your reps
+                  </Link>{" "}
+                  for one-tap access here.
+                </p>
+              )}
+            </div>
           </section>
 
           {/* Selected rep confirmation */}

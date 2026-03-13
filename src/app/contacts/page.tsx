@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import type { ContactLogEntry, ContactDeliveryStatus, EmailServiceConfig } from "@/data/types";
+import { getEngagementStats } from "@/lib/engagement-stats";
+import { useMyReps } from "@/lib/my-reps-context";
+import { checkOutcomes } from "@/lib/outcome-checker";
 
 const STATUS_OPTIONS = [
   { value: "sent", label: "Sent", color: "bg-red-light text-red" },
@@ -46,6 +49,17 @@ const methodEmoji: Record<string, string> = {
   social: "\u{1F4F1}",
 };
 
+const QUICK_ISSUES = [
+  "Healthcare",
+  "Environment & Climate",
+  "Housing",
+  "Immigration",
+  "Education",
+  "Economy & Jobs",
+  "Civil Rights & Justice",
+  "Defense & Foreign Policy",
+];
+
 export default function ContactsPage() {
   const [contacts, setContacts] = useState<ContactLogEntry[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -55,17 +69,40 @@ export default function ContactsPage() {
   const [sendResult, setSendResult] = useState<{ id: string; ok: boolean; message: string } | null>(null);
   const [hasEmailConfig, setHasEmailConfig] = useState(false);
 
+  // Log-a-call state
+  const [showCallForm, setShowCallForm] = useState(false);
+  const [callRepId, setCallRepId] = useState("");
+  const [callIssue, setCallIssue] = useState("");
+  const [callNote, setCallNote] = useState("");
+  const { myReps } = useMyReps();
+  const outcomeChecked = useRef(false);
+
   useEffect(() => {
-    const stored = localStorage.getItem("civicforge_contacts");
+    const stored = localStorage.getItem("citizenforge_contacts");
     if (stored) {
-      setContacts(JSON.parse(stored));
+      const parsed = JSON.parse(stored) as ContactLogEntry[];
+      setContacts(parsed);
+
+      // Check outcomes for contacts with bill numbers (once per page load)
+      if (!outcomeChecked.current) {
+        outcomeChecked.current = true;
+        const contactsWithBills = parsed.filter((c) => c.billNumber);
+        if (contactsWithBills.length > 0) {
+          checkOutcomes(parsed).then((updated) => {
+            setContacts(updated);
+            localStorage.setItem("citizenforge_contacts", JSON.stringify(updated));
+          }).catch(() => {
+            // Silently fail
+          });
+        }
+      }
     }
-    setHasEmailConfig(!!localStorage.getItem("civicforge_email_config"));
+    setHasEmailConfig(!!localStorage.getItem("citizenforge_email_config"));
   }, []);
 
   function save(updated: ContactLogEntry[]) {
     setContacts(updated);
-    localStorage.setItem("civicforge_contacts", JSON.stringify(updated));
+    localStorage.setItem("citizenforge_contacts", JSON.stringify(updated));
   }
 
   function handleDelete(id: string) {
@@ -111,7 +148,7 @@ export default function ContactsPage() {
   }
 
   async function handleEmailViaService(entry: ContactLogEntry) {
-    const configStr = localStorage.getItem("civicforge_email_config");
+    const configStr = localStorage.getItem("citizenforge_email_config");
     if (!configStr || !entry.content) return;
     const config: EmailServiceConfig = JSON.parse(configStr);
     setSendingId(entry.id);
@@ -142,6 +179,31 @@ export default function ContactsPage() {
       setSendingId(null);
     }
   }
+
+  function handleLogCall() {
+    if (!callRepId || !callIssue) return;
+    const rep = myReps.find((r) => r.id === callRepId);
+    if (!rep) return;
+    const entry: ContactLogEntry = {
+      id: `call-${Date.now()}`,
+      repId: rep.id,
+      repName: rep.fullName,
+      method: "call",
+      issue: callIssue,
+      date: new Date().toISOString().split("T")[0],
+      status: "sent",
+      notes: callNote,
+      deliveryStatus: "called",
+      calledAt: new Date().toISOString(),
+    };
+    save([...contacts, entry]);
+    setShowCallForm(false);
+    setCallRepId("");
+    setCallIssue("");
+    setCallNote("");
+  }
+
+  const engagementStats = getEngagementStats(contacts);
 
   const followUpCount = contacts.filter(
     (c) => c.status === "awaiting_response" && daysSince(c.date) >= 14
@@ -197,7 +259,7 @@ export default function ContactsPage() {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = "civicforge-contacts.csv";
+                a.download = "citizenforge-contacts.csv";
                 a.click();
                 URL.revokeObjectURL(url);
               }}
@@ -217,33 +279,123 @@ export default function ContactsPage() {
 
       {/* Stats bar */}
       {contacts.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-8">
-          <div className="border-2 border-border bg-surface p-4 text-center">
-            <div className="font-headline text-3xl">{contacts.length}</div>
-            <div className="font-mono text-xs text-gray-mid font-bold">Total Contacts</div>
-          </div>
-          <div className="border-2 border-border bg-surface p-4 text-center">
-            <div className="font-headline text-3xl">
-              {contacts.filter((c) => c.method === "letter").length}
+        <div className="mb-8 space-y-4">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+            <div className="border-2 border-border bg-surface p-4 text-center">
+              <div className="font-headline text-3xl">{contacts.length}</div>
+              <div className="font-mono text-xs text-gray-mid font-bold">Total Contacts</div>
             </div>
-            <div className="font-mono text-xs text-gray-mid font-bold">Letters</div>
-          </div>
-          <div className="border-2 border-border bg-surface p-4 text-center">
-            <div className="font-headline text-3xl">
-              {contacts.filter((c) => c.method === "call").length}
+            <div className="border-2 border-border bg-surface p-4 text-center">
+              <div className="font-headline text-3xl">
+                {engagementStats.lettersSent}
+              </div>
+              <div className="font-mono text-xs text-gray-mid font-bold">Letters</div>
             </div>
-            <div className="font-mono text-xs text-gray-mid font-bold">Calls</div>
-          </div>
-          <div className="border-2 border-border bg-surface p-4 text-center">
-            <div className="font-headline text-3xl text-green">{emailedCount}</div>
-            <div className="font-mono text-xs text-gray-mid font-bold">Emailed</div>
-          </div>
-          <div className={`border-2 p-4 text-center ${followUpCount > 0 ? "border-status-red bg-status-red-light" : "border-border bg-surface"}`}>
-            <div className={`font-headline text-3xl ${followUpCount > 0 ? "text-status-red" : ""}`}>
-              {followUpCount}
+            <div className="border-2 border-border bg-surface p-4 text-center">
+              <div className="font-headline text-3xl">
+                {engagementStats.callsMade}
+              </div>
+              <div className="font-mono text-xs text-gray-mid font-bold">Calls</div>
             </div>
-            <div className="font-mono text-xs text-gray-mid font-bold">Need Follow-up</div>
+            <div className="border-2 border-border bg-surface p-4 text-center">
+              <div className="font-headline text-3xl text-green">{emailedCount}</div>
+              <div className="font-mono text-xs text-gray-mid font-bold">Emailed</div>
+            </div>
+            <div className={`border-2 p-4 text-center ${followUpCount > 0 ? "border-status-red bg-status-red-light" : "border-border bg-surface"}`}>
+              <div className={`font-headline text-3xl ${followUpCount > 0 ? "text-status-red" : ""}`}>
+                {followUpCount}
+              </div>
+              <div className="font-mono text-xs text-gray-mid font-bold">Need Follow-up</div>
+            </div>
           </div>
+
+          {/* Enhanced engagement row */}
+          <div className="flex flex-wrap items-center gap-4 border-2 border-border bg-surface p-4">
+            {engagementStats.currentStreak > 0 && (
+              <span className="font-mono text-sm font-bold">
+                {"\uD83D\uDD25"} {engagementStats.currentStreak}-week streak
+              </span>
+            )}
+            {engagementStats.mostContactedRep && (
+              <span className="font-mono text-sm text-gray-mid">
+                Most contacted: <span className="font-bold text-black">{engagementStats.mostContactedRep.name}</span>
+              </span>
+            )}
+            {engagementStats.topIssue && (
+              <span className="font-mono text-sm text-gray-mid">
+                Top issue: <span className="font-bold text-black">{engagementStats.topIssue.name}</span>
+              </span>
+            )}
+            <div className="ml-auto">
+              <button
+                onClick={() => setShowCallForm(!showCallForm)}
+                className="px-5 py-2 bg-red text-white font-mono text-sm font-bold uppercase cursor-pointer border-2 border-red hover:bg-red-dark hover:border-red-dark transition-colors"
+              >
+                {showCallForm ? "CANCEL" : "LOG A CALL"}
+              </button>
+            </div>
+          </div>
+
+          {/* Inline log-a-call form */}
+          {showCallForm && (
+            <div className="border-2 border-border bg-surface p-5 space-y-4">
+              <h3 className="font-headline text-xl normal-case">Log a Call</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-mono text-xs font-bold text-gray-mid mb-1">REPRESENTATIVE</label>
+                  <select
+                    value={callRepId}
+                    onChange={(e) => setCallRepId(e.target.value)}
+                    className="w-full px-4 py-2 border-2 border-border font-mono text-sm bg-surface"
+                  >
+                    <option value="">Select a rep...</option>
+                    {myReps.map((rep) => (
+                      <option key={rep.id} value={rep.id}>{rep.fullName} ({rep.title})</option>
+                    ))}
+                  </select>
+                  {myReps.length === 0 && (
+                    <p className="font-mono text-xs text-gray-mid mt-1">
+                      No saved reps. <Link href="/" className="text-red font-bold">Find your reps first.</Link>
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="block font-mono text-xs font-bold text-gray-mid mb-1">ISSUE</label>
+                  <select
+                    value={callIssue}
+                    onChange={(e) => setCallIssue(e.target.value)}
+                    className="w-full px-4 py-2 border-2 border-border font-mono text-sm bg-surface"
+                  >
+                    <option value="">Select an issue...</option>
+                    {QUICK_ISSUES.map((issue) => (
+                      <option key={issue} value={issue}>{issue}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block font-mono text-xs font-bold text-gray-mid mb-1">NOTES</label>
+                <textarea
+                  value={callNote}
+                  onChange={(e) => setCallNote(e.target.value)}
+                  rows={3}
+                  className="w-full px-4 py-2 border-2 border-border font-body text-base resize-none bg-surface"
+                  placeholder="What did you discuss? Any response from staff?"
+                />
+              </div>
+              <button
+                onClick={handleLogCall}
+                disabled={!callRepId || !callIssue}
+                className={`px-6 py-3 font-mono text-sm font-bold uppercase cursor-pointer border-2 transition-colors ${
+                  callRepId && callIssue
+                    ? "bg-black text-white border-black hover:bg-red hover:border-red"
+                    : "bg-gray-mid text-white border-gray-mid cursor-not-allowed"
+                }`}
+              >
+                Save Call
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -379,6 +531,35 @@ export default function ContactsPage() {
                       <p className="font-mono text-xs text-red mt-1">
                         Mailed: {new Date(entry.mailedAt).toLocaleDateString()}
                       </p>
+                    )}
+                    {/* Outcome badge */}
+                    {entry.billNumber && (
+                      <div className="mt-2">
+                        <span className="font-mono text-[10px] text-gray-mid mr-2">BILL: {entry.billNumber}</span>
+                        {entry.outcome ? (
+                          entry.outcome.type === "signed" ? (
+                            <span className="inline-block px-3 py-1 font-mono text-xs font-bold border-3 border-[#b8860b] bg-[#fdf6e3] text-[#b8860b]">
+                              SIGNED INTO LAW
+                            </span>
+                          ) : entry.outcome.repVote === "YEA" ? (
+                            <span className="inline-block px-3 py-1 font-mono text-xs font-bold border-3 border-green bg-green-light text-green">
+                              REP VOTED YOUR WAY &#10003;
+                            </span>
+                          ) : entry.outcome.repVote === "NAY" ? (
+                            <span className="inline-block px-3 py-1 font-mono text-xs font-bold border-3 border-[#C1272D] bg-status-red-light text-[#C1272D]">
+                              REP VOTED AGAINST &#10007;
+                            </span>
+                          ) : (
+                            <span className="inline-block px-3 py-1 font-mono text-xs font-bold border-3 border-border bg-cream-dark text-gray-mid">
+                              {entry.outcome.description}
+                            </span>
+                          )
+                        ) : (
+                          <span className="inline-block px-3 py-1 font-mono text-xs font-bold border-3 border-border bg-cream-dark text-gray-mid">
+                            PENDING
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
 

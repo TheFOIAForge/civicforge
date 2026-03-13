@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect, useRef, Suspense, FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import type { FederalRegisterDocument } from "@/data/types";
 
@@ -246,12 +247,24 @@ function CommentForm({
 /* ── Main Page ── */
 
 export default function FederalRegisterPage() {
+  return (
+    <Suspense fallback={<div className="max-w-7xl mx-auto px-4 py-8"><div className="h-8 bg-border-light w-64 motion-safe:animate-pulse" /></div>}>
+      <FederalRegisterContent />
+    </Suspense>
+  );
+}
+
+function FederalRegisterContent() {
+  const searchParams = useSearchParams();
+  const openCommentParam = searchParams.get("openComment");
   const [docs, setDocs] = useState<FederalRegisterDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [keyword, setKeyword] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [mode, setMode] = useState<"comments" | "rules">("comments");
   const [openCommentForm, setOpenCommentForm] = useState<string | null>(null);
+  const [showDirectComment, setShowDirectComment] = useState(!!openCommentParam);
+  const commentSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -259,10 +272,21 @@ export default function FederalRegisterPage() {
     if (keyword) params.set("keyword", keyword);
     fetch(`/api/federal-register?${params}`)
       .then((r) => r.json())
-      .then(setDocs)
+      .then((data) => {
+        setDocs(data);
+        // If linked with ?openComment=DOC_ID, auto-open that form
+        if (openCommentParam) {
+          setOpenCommentForm(openCommentParam);
+          setShowDirectComment(true);
+          // Scroll to the comment section after render
+          setTimeout(() => {
+            commentSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }, 100);
+        }
+      })
       .catch(() => setDocs([]))
       .finally(() => setLoading(false));
-  }, [keyword, mode]);
+  }, [keyword, mode, openCommentParam]);
 
   const closingSoon = docs.filter((d) => {
     const days = daysUntil(d.commentEndDate);
@@ -282,6 +306,82 @@ export default function FederalRegisterPage() {
       <p className="font-mono text-sm text-gray-mid mb-8 font-bold">
         PROPOSED RULES, OPEN COMMENT PERIODS, AND FINAL RULES FROM FEDERAL AGENCIES
       </p>
+
+      {/* Direct Comment Wizard — shown when linked from urgency banner */}
+      {showDirectComment && openCommentParam && (
+        <div ref={commentSectionRef} className="mb-8 border-3 border-red bg-cream-dark p-6 md:p-8">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 flex items-center justify-center shrink-0" style={{ backgroundColor: "#C1272D" }}>
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="font-headline text-2xl">Submit Your Comment</h2>
+              <p className="font-mono text-xs text-gray-mid font-bold">YOU WERE DIRECTED HERE FROM AN URGENT ACTION</p>
+            </div>
+            <button
+              onClick={() => setShowDirectComment(false)}
+              className="ml-auto w-8 h-8 border-2 border-border flex items-center justify-center font-mono text-sm font-bold text-gray-mid hover:border-black hover:text-black transition-colors cursor-pointer"
+              aria-label="Close wizard"
+            >
+              X
+            </button>
+          </div>
+
+          <div className="mb-6">
+            <h3 className="font-headline text-lg mb-2">How to submit your comment:</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="border-2 border-border bg-surface p-4">
+                <div className="w-8 h-8 text-white font-headline text-lg flex items-center justify-center mb-2" style={{ backgroundColor: "#C1272D" }}>1</div>
+                <p className="font-body text-sm text-gray-dark">
+                  <strong>Draft your comment</strong> using our AI-powered writer, or write it yourself below.
+                </p>
+              </div>
+              <div className="border-2 border-border bg-surface p-4">
+                <div className="w-8 h-8 text-white font-headline text-lg flex items-center justify-center mb-2" style={{ backgroundColor: "#C1272D" }}>2</div>
+                <p className="font-body text-sm text-gray-dark">
+                  <strong>Fill in your name and email</strong> — your comment becomes part of the public record.
+                </p>
+              </div>
+              <div className="border-2 border-border bg-surface p-4">
+                <div className="w-8 h-8 text-white font-headline text-lg flex items-center justify-center mb-2" style={{ backgroundColor: "#C1272D" }}>3</div>
+                <p className="font-body text-sm text-gray-dark">
+                  <strong>Submit directly</strong> — we&apos;ll send it to Regulations.gov and give you a tracking number.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href={`/draft?context=${encodeURIComponent(`Federal Register comment for docket ${openCommentParam}`)}`}
+              className="px-6 py-3 font-headline text-base border-3 text-white no-underline transition-colors"
+              style={{ backgroundColor: "#C1272D", borderColor: "#C1272D" }}
+            >
+              DRAFT WITH AI FIRST
+            </Link>
+            <a
+              href={`https://www.regulations.gov/search?filter=${encodeURIComponent(openCommentParam)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-6 py-3 bg-black text-white font-headline text-base border-3 border-black hover:bg-red hover:border-red transition-colors no-underline"
+            >
+              GO TO REGULATIONS.GOV DIRECTLY
+            </a>
+            <button
+              onClick={() => {
+                setShowDirectComment(false);
+                // Scroll to the document list
+                window.scrollTo({ top: document.querySelector('[role="search"]')?.getBoundingClientRect().top! + window.scrollY - 100, behavior: "smooth" });
+              }}
+              className="px-6 py-3 border-3 border-border font-headline text-base text-gray-dark hover:border-black hover:text-black transition-colors cursor-pointer"
+            >
+              BROWSE ALL OPEN COMMENTS
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* What is the Federal Register? */}
       <section className="border-3 border-border bg-surface p-6 md:p-8 mb-8">
@@ -728,7 +828,7 @@ export default function FederalRegisterPage() {
         <div className="border-2 border-border p-5 bg-cream-dark">
           <h3 className="font-headline text-xl normal-case mb-2">Draft Your Comment</h3>
           <p className="font-body text-sm text-gray-mid leading-relaxed mb-3">
-            Use CivicForge&apos;s AI-powered letter writer to draft a well-structured
+            Use CitizenForge&apos;s AI-powered letter writer to draft a well-structured
             public comment. Click &ldquo;Draft Comment&rdquo; on any open comment period above.
           </p>
           <Link

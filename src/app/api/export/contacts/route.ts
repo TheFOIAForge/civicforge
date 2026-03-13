@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       status: 200,
       headers: {
         "Content-Type": "text/csv",
-        "Content-Disposition": 'attachment; filename="civicforge-contacts.csv"',
+        "Content-Disposition": 'attachment; filename="citizenforge-contacts.csv"',
       },
     });
   } catch {

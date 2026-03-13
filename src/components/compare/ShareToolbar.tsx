@@ -18,7 +18,7 @@ export default function ShareToolbar({ repA, repB, tapeRef }: ShareToolbarProps)
   }, []);
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
-  const shareText = `Compare ${repA.fullName} vs ${repB.fullName} on CivicForge`;
+  const shareText = `Compare ${repA.fullName} vs ${repB.fullName} on CitizenForge`;
 
   const handleCopyLink = useCallback(async () => {
     try {

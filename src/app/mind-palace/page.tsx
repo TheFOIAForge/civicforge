@@ -33,7 +33,7 @@ export default function MindPalacePage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const apiKey = typeof window !== "undefined" ? localStorage.getItem("civicforge_api_key") : null;
+  const apiKey = typeof window !== "undefined" ? localStorage.getItem("citizenforge_api_key") : null;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

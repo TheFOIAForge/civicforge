@@ -1,20 +1,20 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Nav from "@/components/Nav";
-import Footer from "@/components/Footer";
-// EcosystemBar removed — wasted vertical space on every page
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import { UserModeProvider } from "@/lib/user-mode-context";
 import { MyRepsProvider } from "@/lib/my-reps-context";
+import { ScorecardProvider } from "@/lib/scorecard-context";
+import AppShell from "@/components/AppShell";
 
 export const metadata: Metadata = {
-  title: "CivicForge — They Work For You",
+  title: "CitizenForge — They Work For You",
   description:
     "Find your representatives, draft AI-powered letters, track your contacts, and organize campaigns. A civic engagement hub by FOIAForge.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "CivicForge",
+    title: "CitizenForge",
   },
   other: {
     "mobile-web-app-capable": "yes",
@@ -34,17 +34,13 @@ export default function RootLayout({
     <html lang="en">
       <body className="min-h-screen flex flex-col">
         <ServiceWorkerRegistration />
-        <MyRepsProvider>
-          <a
-            href="#main-content"
-            className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:bg-red focus:text-white focus:px-4 focus:py-2 focus:font-mono focus:font-bold"
-          >
-            Skip to main content
-          </a>
-          <Nav />
-          <main id="main-content" className="flex-1">{children}</main>
-          <Footer />
-        </MyRepsProvider>
+        <UserModeProvider>
+          <MyRepsProvider>
+            <ScorecardProvider>
+              <AppShell>{children}</AppShell>
+            </ScorecardProvider>
+          </MyRepsProvider>
+        </UserModeProvider>
       </body>
     </html>
   );

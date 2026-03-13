@@ -1,5 +1,5 @@
 // CivicForge Service Worker
-const CACHE_NAME = "civicforge-v1";
+const CACHE_NAME = "civicforge-v2";
 const OFFLINE_URL = "/";
 
 // Static assets to pre-cache
@@ -58,7 +58,8 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // For static assets: cache first, fallback to network
+  // For static assets: network first with cache fallback
+  // (Next.js hashes filenames so stale cache is the main risk)
   if (
     url.pathname.startsWith("/icons/") ||
     url.pathname.startsWith("/_next/static/") ||
@@ -69,14 +70,13 @@ self.addEventListener("fetch", (event) => {
     url.pathname.endsWith(".js")
   ) {
     event.respondWith(
-      caches.match(request).then((cached) => {
-        if (cached) return cached;
-        return fetch(request).then((response) => {
+      fetch(request)
+        .then((response) => {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
           return response;
-        });
-      })
+        })
+        .catch(() => caches.match(request))
     );
     return;
   }

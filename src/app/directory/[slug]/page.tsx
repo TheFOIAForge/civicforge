@@ -44,9 +44,9 @@ export default function RepProfilePage() {
   const [emailResult, setEmailResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   useEffect(() => {
-    setHasApiKey(!!localStorage.getItem("civicforge_api_key"));
+    setHasApiKey(!!localStorage.getItem("citizenforge_api_key"));
     // Load latest draft for this rep from contact log
-    const stored = localStorage.getItem("civicforge_contacts");
+    const stored = localStorage.getItem("citizenforge_contacts");
     if (stored) {
       const contacts: ContactLogEntry[] = JSON.parse(stored);
       const repDrafts = contacts.filter((c) => c.repId === slug || c.repName?.toLowerCase().includes(slug.replace(/-/g, " ")));
@@ -87,7 +87,7 @@ export default function RepProfilePage() {
 
   async function sendDirectEmail() {
     if (!rep || !latestDraft?.content) return;
-    const configStr = localStorage.getItem("civicforge_email_config");
+    const configStr = localStorage.getItem("citizenforge_email_config");
     if (!configStr) return;
     const config: EmailServiceConfig = JSON.parse(configStr);
     setEmailSending(true);
@@ -549,7 +549,7 @@ export default function RepProfilePage() {
               {hasApiKey && !lobbyAnalysis && !lobbyAnalysisLoading && (
                 <button
                   onClick={() => {
-                    const apiKey = localStorage.getItem("civicforge_api_key");
+                    const apiKey = localStorage.getItem("citizenforge_api_key");
                     if (!apiKey || !rep?.lobbyingFilings) return;
                     setLobbyAnalysisLoading(true);
                     const filingsSummary = rep.lobbyingFilings.map((f) =>
@@ -865,6 +865,52 @@ export default function RepProfilePage() {
             </section>
           )}
 
+          {/* Interest Group Ratings */}
+          {rep.interestGroupRatings && rep.interestGroupRatings.length > 0 && (
+            <section className="border-3 border-border p-6 bg-surface">
+              <h2 className="font-headline text-2xl mb-1">Interest Group Ratings</h2>
+              <p className="font-body text-sm text-gray-mid mb-5">How advocacy organizations score this member</p>
+              <div className="space-y-4">
+                {rep.interestGroupRatings.map((r) => {
+                  // Convert letter grades to percentage widths
+                  const letterToWidth: Record<string, number> = {
+                    "A+": 95, "A": 90, "A-": 85, "B+": 80, "B": 75, "B-": 70,
+                    "C+": 55, "C": 50, "C-": 45, "D+": 30, "D": 25, "D-": 20, "F": 10,
+                  };
+                  const isLetter = typeof r.score === "string";
+                  const barWidth = isLetter ? (letterToWidth[r.score as string] || 10) : (r.score as number);
+                  const barColor = r.lean === "left" ? "bg-[#2563EB]" : "bg-[#C1272D]";
+                  return (
+                    <div key={r.group}>
+                      <div className="flex justify-between mb-1.5">
+                        <span className="font-mono text-sm font-bold">
+                          {r.icon} {r.group}
+                        </span>
+                        <span className="font-mono text-sm text-gray-mid">
+                          {r.score}{isLetter ? "" : "/100"} ({r.year})
+                        </span>
+                      </div>
+                      <div className="h-5 bg-cream-dark border-2 border-border">
+                        <div
+                          className={`${barColor} h-full transition-all`}
+                          style={{ width: `${barWidth}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-4 flex gap-6 font-mono text-sm text-gray-mid">
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 bg-[#2563EB] inline-block border-2 border-border" /> Left-leaning groups
+                </span>
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 bg-[#C1272D] inline-block border-2 border-border" /> Right-leaning groups
+                </span>
+              </div>
+            </section>
+          )}
+
           {/* Key Votes */}
           {rep.keyVotes.length > 0 && (
             <section className="border-3 border-border p-6 bg-surface">
@@ -916,7 +962,7 @@ export default function RepProfilePage() {
               </button>
 
               {latestDraft?.content && (() => {
-                const configStr = typeof window !== "undefined" ? localStorage.getItem("civicforge_email_config") : null;
+                const configStr = typeof window !== "undefined" ? localStorage.getItem("citizenforge_email_config") : null;
                 return configStr ? (
                   <button
                     onClick={sendDirectEmail}
@@ -1028,7 +1074,7 @@ export default function RepProfilePage() {
                 hasApiKey ? (
                   <button
                     onClick={() => {
-                      const apiKey = localStorage.getItem("civicforge_api_key");
+                      const apiKey = localStorage.getItem("citizenforge_api_key");
                       if (!apiKey || !rep) return;
                       setAiLoading(true);
 
@@ -1132,7 +1178,7 @@ RULES:
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
-                      const apiKey = localStorage.getItem("civicforge_api_key");
+                      const apiKey = localStorage.getItem("citizenforge_api_key");
                       if (!apiKey || !followUp.trim() || aiLoading) return;
                       const newMessages = [...aiMessages, { role: "user", content: followUp.trim() }];
                       setAiMessages(newMessages);

@@ -50,7 +50,7 @@ export default function Footer() {
           <div>
             <Link href="/" className="no-underline">
               <span className="font-headline text-3xl uppercase text-white">
-                Civic<span className="text-red">Forge</span>
+                Citizen<span className="text-red">Forge</span>
               </span>
             </Link>
             <p className="mt-3 text-sm text-white/60 font-body leading-relaxed">
@@ -165,7 +165,7 @@ export default function Footer() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
             <div>
               <p className="font-mono text-xs text-white/60 font-bold mb-1">
-                CIVICFORGE IS FREE AND OPEN SOURCE
+                CITIZENFORGE IS FREE AND OPEN SOURCE
               </p>
               <p className="font-body text-sm text-white/40">
                 If this tool has helped you engage with your government, consider supporting the project.
@@ -185,7 +185,7 @@ export default function Footer() {
           {/* Copyright */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="font-mono text-xs text-white/40">
-              &copy; {new Date().getFullYear()} CivicForge. All data is publicly sourced.
+              &copy; {new Date().getFullYear()} CitizenForge. All data is publicly sourced.
             </p>
             <div className="flex items-center gap-4">
               <span className="font-mono text-xs text-white/40">

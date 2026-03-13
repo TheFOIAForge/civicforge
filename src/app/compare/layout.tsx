@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-export const metadata: Metadata = { title: "Compare Representatives — CivicForge" };
+export const metadata: Metadata = { title: "Compare Representatives — CitizenForge" };
 export default function Layout({ children }: { children: React.ReactNode }) {
   return children;
 }

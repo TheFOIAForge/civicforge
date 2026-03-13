@@ -4,40 +4,44 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useMyReps } from "@/lib/my-reps-context";
+import { useUserMode, type UserMode } from "@/lib/user-mode-context";
+import ModeSelector from "./ModeSelector";
 
 interface NavSection {
   label: string;
-  links: { href: string; label: string; sub?: boolean }[];
+  minMode?: UserMode;
+  links: { href: string; label: string; sub?: boolean; minMode?: UserMode }[];
 }
 
 const sections: NavSection[] = [
   {
-    label: "Research",
-    links: [
-      { href: "/directory", label: "Members of Congress" },
-      { href: "/committees", label: "Committees", sub: true },
-      { href: "/compare", label: "Compare Reps", sub: true },
-      { href: "/bills", label: "Legislation" },
-      { href: "/votes", label: "Vote Lookup", sub: true },
-      { href: "/issues", label: "Key Issues" },
-    ],
-  },
-  {
-    label: "Watchdog",
-    links: [
-      { href: "/federal-register", label: "Federal Register" },
-      { href: "/gao-reports", label: "GAO Oversight" },
-    ],
-  },
-  {
     label: "Take Action",
     links: [
-      { href: "/my-reps", label: "My Representatives" },
       { href: "/draft", label: "Write Congress" },
+      { href: "/my-reps", label: "My Representatives" },
+      { href: "/scorecard", label: "My Scorecard", sub: true, minMode: "power" },
       { href: "/contacts", label: "My Letters", sub: true },
       { href: "/campaigns", label: "My Campaigns" },
       { href: "/alerts", label: "Alerts" },
-      { href: "/support", label: "Support This Project", sub: true },
+    ],
+  },
+  {
+    label: "Research",
+    links: [
+      { href: "/directory", label: "Members of Congress" },
+      { href: "/compare", label: "Compare Reps", sub: true },
+      { href: "/committees", label: "Committees", sub: true },
+      { href: "/issues", label: "Key Issues" },
+      { href: "/bills", label: "Legislation" },
+      { href: "/votes", label: "Vote Lookup", sub: true },
+    ],
+  },
+  {
+    label: "Oversight",
+    links: [
+      { href: "/federal-register", label: "Federal Register" },
+      { href: "/gao-reports", label: "GAO Oversight", sub: true },
+      { href: "/support", label: "Support This Project" },
     ],
   },
 ];
@@ -46,6 +50,7 @@ export default function Nav() {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { myReps } = useMyReps();
+  const { mode, modeAtLeast: checkMode } = useUserMode();
   const sidebarRef = useRef<HTMLElement>(null);
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -114,7 +119,7 @@ export default function Nav() {
               </button>
               <Link href="/" className="no-underline text-white hover:text-white/80 focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black">
                 <span className="font-headline text-3xl tracking-tight uppercase">
-                  Civic<span className="text-red">Forge</span>
+                  Citizen<span className="text-red">Forge</span>
                 </span>
                 <span className="block font-mono text-xs text-white/40 uppercase tracking-widest -mt-1">
                   A project of FOIAForge
@@ -124,6 +129,7 @@ export default function Nav() {
 
             {/* Quick-access top bar icons */}
             <div className="flex items-center gap-5">
+              <ModeSelector />
               {myReps.length > 0 && (
                 <span className="font-mono text-xs text-white/40 hidden sm:block">
                   {myReps.length} REP{myReps.length !== 1 ? "S" : ""} SAVED
@@ -183,7 +189,7 @@ export default function Nav() {
             className="no-underline text-white hover:text-white/80 focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           >
             <span className="font-headline text-3xl tracking-tight uppercase">
-              Civic<span className="text-red">Forge</span>
+              Citizen<span className="text-red">Forge</span>
             </span>
             <span className="block font-mono text-xs text-white/40 uppercase tracking-widest -mt-1">
               A project of FOIAForge
@@ -199,49 +205,58 @@ export default function Nav() {
         </div>
 
         <nav aria-label="Main navigation" className="py-2">
-          {/* Mind Palace — highlighted feature */}
-          <Link
-            href="/mind-palace"
-            onClick={closeSidebar}
-            className={`flex items-center gap-2 no-underline px-5 py-4 font-mono text-[17px] uppercase tracking-wider font-bold transition-colors border-l-4 mb-1 focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
-              pathname === "/mind-palace"
-                ? "bg-red text-white border-white"
-                : "bg-red/80 text-white border-red hover:bg-red"
-            }`}
-            aria-current={pathname === "/mind-palace" ? "page" : undefined}
-          >
-            <span className="px-1.5 py-0.5 bg-white text-red text-[10px] font-bold tracking-widest" aria-hidden="true">AI</span>
-            Mind Palace
-          </Link>
+          {/* Mind Palace — highlighted feature (power mode only) */}
+          {checkMode("power") && (
+            <Link
+              href="/mind-palace"
+              onClick={closeSidebar}
+              className={`flex items-center gap-2 no-underline px-5 py-4 font-mono text-[17px] uppercase tracking-wider font-bold transition-colors border-l-4 mb-1 focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
+                pathname === "/mind-palace"
+                  ? "bg-red text-white border-white"
+                  : "bg-red/80 text-white border-red hover:bg-red"
+              }`}
+              aria-current={pathname === "/mind-palace" ? "page" : undefined}
+            >
+              <span className="px-1.5 py-0.5 bg-white text-red text-[10px] font-bold tracking-widest" aria-hidden="true">AI</span>
+              Mind Palace
+            </Link>
+          )}
 
-          {sections.map((section) => (
-            <div key={section.label} role="group" aria-labelledby={`nav-section-${section.label}`}>
-              <div className="px-5 pt-5 pb-1.5">
-                <span id={`nav-section-${section.label}`} className="font-mono text-[13px] font-bold text-white/30 uppercase tracking-[0.2em]">
-                  {section.label}
-                </span>
+          {sections.map((section) => {
+            // Filter links by mode
+            const visibleLinks = section.links.filter(
+              (link) => !link.minMode || checkMode(link.minMode)
+            );
+            if (visibleLinks.length === 0) return null;
+            return (
+              <div key={section.label} role="group" aria-labelledby={`nav-section-${section.label}`}>
+                <div className="px-5 pt-5 pb-1.5">
+                  <span id={`nav-section-${section.label}`} className="font-mono text-[13px] font-bold text-white/30 uppercase tracking-[0.2em]">
+                    {section.label}
+                  </span>
+                </div>
+                {visibleLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={closeSidebar}
+                    aria-current={pathname === link.href ? "page" : undefined}
+                    className={`flex items-center no-underline font-mono uppercase tracking-wider font-bold transition-colors border-l-4 focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
+                      link.sub ? "px-8 py-2.5 text-[15px]" : "px-5 py-3.5 text-[17px]"
+                    } ${
+                      pathname === link.href
+                        ? "bg-red/20 text-red border-red"
+                        : link.sub
+                          ? "text-white/50 border-transparent hover:bg-white/5 hover:text-white/80 hover:border-white/20"
+                          : "text-white/80 border-transparent hover:bg-white/5 hover:text-white hover:border-white/30"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
               </div>
-              {section.links.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={closeSidebar}
-                  aria-current={pathname === link.href ? "page" : undefined}
-                  className={`flex items-center no-underline font-mono uppercase tracking-wider font-bold transition-colors border-l-4 focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
-                    link.sub ? "px-8 py-2.5 text-[15px]" : "px-5 py-3.5 text-[17px]"
-                  } ${
-                    pathname === link.href
-                      ? "bg-red/20 text-red border-red"
-                      : link.sub
-                        ? "text-white/50 border-transparent hover:bg-white/5 hover:text-white/80 hover:border-white/20"
-                        : "text-white/80 border-transparent hover:bg-white/5 hover:text-white hover:border-white/30"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          ))}
+            );
+          })}
 
           {/* FOIAForge — Records section */}
           <div role="group" aria-labelledby="nav-section-Records">
