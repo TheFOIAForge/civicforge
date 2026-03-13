@@ -49,8 +49,8 @@ export default function ActivistBottomNav() {
     <nav
       className="fixed bottom-0 left-0 right-0 z-50"
       style={{
-        background: "linear-gradient(180deg, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.98) 100%)",
-        borderTop: "1px solid rgba(193,39,45,0.4)",
+        background: "rgba(255,255,255,0.95)",
+        borderTop: "1px solid rgba(0,0,0,0.1)",
         backdropFilter: "blur(12px)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
@@ -66,7 +66,7 @@ export default function ActivistBottomNav() {
               aria-current={isActive ? "page" : undefined}
               className="flex flex-col items-center justify-center gap-1 no-underline transition-all w-full h-full relative"
               style={{
-                color: isActive ? "#C1272D" : "rgba(255,255,255,0.45)",
+                color: isActive ? "#C1272D" : "rgba(0,0,0,0.4)",
               }}
             >
               {/* Active glow */}

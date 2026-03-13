@@ -26,7 +26,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <main
         id="main-content"
         className="flex-1"
-        style={isActivist ? { paddingBottom: "5rem", backgroundColor: "#111827" } : undefined}
+        style={isActivist ? { paddingBottom: "5rem", backgroundColor: "#ffffff" } : undefined}
       >
         {children}
       </main>

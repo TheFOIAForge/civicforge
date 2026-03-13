@@ -8,16 +8,16 @@ export default function ActivistTopBar() {
     <header
       className="sticky top-0 z-50"
       style={{
-        background: "linear-gradient(180deg, rgba(10,10,10,0.98) 0%, rgba(10,10,10,0.95) 100%)",
-        borderBottom: "1px solid rgba(193,39,45,0.4)",
+        background: "rgba(255,255,255,0.95)",
+        borderBottom: "1px solid rgba(0,0,0,0.1)",
         backdropFilter: "blur(12px)",
       }}
     >
       <div className="px-4">
         <div className="flex items-center justify-between h-14">
-          <Link href="/" className="no-underline text-white hover:text-white/80">
+          <Link href="/" className="no-underline text-gray-900 hover:text-gray-700">
             <span className="font-headline text-2xl tracking-tight uppercase">
-              Citizen<span style={{ color: "#C1272D", textShadow: "0 0 20px rgba(193,39,45,0.4)" }}>Forge</span>
+              Citizen<span style={{ color: "#C1272D" }}>Forge</span>
             </span>
           </Link>
 
@@ -26,7 +26,7 @@ export default function ActivistTopBar() {
             <Link
               href="/settings"
               className="no-underline transition-colors p-2"
-              style={{ color: "rgba(255,255,255,0.5)" }}
+              style={{ color: "rgba(0,0,0,0.4)" }}
               aria-label="Settings"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">

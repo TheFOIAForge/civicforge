@@ -270,12 +270,12 @@ function DraftInner() {
   // ─── ACTIVIST MODE: Guided wizard with dark dramatic UI ───
   if (isActivist) {
     return (
-      <div className="min-h-screen pb-24" style={{ backgroundColor: "#111827" }} data-print-content>
+      <div className="min-h-screen pb-24" style={{ backgroundColor: "#ffffff" }} data-print-content>
         {/* Dark hero header */}
         <div
           className="relative px-5 pt-8 pb-6 overflow-hidden"
           style={{
-            background: "linear-gradient(180deg, rgba(140,20,25,0.95) 0%, rgba(50,10,12,0.95) 50%, #111827 100%)",
+            background: "linear-gradient(180deg, rgba(140,20,25,0.95) 0%, rgba(140,20,25,0.9) 50%, rgba(140,20,25,0.3) 100%)",
           }}
         >
           {/* Grid overlay */}
@@ -312,7 +312,7 @@ function DraftInner() {
                 >
                   1
                 </div>
-                <h2 className="font-headline text-lg uppercase" style={{ color: "#FFFFFF" }}>
+                <h2 className="font-headline text-lg uppercase" style={{ color: "#111827" }}>
                   How do you want to reach them?
                 </h2>
               </div>
@@ -325,8 +325,8 @@ function DraftInner() {
                       onClick={() => { setMode(m); setOutput(""); }}
                       className="relative text-left overflow-hidden border-2 cursor-pointer transition-all"
                       style={{
-                        borderColor: mode === m ? "#C1272D" : "rgba(255,255,255,0.15)",
-                        backgroundColor: mode === m ? "rgba(193,39,45,0.15)" : "rgba(255,255,255,0.05)",
+                        borderColor: mode === m ? "#C1272D" : "rgba(0,0,0,0.12)",
+                        backgroundColor: mode === m ? "rgba(193,39,45,0.15)" : "rgba(0,0,0,0.03)",
                         height: "90px",
                       }}
                     >
@@ -334,20 +334,20 @@ function DraftInner() {
                         <div className="flex-1 px-4 py-3 relative z-10">
                           <span
                             className="block font-headline text-lg uppercase"
-                            style={{ color: mode === m ? "#FFFFFF" : "rgba(255,255,255,0.8)", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
+                            style={{ color: mode === m ? "#111827" : "rgba(0,0,0,0.7)" }}
                           >
                             {modeConfig[m].label}
                           </span>
                           <span
                             className="block font-mono text-xs mt-1"
-                            style={{ color: mode === m ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.4)" }}
+                            style={{ color: mode === m ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.4)" }}
                           >
                             {modeConfig[m].hint}
                           </span>
                         </div>
                         <div className="relative h-full w-[45%] shrink-0">
                           <img src={actionImg} alt="" className="absolute inset-0 w-full h-full object-cover" />
-                          <div className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(17,24,39,1) 0%, rgba(17,24,39,0.4) 30%, transparent 100%)" }} />
+                          <div className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.4) 30%, transparent 100%)" }} />
                         </div>
                         {mode === m && (
                           <div className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center z-10" style={{ backgroundColor: "#C1272D" }}>
@@ -368,11 +368,11 @@ function DraftInner() {
               <div className="flex items-center gap-3 mb-4">
                 <div
                   className="w-8 h-8 flex items-center justify-center font-headline text-base shrink-0"
-                  style={{ backgroundColor: step >= 1 ? "#C1272D" : "rgba(255,255,255,0.2)", color: "#fff" }}
+                  style={{ backgroundColor: step >= 1 ? "#C1272D" : "rgba(0,0,0,0.15)", color: "#fff" }}
                 >
                   2
                 </div>
-                <h2 className="font-headline text-lg uppercase" style={{ color: "#FFFFFF" }}>
+                <h2 className="font-headline text-lg uppercase" style={{ color: "#111827" }}>
                   Who are you writing to?
                 </h2>
               </div>
@@ -391,10 +391,10 @@ function DraftInner() {
                       )}
                     </div>
                     <div>
-                      <span className="block font-headline text-lg normal-case" style={{ color: "#FFFFFF" }}>
+                      <span className="block font-headline text-lg normal-case" style={{ color: "#111827" }}>
                         {selectedRep.fullName}
                       </span>
-                      <span className="block font-mono text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>
+                      <span className="block font-mono text-xs" style={{ color: "rgba(0,0,0,0.5)" }}>
                         {selectedRep.title} — {selectedRep.state}{selectedRep.district ? `, ${selectedRep.district}` : ""}
                       </span>
                     </div>
@@ -412,7 +412,7 @@ function DraftInner() {
               {/* Saved reps — big tap targets */}
               {!selectedRep && hasSavedReps && (
                 <div className="mb-4">
-                  <p className="font-mono text-xs font-bold mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>
+                  <p className="font-mono text-xs font-bold mb-3" style={{ color: "rgba(0,0,0,0.5)" }}>
                     YOUR SAVED REPRESENTATIVES — TAP TO SELECT
                   </p>
                   <div className="grid grid-cols-1 gap-2">
@@ -422,8 +422,8 @@ function DraftInner() {
                         onClick={() => { setSelectedRep(rep); setStep(2); }}
                         className="flex items-center gap-3 p-4 text-left cursor-pointer transition-all"
                         style={{
-                          backgroundColor: "rgba(255,255,255,0.06)",
-                          border: "2px solid rgba(255,255,255,0.12)",
+                          backgroundColor: "rgba(0,0,0,0.03)",
+                          border: "2px solid rgba(0,0,0,0.1)",
                         }}
                       >
                         <div className={`w-12 h-12 ${partyBg(rep.party)} flex items-center justify-center shrink-0 overflow-hidden relative`}>
@@ -433,14 +433,14 @@ function DraftInner() {
                           )}
                         </div>
                         <div className="flex-1">
-                          <span className="block font-headline text-base normal-case" style={{ color: "#FFFFFF" }}>
+                          <span className="block font-headline text-base normal-case" style={{ color: "#111827" }}>
                             {rep.fullName}
                           </span>
-                          <span className="block font-mono text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>
+                          <span className="block font-mono text-xs" style={{ color: "rgba(0,0,0,0.5)" }}>
                             {rep.party === "D" ? "Democrat" : rep.party === "R" ? "Republican" : "Independent"} — {rep.chamber}
                           </span>
                         </div>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth={2}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                         </svg>
                       </button>
@@ -457,8 +457,8 @@ function DraftInner() {
                       onClick={() => setShowAllReps(true)}
                       className="w-full p-3 font-mono text-xs font-bold uppercase text-center cursor-pointer transition-colors"
                       style={{
-                        color: "rgba(255,255,255,0.5)",
-                        border: "1px dashed rgba(255,255,255,0.2)",
+                        color: "rgba(0,0,0,0.5)",
+                        border: "1px dashed rgba(0,0,0,0.15)",
                         backgroundColor: "transparent",
                       }}
                     >
@@ -467,7 +467,7 @@ function DraftInner() {
                   ) : (
                     <>
                       {!hasSavedReps && (
-                        <p className="font-mono text-xs mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>
+                        <p className="font-mono text-xs mb-3" style={{ color: "rgba(0,0,0,0.5)" }}>
                           Search for your representative, or{" "}
                           <Link href="/my-reps" className="no-underline font-bold" style={{ color: "#C1272D" }}>
                             save your reps
@@ -476,71 +476,78 @@ function DraftInner() {
                         </p>
                       )}
 
-                      {/* Filters row — compact */}
-                      <div className="flex flex-wrap items-center gap-2 mb-3">
-                        <div className="flex border border-white/20 divide-x divide-white/20">
-                          {(["All", "Senate", "House"] as const).map((c) => {
-                            const filterIcon = c === "Senate" ? "/images/icons/filters/senate.png" : c === "House" ? "/images/icons/filters/house.png" : "/images/icons/filters/all.png";
-                            return (
-                              <button
-                                key={c}
-                                onClick={() => { setChamberFilter(c); setShowResults(true); setHighlightIdx(-1); }}
-                                className="flex items-center gap-1.5 px-3 py-1.5 font-mono text-[11px] font-bold uppercase cursor-pointer transition-colors"
-                                style={{
-                                  backgroundColor: chamberFilter === c ? "rgba(255,255,255,0.15)" : "transparent",
-                                  color: chamberFilter === c ? "#fff" : "rgba(255,255,255,0.4)",
-                                }}
-                              >
-                                <img src={filterIcon} alt="" className="w-5 h-5 object-contain" style={{ filter: chamberFilter === c ? "brightness(1.2)" : "brightness(0.6)" }} />
-                                {c}
-                              </button>
-                            );
-                          })}
-                        </div>
+                      {/* Unified filter row — single row of chips */}
+                      <div className="flex flex-wrap items-center gap-1.5 mb-3">
+                        {/* Chamber chips */}
+                        {(["All", "Senate", "House"] as const).map((c) => (
+                          <button
+                            key={c}
+                            onClick={() => { setChamberFilter(c); setShowResults(true); setHighlightIdx(-1); }}
+                            className="px-3 py-1.5 rounded-full font-mono text-[11px] font-bold uppercase cursor-pointer transition-all"
+                            style={{
+                              backgroundColor: chamberFilter === c ? "rgba(0,0,0,0.1)" : "rgba(0,0,0,0.03)",
+                              color: chamberFilter === c ? "#111827" : "rgba(0,0,0,0.4)",
+                              border: chamberFilter === c ? "1px solid rgba(0,0,0,0.15)" : "1px solid rgba(0,0,0,0.1)",
+                            }}
+                          >
+                            {c === "All" ? "All" : c}
+                          </button>
+                        ))}
 
-                        <div className="flex border border-white/20 divide-x divide-white/20">
-                          {(["All", "D", "R", "I"] as const).map((p) => {
-                            const partyIcon = p === "D" ? "/images/icons/filters/dem.png" : p === "R" ? "/images/icons/filters/gop.png" : p === "I" ? "/images/icons/filters/ind.png" : "/images/icons/filters/all.png";
-                            return (
-                              <button
-                                key={p}
-                                onClick={() => { setPartyFilter(p); setShowResults(true); setHighlightIdx(-1); }}
-                                className="flex items-center gap-1.5 px-3 py-1.5 font-mono text-[11px] font-bold uppercase cursor-pointer transition-colors"
-                                style={{
-                                  backgroundColor: partyFilter === p
-                                    ? p === "D" ? "#1a3a6b" : p === "R" ? "#C1272D" : p === "I" ? "#6b5b3e" : "rgba(255,255,255,0.15)"
-                                    : "transparent",
-                                  color: partyFilter === p ? "#fff" : "rgba(255,255,255,0.4)",
-                                }}
-                              >
-                                <img src={partyIcon} alt="" className="w-5 h-5 object-contain" style={{ filter: partyFilter === p ? "brightness(1.2)" : "brightness(0.6)" }} />
-                                {p === "D" ? "DEM" : p === "R" ? "GOP" : p === "I" ? "IND" : "ALL"}
-                              </button>
-                            );
-                          })}
-                        </div>
+                        {/* Divider */}
+                        <div className="w-px h-5 mx-1" style={{ backgroundColor: "rgba(0,0,0,0.12)" }} />
 
+                        {/* Party chips — color coded */}
+                        {(["D", "R", "I"] as const).map((p) => {
+                          const isActive = partyFilter === p;
+                          const colors = {
+                            D: { bg: isActive ? "#1a5fb4" : "rgba(26,95,180,0.15)", border: isActive ? "#3584e4" : "rgba(26,95,180,0.3)", label: "DEM" },
+                            R: { bg: isActive ? "#C1272D" : "rgba(193,39,45,0.15)", border: isActive ? "#e85555" : "rgba(193,39,45,0.3)", label: "GOP" },
+                            I: { bg: isActive ? "#8B6914" : "rgba(139,105,20,0.15)", border: isActive ? "#c49b1a" : "rgba(139,105,20,0.3)", label: "IND" },
+                          };
+                          const c = colors[p];
+                          return (
+                            <button
+                              key={p}
+                              onClick={() => { setPartyFilter(partyFilter === p ? "All" : p); setShowResults(true); setHighlightIdx(-1); }}
+                              className="px-3 py-1.5 rounded-full font-mono text-[11px] font-bold uppercase cursor-pointer transition-all"
+                              style={{
+                                backgroundColor: c.bg,
+                                color: isActive ? "#fff" : "rgba(0,0,0,0.5)",
+                                border: `1px solid ${c.border}`,
+                              }}
+                            >
+                              {c.label}
+                            </button>
+                          );
+                        })}
+
+                        {/* Divider */}
+                        <div className="w-px h-5 mx-1" style={{ backgroundColor: "rgba(0,0,0,0.12)" }} />
+
+                        {/* State dropdown */}
                         <select
                           value={stateFilter}
                           onChange={(e) => { setStateFilter(e.target.value); setShowResults(true); setHighlightIdx(-1); }}
-                          className="px-3 py-1.5 font-mono text-[11px] font-bold uppercase cursor-pointer"
+                          className="px-3 py-1.5 rounded-full font-mono text-[11px] font-bold uppercase cursor-pointer"
                           style={{
-                            backgroundColor: "transparent",
-                            color: stateFilter === "All" ? "rgba(255,255,255,0.4)" : "#fff",
-                            border: "1px solid rgba(255,255,255,0.2)",
+                            backgroundColor: stateFilter === "All" ? "rgba(0,0,0,0.03)" : "rgba(0,0,0,0.1)",
+                            color: stateFilter === "All" ? "rgba(0,0,0,0.4)" : "#111827",
+                            border: stateFilter === "All" ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(0,0,0,0.15)",
                           }}
                         >
-                          <option value="All">All States</option>
+                          <option value="All">State</option>
                           {US_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
                         </select>
 
+                        {/* Clear button */}
                         {activeFilterCount > 0 && (
                           <button
                             onClick={() => { setChamberFilter("All"); setPartyFilter("All"); setStateFilter("All"); }}
-                            className="px-2 py-1.5 font-mono text-[10px] font-bold cursor-pointer"
-                            style={{ color: "#C1272D" }}
+                            className="px-2 py-1.5 rounded-full font-mono text-[10px] font-bold cursor-pointer transition-all"
+                            style={{ color: "#C1272D", border: "1px solid rgba(193,39,45,0.3)" }}
                           >
-                            CLEAR ({activeFilterCount})
+                            ✕ CLEAR
                           </button>
                         )}
                       </div>
@@ -557,20 +564,20 @@ function DraftInner() {
                           placeholder="Search by name or state..."
                           className="w-full px-4 py-3 font-mono text-sm focus:outline-none"
                           style={{
-                            backgroundColor: "rgba(255,255,255,0.08)",
-                            border: "2px solid rgba(255,255,255,0.15)",
-                            color: "#fff",
+                            backgroundColor: "rgba(0,0,0,0.04)",
+                            border: "2px solid rgba(0,0,0,0.12)",
+                            color: "#111827",
                           }}
                         />
                         {hasFilters && (
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[10px] font-bold pointer-events-none" style={{ color: "rgba(255,255,255,0.4)" }}>
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[10px] font-bold pointer-events-none" style={{ color: "rgba(0,0,0,0.4)" }}>
                             {filteredReps.length} FOUND
                           </span>
                         )}
                         {showResults && hasFilters && dropdownReps.length > 0 && (
                           <div
-                            className="absolute z-40 left-0 right-0 top-full mt-1 max-h-72 overflow-y-auto"
-                            style={{ backgroundColor: "#1a2234", border: "2px solid rgba(255,255,255,0.15)" }}
+                            className="absolute z-40 left-0 right-0 top-full mt-1 max-h-72 overflow-y-auto shadow-lg"
+                            style={{ backgroundColor: "#fff", border: "2px solid rgba(0,0,0,0.1)" }}
                           >
                             {dropdownReps.map((rep, idx) => (
                               <button
@@ -584,8 +591,8 @@ function DraftInner() {
                                 onMouseEnter={() => setHighlightIdx(idx)}
                                 className="w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer transition-colors"
                                 style={{
-                                  backgroundColor: idx === highlightIdx ? "rgba(255,255,255,0.1)" : "transparent",
-                                  borderBottom: "1px solid rgba(255,255,255,0.06)",
+                                  backgroundColor: idx === highlightIdx ? "rgba(0,0,0,0.05)" : "transparent",
+                                  borderBottom: "1px solid rgba(0,0,0,0.06)",
                                 }}
                               >
                                 <span className={`w-8 h-8 ${partyBg(rep.party)} flex items-center justify-center shrink-0 overflow-hidden relative`}>
@@ -594,14 +601,14 @@ function DraftInner() {
                                     <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                                   )}
                                 </span>
-                                <span className="font-mono text-sm font-bold flex-1" style={{ color: "#fff" }}>{rep.fullName}</span>
-                                <span className="font-mono text-[11px]" style={{ color: "rgba(255,255,255,0.4)" }}>
+                                <span className="font-mono text-sm font-bold flex-1" style={{ color: "#111827" }}>{rep.fullName}</span>
+                                <span className="font-mono text-[11px]" style={{ color: "rgba(0,0,0,0.4)" }}>
                                   {rep.party === "D" ? "DEM" : rep.party === "R" ? "GOP" : "IND"} · {rep.stateAbbr} · {rep.chamber}
                                 </span>
                               </button>
                             ))}
                             {filteredReps.length > 30 && (
-                              <div className="px-4 py-2 font-mono text-[10px] text-center" style={{ color: "rgba(255,255,255,0.4)" }}>
+                              <div className="px-4 py-2 font-mono text-[10px] text-center" style={{ color: "rgba(0,0,0,0.4)" }}>
                                 Showing 30 of {filteredReps.length} — type to narrow results
                               </div>
                             )}
@@ -609,10 +616,10 @@ function DraftInner() {
                         )}
                         {showResults && hasFilters && dropdownReps.length === 0 && (
                           <div
-                            className="absolute z-40 left-0 right-0 top-full mt-1 p-4"
-                            style={{ backgroundColor: "#1a2234", border: "2px solid rgba(255,255,255,0.15)" }}
+                            className="absolute z-40 left-0 right-0 top-full mt-1 p-4 shadow-lg"
+                            style={{ backgroundColor: "#fff", border: "2px solid rgba(0,0,0,0.1)" }}
                           >
-                            <p className="font-mono text-sm text-center" style={{ color: "rgba(255,255,255,0.5)" }}>
+                            <p className="font-mono text-sm text-center" style={{ color: "rgba(0,0,0,0.5)" }}>
                               No representatives found. Try different filters.
                             </p>
                           </div>
@@ -629,13 +636,13 @@ function DraftInner() {
               <div className="flex items-center gap-3 mb-4">
                 <div
                   className="w-8 h-8 flex items-center justify-center font-headline text-base shrink-0"
-                  style={{ backgroundColor: selectedRep ? "#C1272D" : "rgba(255,255,255,0.2)", color: "#fff" }}
+                  style={{ backgroundColor: selectedRep ? "#C1272D" : "rgba(0,0,0,0.15)", color: "#fff" }}
                 >
                   3
                 </div>
                 <h2
                   className="font-headline text-lg uppercase"
-                  style={{ color: selectedRep ? "#FFFFFF" : "rgba(255,255,255,0.3)" }}
+                  style={{ color: selectedRep ? "#111827" : "rgba(0,0,0,0.3)" }}
                 >
                   What&apos;s on your mind?
                 </h2>
@@ -659,7 +666,7 @@ function DraftInner() {
                       }}
                       className="relative text-left overflow-hidden cursor-pointer transition-all"
                       style={{
-                        border: isSelected ? "2px solid #C1272D" : "2px solid rgba(255,255,255,0.08)",
+                        border: isSelected ? "2px solid #C1272D" : "2px solid rgba(0,0,0,0.08)",
                         backgroundColor: "#000",
                         height: "100px",
                       }}
@@ -702,7 +709,7 @@ function DraftInner() {
               <label
                 htmlFor="draft-concern"
                 className="font-mono text-xs block mb-2 font-bold"
-                style={{ color: "rgba(255,255,255,0.5)" }}
+                style={{ color: "rgba(0,0,0,0.5)" }}
               >
                 YOUR CONCERN — EVEN A FEW WORDS, THE AI WILL EXPAND IT
               </label>
@@ -714,9 +721,9 @@ function DraftInner() {
                 rows={3}
                 className="w-full px-4 py-3 font-body text-base focus:outline-none resize-none"
                 style={{
-                  backgroundColor: "rgba(255,255,255,0.08)",
-                  border: "2px solid rgba(255,255,255,0.15)",
-                  color: "#fff",
+                  backgroundColor: "rgba(0,0,0,0.04)",
+                  border: "2px solid rgba(0,0,0,0.12)",
+                  color: "#111827",
                 }}
               />
             </div>
@@ -726,11 +733,11 @@ function DraftInner() {
               <div
                 className="p-4 font-mono text-sm font-bold"
                 role="alert"
-                style={{ backgroundColor: "rgba(193,39,45,0.3)", border: "2px solid #C1272D", color: "#fff" }}
+                style={{ backgroundColor: "rgba(193,39,45,0.15)", border: "2px solid #C1272D", color: "#C1272D" }}
               >
                 {error}
                 {error.includes("API key") && (
-                  <Link href="/settings" className="ml-2 underline" style={{ color: "rgba(255,255,255,0.8)" }}>
+                  <Link href="/settings" className="ml-2 underline" style={{ color: "#C1272D" }}>
                     Go to Settings
                   </Link>
                 )}
@@ -743,8 +750,8 @@ function DraftInner() {
               disabled={loading || !canGenerate}
               className="w-full py-5 font-headline uppercase text-xl tracking-wider cursor-pointer transition-all"
               style={{
-                backgroundColor: loading ? "#666" : canGenerate ? "#C1272D" : "rgba(255,255,255,0.1)",
-                color: loading ? "#ccc" : canGenerate ? "#fff" : "rgba(255,255,255,0.3)",
+                backgroundColor: loading ? "#999" : canGenerate ? "#C1272D" : "rgba(0,0,0,0.08)",
+                color: loading ? "#fff" : canGenerate ? "#fff" : "rgba(0,0,0,0.3)",
                 border: "none",
                 textShadow: canGenerate ? "0 2px 8px rgba(0,0,0,0.5)" : "none",
                 boxShadow: canGenerate && !loading ? "0 0 30px rgba(193,39,45,0.4)" : "none",
@@ -761,11 +768,11 @@ function DraftInner() {
 
             {/* Loading state */}
             {loading && (
-              <div className="p-6 text-center" style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "2px solid rgba(255,255,255,0.1)" }}>
+              <div className="p-6 text-center" style={{ backgroundColor: "rgba(0,0,0,0.03)", border: "2px solid rgba(0,0,0,0.1)" }}>
                 <div className="font-headline text-2xl mb-2 motion-safe:animate-pulse" style={{ color: "#C1272D" }}>
                   Drafting...
                 </div>
-                <p className="font-mono text-xs font-bold" style={{ color: "rgba(255,255,255,0.5)" }}>
+                <p className="font-mono text-xs font-bold" style={{ color: "rgba(0,0,0,0.5)" }}>
                   Injecting {selectedRep?.fullName}&apos;s voting record + committee data
                 </p>
               </div>
@@ -845,7 +852,7 @@ function DraftInner() {
             </div>
 
             {/* Bottom actions */}
-            <div className="p-4 flex flex-col gap-3" style={{ backgroundColor: "rgba(255,255,255,0.05)", borderTop: "1px solid rgba(255,255,255,0.1)" }} data-print-hide>
+            <div className="p-4 flex flex-col gap-3" style={{ backgroundColor: "rgba(0,0,0,0.03)", borderTop: "1px solid rgba(0,0,0,0.1)" }} data-print-hide>
               <div className="flex gap-2 flex-wrap">
                 {mode === "letter" && (
                   <a
@@ -859,7 +866,7 @@ function DraftInner() {
                 <button
                   onClick={handleCopy}
                   className="flex-1 px-4 py-3 font-mono text-xs font-bold cursor-pointer"
-                  style={{ backgroundColor: "rgba(255,255,255,0.1)", color: "#fff", border: "none" }}
+                  style={{ backgroundColor: "rgba(0,0,0,0.08)", color: "#111827", border: "none" }}
                 >
                   {copied ? "COPIED!" : "COPY TO CLIPBOARD"}
                 </button>
@@ -871,11 +878,11 @@ function DraftInner() {
                   <button
                     onClick={() => { setMode("call"); setOutput(""); }}
                     className="p-3 text-left cursor-pointer"
-                    style={{ backgroundColor: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+                    style={{ backgroundColor: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)" }}
                   >
                     <span className="block text-lg mb-1">📞</span>
-                    <span className="block font-headline text-sm normal-case" style={{ color: "#fff" }}>Call Too</span>
-                    <span className="block font-mono text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
+                    <span className="block font-headline text-sm normal-case" style={{ color: "#111827" }}>Call Too</span>
+                    <span className="block font-mono text-[10px] mt-1" style={{ color: "rgba(0,0,0,0.4)" }}>
                       Letters + calls = 3x impact
                     </span>
                   </button>
@@ -884,11 +891,11 @@ function DraftInner() {
                   <button
                     onClick={() => { setMode("social"); setOutput(""); }}
                     className="p-3 text-left cursor-pointer"
-                    style={{ backgroundColor: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+                    style={{ backgroundColor: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)" }}
                   >
                     <span className="block text-lg mb-1">📱</span>
-                    <span className="block font-headline text-sm normal-case" style={{ color: "#fff" }}>Go Public</span>
-                    <span className="block font-mono text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
+                    <span className="block font-headline text-sm normal-case" style={{ color: "#111827" }}>Go Public</span>
+                    <span className="block font-mono text-[10px] mt-1" style={{ color: "rgba(0,0,0,0.4)" }}>
                       Add accountability pressure
                     </span>
                   </button>
@@ -896,28 +903,28 @@ function DraftInner() {
                 <button
                   onClick={() => { setOutput(""); setSelectedRep(null); }}
                   className="p-3 text-left cursor-pointer"
-                  style={{ backgroundColor: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+                  style={{ backgroundColor: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)" }}
                 >
                   <span className="block text-lg mb-1">👥</span>
-                  <span className="block font-headline text-sm normal-case" style={{ color: "#fff" }}>Another Rep</span>
-                  <span className="block font-mono text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
+                  <span className="block font-headline text-sm normal-case" style={{ color: "#111827" }}>Another Rep</span>
+                  <span className="block font-mono text-[10px] mt-1" style={{ color: "rgba(0,0,0,0.4)" }}>
                     Both senators + house rep
                   </span>
                 </button>
                 <button
                   onClick={() => { setOutput(""); setError(""); }}
                   className="p-3 text-left cursor-pointer"
-                  style={{ backgroundColor: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+                  style={{ backgroundColor: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)" }}
                 >
                   <span className="block text-lg mb-1">✏️</span>
-                  <span className="block font-headline text-sm normal-case" style={{ color: "#fff" }}>Edit & Redo</span>
-                  <span className="block font-mono text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
+                  <span className="block font-headline text-sm normal-case" style={{ color: "#111827" }}>Edit & Redo</span>
+                  <span className="block font-mono text-[10px] mt-1" style={{ color: "rgba(0,0,0,0.4)" }}>
                     Tweak your concern & regenerate
                   </span>
                 </button>
               </div>
 
-              <p className="mt-2 text-center font-mono text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
+              <p className="mt-2 text-center font-mono text-xs" style={{ color: "rgba(0,0,0,0.3)" }}>
                 This message was auto-saved to your{" "}
                 <Link href="/contacts" className="no-underline font-bold" style={{ color: "#C1272D" }}>
                   contact log
@@ -1428,7 +1435,7 @@ function DraftInner() {
                   href="https://www.thefoiaforge.org/new-request"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full px-3 py-2 bg-[#1a1a2e] text-white font-mono text-[10px] font-bold text-center no-underline hover:bg-red transition-colors"
+                  className="block w-full px-3 py-2 bg-gray-100 text-black font-mono text-[10px] font-bold text-center no-underline hover:bg-red hover:text-white transition-colors"
                 >
                   FILE A FOIA REQUEST →
                 </a>

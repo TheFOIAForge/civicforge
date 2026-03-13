@@ -258,11 +258,11 @@ export default function Home() {
   };
 
   /* ──────────────────────────────────────────────────
-     ACTIVIST MODE — Dark dramatic layout
+     ACTIVIST MODE — Light layout
   ────────────────────────────────────────────────── */
   if (isActivist) {
     return (
-      <div ref={scrollRef} style={{ backgroundColor: "#111827" }}>
+      <div ref={scrollRef} style={{ backgroundColor: "#ffffff" }}>
         {/* Hero — Full screen dramatic with background image */}
         <section
           className="relative min-h-[70vh] flex items-center justify-center overflow-hidden"
@@ -280,7 +280,7 @@ export default function Home() {
           <div
             className="absolute inset-0"
             style={{
-              background: "linear-gradient(180deg, rgba(140,20,25,0.97) 0%, rgba(50,10,12,0.98) 40%, rgba(17,24,39,1) 100%)",
+              background: "linear-gradient(180deg, rgba(140,20,25,0.97) 0%, rgba(50,10,12,0.98) 40%, rgba(255,255,255,1) 100%)",
             }}
           />
           {/* Decorative grid */}
@@ -309,7 +309,7 @@ export default function Home() {
               </span>
             </h1>
             <p
-              className="mt-6 text-xl md:text-2xl font-body max-w-xl mx-auto"
+              className="mt-6 text-base md:text-2xl font-body max-w-2xl mx-auto whitespace-nowrap"
               style={{ color: "rgba(255,255,255,0.95)", textShadow: "0 2px 8px rgba(0,0,0,0.7)", animation: "fadeInUp 0.8s ease-out 0.3s both" }}
             >
               Find your reps. Write a letter. Make a call. Three taps from couch to Congress.
@@ -323,19 +323,18 @@ export default function Home() {
               className="mt-10 flex flex-col sm:flex-row gap-0 max-w-xl mx-auto"
               style={{ animation: "fadeInUp 0.8s ease-out 0.45s both" }}
             >
-              <label htmlFor="address-lookup" className="sr-only">Enter your ZIP code or full address</label>
+              <label htmlFor="address-lookup" className="sr-only">Enter your full address</label>
               <input
                 id="address-lookup"
                 type="search"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                placeholder="Enter your ZIP or address"
-                className="flex-1 px-5 py-4 font-mono text-lg focus:outline-none placeholder:text-white/50"
+                placeholder="Enter your full address"
+                className="flex-1 px-5 py-4 font-mono text-lg focus:outline-none placeholder:text-gray-400"
                 style={{
-                  backgroundColor: "rgba(255,255,255,0.1)",
-                  color: "#fff",
-                  border: "2px solid rgba(255,255,255,0.2)",
-                  backdropFilter: "blur(10px)",
+                  backgroundColor: "#ffffff",
+                  color: "#111827",
+                  border: "2px solid rgba(0,0,0,0.15)",
                 }}
               />
               <button
@@ -351,51 +350,59 @@ export default function Home() {
               </button>
             </form>
 
-            {/* Quick action pills */}
-            <div className="mt-8 flex flex-wrap justify-center gap-3" style={{ animation: "fadeInUp 0.8s ease-out 0.6s both" }}>
-              <Link
-                href="/draft"
-                className="px-6 py-3 font-mono text-base font-bold uppercase tracking-wider no-underline transition-all hover:scale-105 hover:brightness-125 hover:shadow-[0_0_20px_rgba(193,39,45,0.5)]"
-                style={{
-                  border: "2px solid #C1272D",
-                  color: "#fff",
-                  backgroundColor: "#C1272D",
-                }}
-              >
-                Write a Letter
-              </Link>
-              <Link
-                href="/draft?mode=call"
-                className="px-6 py-3 font-mono text-base font-bold uppercase tracking-wider no-underline transition-all hover:scale-105 hover:bg-white/30 hover:border-white"
-                style={{
-                  border: "2px solid rgba(255,255,255,0.5)",
-                  color: "#fff",
-                  backgroundColor: "rgba(255,255,255,0.15)",
-                }}
-              >
-                Make a Call
-              </Link>
-              <Link
-                href="/draft?mode=email"
-                className="px-6 py-3 font-mono text-base font-bold uppercase tracking-wider no-underline transition-all hover:scale-105 hover:bg-white/30 hover:border-white"
-                style={{
-                  border: "2px solid rgba(255,255,255,0.5)",
-                  color: "#fff",
-                  backgroundColor: "rgba(255,255,255,0.15)",
-                }}
-              >
-                Send an Email
-              </Link>
+            {/* Quick action pills — top 3 same width */}
+            <div className="mt-8 flex flex-col items-center gap-3 max-w-xl mx-auto" style={{ animation: "fadeInUp 0.8s ease-out 0.6s both" }}>
+              <div className="flex w-full gap-3">
+                <Link
+                  href="/draft"
+                  className="flex-1 py-3 font-mono text-base font-bold uppercase tracking-wider no-underline transition-all hover:scale-105 hover:brightness-125 text-center"
+                  style={{
+                    border: "2px solid #C1272D",
+                    color: "#fff",
+                    backgroundColor: "#C1272D",
+                  }}
+                >
+                  Write a Letter
+                </Link>
+                <Link
+                  href="/draft?mode=call"
+                  className="flex-1 py-3 font-mono text-base font-bold uppercase tracking-wider no-underline transition-all hover:scale-105 hover:brightness-110 text-center"
+                  style={{
+                    border: "2px solid #1a3a6b",
+                    color: "#fff",
+                    backgroundColor: "#1a3a6b",
+                  }}
+                >
+                  Make a Call
+                </Link>
+                <Link
+                  href="/draft?mode=email"
+                  className="flex-1 py-3 font-mono text-base font-bold uppercase tracking-wider no-underline transition-all hover:scale-105 hover:bg-gray-100 text-center"
+                  style={{
+                    border: "2px solid rgba(0,0,0,0.2)",
+                    color: "#111827",
+                    backgroundColor: "#ffffff",
+                  }}
+                >
+                  Send an Email
+                </Link>
+              </div>
+              {/* Browse Issues — full width flag bar */}
               <Link
                 href="/issues"
-                className="px-6 py-3 font-mono text-base font-bold uppercase tracking-wider no-underline transition-all hover:scale-105 hover:bg-white/30 hover:border-white"
+                className="relative w-full py-4 font-mono text-lg font-bold uppercase tracking-wider no-underline transition-all hover:scale-[1.02] hover:brightness-110 text-center overflow-hidden"
                 style={{
-                  border: "2px solid rgba(255,255,255,0.5)",
+                  background: "linear-gradient(90deg, #C1272D 0%, #C1272D 33%, #ffffff 33%, #ffffff 66%, #1a3a6b 66%, #1a3a6b 100%)",
                   color: "#fff",
-                  backgroundColor: "rgba(255,255,255,0.15)",
+                  border: "2px solid rgba(0,0,0,0.1)",
+                  textShadow: "0 1px 4px rgba(0,0,0,0.5), 0 0 10px rgba(0,0,0,0.3)",
                 }}
               >
-                Browse Issues
+                {/* Stars overlay */}
+                <span className="absolute inset-0 flex items-center justify-around pointer-events-none opacity-20 text-white text-2xl" aria-hidden="true">
+                  ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★
+                </span>
+                <span className="relative z-10">Browse Issues</span>
               </Link>
             </div>
           </div>
@@ -403,29 +410,29 @@ export default function Home() {
 
         {/* Lookup results */}
         {lookupLoading && (
-          <section className="px-4 py-10" style={{ backgroundColor: "#111827" }} aria-live="polite" aria-busy="true">
+          <section className="px-4 py-10" style={{ backgroundColor: "#ffffff" }} aria-live="polite" aria-busy="true">
             <div className="max-w-3xl mx-auto text-center">
               <div className="inline-block shimmer px-8 py-4">
-                <p className="font-headline text-2xl text-white motion-safe:animate-pulse">Looking up your representatives...</p>
+                <p className="font-headline text-2xl motion-safe:animate-pulse" style={{ color: "#111827" }}>Looking up your representatives...</p>
               </div>
             </div>
           </section>
         )}
         {results && !lookupLoading && results.length === 0 && (
-          <section className="px-4 py-10" style={{ backgroundColor: "#111827" }}>
+          <section className="px-4 py-10" style={{ backgroundColor: "#ffffff" }}>
             <div className="max-w-3xl mx-auto text-center">
-              <p className="font-headline text-2xl text-white">No representatives found.</p>
-              <p className="font-body text-base mt-2" style={{ color: "rgba(255,255,255,0.85)" }}>
+              <p className="font-headline text-2xl" style={{ color: "#111827" }}>No representatives found.</p>
+              <p className="font-body text-base mt-2" style={{ color: "rgba(0,0,0,0.6)" }}>
                 Try a full address with ZIP code.
               </p>
             </div>
           </section>
         )}
         {results && !lookupLoading && results.length > 0 && (
-          <section className="px-4 py-10" style={{ backgroundColor: "#111827" }}>
+          <section className="px-4 py-10" style={{ backgroundColor: "#ffffff" }}>
             <div className="max-w-5xl mx-auto">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="font-headline text-3xl text-white">Your Representatives</h2>
+                <h2 className="font-headline text-3xl" style={{ color: "#111827" }}>Your Representatives</h2>
                 <button
                   onClick={handleSaveReps}
                   className="px-5 py-3 font-mono text-base font-bold cursor-pointer transition-colors"
@@ -441,18 +448,18 @@ export default function Home() {
                     href={`/directory/${rep.slug}`}
                     className="no-underline group relative overflow-hidden p-6 transition-all"
                     style={{
-                      backgroundColor: "#1e2030",
-                      border: "2px solid rgba(255,255,255,0.15)",
+                      backgroundColor: "#f3f4f6",
+                      border: "2px solid rgba(0,0,0,0.12)",
                     }}
                   >
                     <div
                       className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
                       style={{
                         background: rep.party === "D"
-                          ? "linear-gradient(135deg, rgba(26,58,107,0.4) 0%, transparent 100%)"
+                          ? "linear-gradient(135deg, rgba(26,58,107,0.1) 0%, transparent 100%)"
                           : rep.party === "R"
-                            ? "linear-gradient(135deg, rgba(193,39,45,0.4) 0%, transparent 100%)"
-                            : "linear-gradient(135deg, rgba(107,91,62,0.4) 0%, transparent 100%)",
+                            ? "linear-gradient(135deg, rgba(193,39,45,0.1) 0%, transparent 100%)"
+                            : "linear-gradient(135deg, rgba(107,91,62,0.1) 0%, transparent 100%)",
                       }}
                     />
                     <div className="relative z-10 flex items-center gap-4">
@@ -478,8 +485,8 @@ export default function Home() {
                             {rep.party === "D" ? "DEM" : rep.party === "R" ? "GOP" : "IND"}
                           </span>
                         </div>
-                        <h3 className="font-headline text-2xl text-white normal-case">{rep.fullName}</h3>
-                        <p className="font-mono text-base mt-1" style={{ color: "rgba(255,255,255,0.9)" }}>
+                        <h3 className="font-headline text-2xl normal-case" style={{ color: "#111827" }}>{rep.fullName}</h3>
+                        <p className="font-mono text-base mt-1" style={{ color: "rgba(0,0,0,0.6)" }}>
                           {rep.title} — {rep.state}{rep.district ? `, ${rep.district} District` : ""}
                         </p>
                       </div>
@@ -503,12 +510,12 @@ export default function Home() {
 
         {/* My Reps (saved) */}
         {hasSavedReps && !results && (
-          <section className="px-4 py-12" style={{ backgroundColor: "#111827" }}>
+          <section className="px-4 py-12" style={{ backgroundColor: "#ffffff" }}>
             <div className="max-w-5xl mx-auto">
               <div className="flex items-center justify-between mb-6 animate-on-scroll">
                 <div>
-                  <h2 className="font-headline text-3xl text-white">My Representatives</h2>
-                  <p className="font-mono text-sm mt-1 font-bold" style={{ color: "rgba(255,255,255,0.85)" }}>
+                  <h2 className="font-headline text-3xl" style={{ color: "#111827" }}>My Representatives</h2>
+                  <p className="font-mono text-sm mt-1 font-bold" style={{ color: "rgba(0,0,0,0.6)" }}>
                     YOUR SAVED REPS
                   </p>
                 </div>
@@ -527,18 +534,18 @@ export default function Home() {
                     href={`/directory/${rep.slug}`}
                     className="no-underline group relative overflow-hidden p-5 transition-all"
                     style={{
-                      backgroundColor: "#1e2030",
-                      border: "2px solid rgba(255,255,255,0.15)",
+                      backgroundColor: "#f3f4f6",
+                      border: "2px solid rgba(0,0,0,0.12)",
                     }}
                   >
                     <div
                       className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
                       style={{
                         background: rep.party === "D"
-                          ? "linear-gradient(135deg, rgba(26,58,107,0.3) 0%, transparent 100%)"
+                          ? "linear-gradient(135deg, rgba(26,58,107,0.1) 0%, transparent 100%)"
                           : rep.party === "R"
-                            ? "linear-gradient(135deg, rgba(193,39,45,0.3) 0%, transparent 100%)"
-                            : "linear-gradient(135deg, rgba(107,91,62,0.3) 0%, transparent 100%)",
+                            ? "linear-gradient(135deg, rgba(193,39,45,0.1) 0%, transparent 100%)"
+                            : "linear-gradient(135deg, rgba(107,91,62,0.1) 0%, transparent 100%)",
                       }}
                     />
                     <div className="relative z-10 flex items-center gap-4">
@@ -562,8 +569,8 @@ export default function Home() {
                         >
                           {rep.party === "D" ? "DEM" : rep.party === "R" ? "GOP" : "IND"}
                         </span>
-                        <h3 className="font-headline text-xl text-white normal-case">{rep.fullName}</h3>
-                        <p className="font-mono text-sm mt-0.5" style={{ color: "rgba(255,255,255,0.9)" }}>
+                        <h3 className="font-headline text-xl normal-case" style={{ color: "#111827" }}>{rep.fullName}</h3>
+                        <p className="font-mono text-sm mt-0.5" style={{ color: "rgba(0,0,0,0.6)" }}>
                           {rep.title} — {rep.state}
                         </p>
                       </div>
@@ -576,23 +583,23 @@ export default function Home() {
         )}
 
         {/* Issues — dramatic dark cards */}
-        <section className="px-4 py-16 relative" style={{ backgroundColor: "#111827" }}>
+        <section className="px-4 py-16 relative" style={{ backgroundColor: "#ffffff" }}>
           <div
             className="absolute inset-0"
             style={{
-              background: "linear-gradient(180deg, transparent 0%, rgba(193,39,45,0.05) 50%, transparent 100%)",
+              background: "linear-gradient(180deg, transparent 0%, rgba(193,39,45,0.03) 50%, transparent 100%)",
             }}
           />
           <div className="max-w-5xl mx-auto relative z-10">
             <div className="text-center mb-10 animate-on-scroll">
-              <p className="font-mono text-base tracking-[0.4em] uppercase mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>
-                What Matters To You
+              <p className="font-mono text-base tracking-[0.4em] uppercase mb-3" style={{ color: "rgba(0,0,0,0.6)" }}>
+                The Issues
               </p>
               <h2
                 className="font-headline text-4xl md:text-5xl"
-                style={{ color: "#FFFFFF", textShadow: "0 2px 20px rgba(193,39,45,0.4), 0 2px 8px rgba(0,0,0,0.6)" }}
+                style={{ color: "#111827" }}
               >
-                Issues That Matter
+                What Matters To You
               </h2>
               <div className="mt-4 h-1 w-20 mx-auto" style={{ backgroundColor: "#C1272D" }} />
             </div>
@@ -607,8 +614,8 @@ export default function Home() {
                     href={`/issues/${issue.slug}`}
                     className="no-underline group relative overflow-hidden transition-all"
                     style={{
-                      backgroundColor: "#1e2030",
-                      border: "2px solid rgba(255,255,255,0.15)",
+                      backgroundColor: "#f3f4f6",
+                      border: "2px solid rgba(0,0,0,0.12)",
                       minHeight: "180px",
                     }}
                   >
@@ -656,48 +663,18 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Visual break — dramatic divider */}
-        <section className="relative h-48 md:h-64 overflow-hidden" style={{ backgroundColor: "#111827" }}>
-          {/* Animated grid overlay */}
-          <div
-            className="absolute inset-0 opacity-[0.06]"
-            style={{
-              backgroundImage: "linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)",
-              backgroundSize: "60px 60px",
-            }}
-          />
-          {/* Red accent glow */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: "radial-gradient(ellipse 60% 100% at 50% 50%, rgba(193,39,45,0.15) 0%, transparent 70%)",
-            }}
-          />
-          {/* Horizontal rule accents */}
-          <div className="absolute left-0 right-0 top-0 h-px" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(193,39,45,0.4) 50%, transparent 100%)" }} />
-          <div className="absolute left-0 right-0 bottom-0 h-px" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(193,39,45,0.4) 50%, transparent 100%)" }} />
-          <div className="relative z-10 h-full flex flex-col items-center justify-center gap-3">
-            <div className="flex items-center gap-4">
-              <div className="h-px w-12 md:w-24" style={{ backgroundColor: "rgba(193,39,45,0.6)" }} />
-              <p
-                className="font-mono text-sm md:text-base tracking-[0.4em] uppercase font-bold"
-                style={{ color: "rgba(255,255,255,0.7)" }}
-              >
-                Your neighbors are already showing up
-              </p>
-              <div className="h-px w-12 md:w-24" style={{ backgroundColor: "rgba(193,39,45,0.6)" }} />
-            </div>
-          </div>
-        </section>
-
-        {/* Stats — glowing numbers */}
+        {/* Stats — navy blue banner */}
         <section
           className="px-4 py-16 relative overflow-hidden"
           style={{
-            background: "linear-gradient(180deg, #111827 0%, #1a0a0b 50%, #111827 100%)",
+            background: "linear-gradient(135deg, #1a3a6b 0%, #0d2240 50%, #1a3a6b 100%)",
           }}
         >
-          <div className="absolute inset-0 grid-overlay" />
+          {/* Stars pattern */}
+          <div className="absolute inset-0 opacity-[0.06]" style={{
+            backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
+            backgroundSize: "30px 30px",
+          }} />
           <div className="max-w-5xl mx-auto relative z-10 grid grid-cols-2 md:grid-cols-4 gap-6 text-center stagger-children">
             {[
               { number: "535", label: "Members of Congress" },
@@ -707,15 +684,15 @@ export default function Home() {
             ].map((stat) => (
               <div key={stat.label} className="py-4">
                 <div
-                  className="font-headline text-5xl md:text-6xl"
+                  className="font-headline text-5xl md:text-7xl"
                   style={{
-                    color: "#FFFFFF",
-                    textShadow: "0 0 30px rgba(193,39,45,0.6), 0 2px 10px rgba(0,0,0,0.5)",
+                    color: "#ffffff",
+                    textShadow: "0 2px 10px rgba(0,0,0,0.3)",
                   }}
                 >
                   {stat.number}
                 </div>
-                <div className="font-mono text-sm mt-2 uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.9)" }}>
+                <div className="font-mono text-xs md:text-sm mt-3 uppercase tracking-[0.2em]" style={{ color: "rgba(255,255,255,0.7)" }}>
                   {stat.label}
                 </div>
               </div>
@@ -723,8 +700,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Call your rep — noir illustration */}
-        <section className="relative overflow-hidden animate-on-scroll" style={{ backgroundColor: "#111827" }}>
+        {/* Call your rep */}
+        <section className="relative overflow-hidden animate-on-scroll" style={{ backgroundColor: "#ffffff" }}>
           <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-0">
             <div
               className="h-72 md:h-auto"
@@ -736,16 +713,16 @@ export default function Home() {
               }}
             />
             <div className="flex flex-col justify-center p-8 md:p-12">
-              <p className="font-mono text-lg md:text-xl tracking-[0.4em] uppercase mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>
+              <p className="font-mono text-lg md:text-xl tracking-[0.4em] uppercase mb-3" style={{ color: "rgba(0,0,0,0.6)" }}>
                 Make The Call
               </p>
               <h2
                 className="font-headline text-4xl md:text-5xl leading-tight"
-                style={{ color: "#FF4444", textShadow: "0 2px 20px rgba(255,68,68,0.4), 0 4px 30px rgba(0,0,0,0.5)" }}
+                style={{ color: "#C1272D" }}
               >
                 Your Rep Is One Phone Call Away
               </h2>
-              <p className="mt-4 font-body text-lg" style={{ color: "#fff", textShadow: "0 1px 6px rgba(0,0,0,0.6)" }}>
+              <p className="mt-4 font-body text-lg" style={{ color: "rgba(0,0,0,0.8)" }}>
                 A two-minute call has 10x the impact of an email. We&apos;ll give you talking points and connect you directly.
               </p>
               <Link
@@ -775,7 +752,7 @@ export default function Home() {
           <div
             className="absolute inset-0"
             style={{
-              background: "linear-gradient(180deg, rgba(17,24,39,0.95) 0%, rgba(193,39,45,0.8) 100%)",
+              background: "linear-gradient(180deg, rgba(17,24,39,0.9) 0%, rgba(193,39,45,0.85) 100%)",
             }}
           />
           <div className="absolute inset-0 grid-overlay" />
@@ -817,7 +794,7 @@ export default function Home() {
           <div
             className="absolute inset-0"
             style={{
-              background: "linear-gradient(0deg, #111827 0%, rgba(17,24,39,0.6) 50%, #111827 100%)",
+              background: "linear-gradient(0deg, #ffffff 0%, rgba(255,255,255,0.6) 50%, #ffffff 100%)",
             }}
           />
         </div>
