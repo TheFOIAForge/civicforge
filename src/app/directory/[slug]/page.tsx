@@ -78,9 +78,10 @@ export default function RepProfilePage() {
 
   function openMailto() {
     if (!rep) return;
+    const to = rep.email || "";
     const subject = latestDraft ? `Re: ${latestDraft.issue}` : `Message for ${rep.fullName}`;
     const body = latestDraft?.content || "";
-    const mailto = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(mailto, "_self");
   }
 
@@ -366,7 +367,7 @@ export default function RepProfilePage() {
                 onClick={openMailto}
                 className="px-5 py-3 bg-black text-white font-headline uppercase text-sm cursor-pointer hover:bg-gray-dark transition-colors border-3 border-black hover:border-gray-dark"
               >
-                &#9993; Email Client
+                &#9993; Send Email
               </button>
             </div>
 
@@ -911,7 +912,7 @@ export default function RepProfilePage() {
                 onClick={openMailto}
                 className="w-full px-5 py-4 bg-black text-white font-headline uppercase text-base text-center cursor-pointer hover:bg-gray-dark transition-colors border-3 border-black hover:border-gray-dark"
               >
-                {latestDraft ? "Send Your Letter via Email" : "Open Email Client"}
+                {latestDraft ? "Send Your Letter via Email" : "Send Email"}
               </button>
 
               {latestDraft?.content && (() => {
@@ -981,7 +982,7 @@ export default function RepProfilePage() {
             {!rep.contactForm && (
               <div className="mt-4 p-3 bg-yellow-light border-2 border-yellow">
                 <p className="font-mono text-xs font-bold text-gray-mid">
-                  NOTE: Members of Congress do not publish direct email addresses. Use the &quot;Open Email Client&quot; button to compose a message, then paste it into the official contact form on their website.
+                  NOTE: Most Members of Congress do not publish direct email addresses. If no email is available, use the &quot;Send Email&quot; button to compose a draft, then paste it into the official contact form on their website.
                 </p>
               </div>
             )}
