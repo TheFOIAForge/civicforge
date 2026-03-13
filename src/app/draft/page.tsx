@@ -554,8 +554,7 @@ function DraftInner() {
               )}
 
               {/* Search for other reps */}
-              {(
-                <div ref={resultsRef}>
+              <div ref={resultsRef}>
                   {hasSavedReps && !showAllReps ? (
                     <button
                       onClick={() => setShowAllReps(true)}
@@ -736,7 +735,6 @@ function DraftInner() {
                     </>
                   )}
                 </div>
-              )}
             </div>
 
             {/* ── STEP 3: What's on your mind? ── */}
