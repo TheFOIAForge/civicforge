@@ -198,7 +198,7 @@ export default function Home() {
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem("citizenforge_contacts");
+      const stored = localStorage.getItem("checkmyrep_contacts");
       if (stored) {
         const contacts: ContactLogEntry[] = JSON.parse(stored);
         if (contacts.length > 0) {
@@ -302,25 +302,17 @@ export default function Home() {
           />
 
           <div className="relative z-10 text-center px-4 py-16 w-full max-w-3xl mx-auto">
-            {/* Live hot issue banner */}
-            {feed.length > 0 && (
-              <LiveIssueBanner items={feed} />
-            )}
             <h1
               className="font-headline text-5xl sm:text-6xl md:text-8xl uppercase leading-none"
-              style={{ color: "#FFFFFF", textShadow: "0 2px 10px rgba(0,0,0,0.8), 0 4px 30px rgba(193,39,45,0.5)", animation: "fadeInUp 0.8s ease-out 0.15s both" }}
+              style={{ textShadow: "0 2px 10px rgba(0,0,0,0.8), 0 4px 30px rgba(193,39,45,0.5)", animation: "fadeInUp 0.8s ease-out 0.1s both" }}
             >
-              They Work
-              <br />
-              <span style={{ color: "#FF8A8A", textShadow: "0 0 30px rgba(255,138,138,0.7), 0 2px 10px rgba(0,0,0,0.8)" }}>
-                For You.
-              </span>
+              <span style={{ color: "#FFFFFF" }}>Check</span><span style={{ color: "#C1272D" }}>My</span><span style={{ color: "#FFFFFF" }}>Rep</span>
             </h1>
             <p
-              className="mt-6 text-base md:text-2xl font-body max-w-2xl mx-auto whitespace-nowrap"
-              style={{ color: "rgba(255,255,255,0.95)", textShadow: "0 2px 8px rgba(0,0,0,0.7)", animation: "fadeInUp 0.8s ease-out 0.3s both" }}
+              className="mt-3 font-body text-xl sm:text-2xl md:text-3xl tracking-wide"
+              style={{ color: "rgba(255,255,255,0.6)", textShadow: "0 1px 4px rgba(0,0,0,0.6)", animation: "fadeInUp 0.8s ease-out 0.2s both" }}
             >
-              Find your reps. Write a letter. Make a call. Three taps from couch to Congress.
+              They Work For You.
             </p>
 
             {/* Search bar */}
@@ -808,22 +800,24 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Civic icons decorative strip */}
-        <div className="relative h-20 overflow-hidden">
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: "url(/images/civic-icons.jpg)",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          />
-          <div
-            className="absolute inset-0"
-            style={{
-              background: "linear-gradient(0deg, #ffffff 0%, rgba(255,255,255,0.6) 50%, #ffffff 100%)",
-            }}
-          />
+        {/* Trust bar — engagement stats */}
+        <div
+          className="py-4 px-4"
+          style={{ backgroundColor: "#f8f8f8", borderTop: "1px solid rgba(0,0,0,0.06)", borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+        >
+          <div className="max-w-3xl mx-auto flex items-center justify-center gap-8 flex-wrap">
+            <span className="font-mono text-xs font-bold uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.35)" }}>
+              <strong className="font-headline text-base" style={{ color: "#111827" }}>535</strong> MEMBERS TRACKED
+            </span>
+            <span className="hidden sm:inline" style={{ color: "rgba(0,0,0,0.15)" }}>|</span>
+            <span className="font-mono text-xs font-bold uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.35)" }}>
+              <strong className="font-headline text-base" style={{ color: "#111827" }}>8</strong> ISSUES COVERED
+            </span>
+            <span className="hidden sm:inline" style={{ color: "rgba(0,0,0,0.15)" }}>|</span>
+            <span className="font-mono text-xs font-bold uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.35)" }}>
+              <strong className="font-headline text-base" style={{ color: "#111827" }}>100%</strong> FREE &amp; OPEN
+            </span>
+          </div>
         </div>
       </div>
     );
@@ -968,7 +962,7 @@ export default function Home() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="font-headline text-3xl">My Representatives</h2>
-                <p className="font-mono text-xs text-gray-mid mt-1 font-bold">YOUR SAVED REPS — PERSONALIZED ACROSS CITIZENFORGE</p>
+                <p className="font-mono text-xs text-gray-mid mt-1 font-bold">YOUR SAVED REPS — PERSONALIZED ACROSS CHECKMYREP</p>
               </div>
               <Link
                 href="/draft"

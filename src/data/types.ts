@@ -282,6 +282,15 @@ export interface RecentRollCallVote {
 
 export type ContactDeliveryStatus = "drafted" | "emailed" | "called" | "mailed";
 
+export interface MailingAddress {
+  name: string;
+  address_line1: string;
+  address_line2?: string;
+  address_city: string;
+  address_state: string;
+  address_zip: string;
+}
+
 export interface ContactLogEntry {
   id: string;
   repId: string;
@@ -296,6 +305,11 @@ export interface ContactLogEntry {
   emailedAt?: string;
   calledAt?: string;
   mailedAt?: string;
+  // Physical mail tracking
+  lobLetterId?: string;
+  lobTrackingUrl?: string;
+  expectedDeliveryDate?: string;
+  stripeSessionId?: string;
   // Outcome tracking
   billId?: string;
   billNumber?: string;

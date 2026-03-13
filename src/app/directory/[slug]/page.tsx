@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import type { Representative, ContactLogEntry, EmailServiceConfig } from "@/data/types";
+import MailLetterModal from "@/components/MailLetterModal";
 
 function partyColor(party: string) {
   if (party === "D") return "bg-dem text-white";
@@ -42,11 +43,12 @@ export default function RepProfilePage() {
   const [latestDraft, setLatestDraft] = useState<ContactLogEntry | null>(null);
   const [emailSending, setEmailSending] = useState(false);
   const [emailResult, setEmailResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const [mailModalOpen, setMailModalOpen] = useState(false);
 
   useEffect(() => {
-    setHasApiKey(!!localStorage.getItem("citizenforge_api_key"));
+    setHasApiKey(!!localStorage.getItem("checkmyrep_api_key"));
     // Load latest draft for this rep from contact log
-    const stored = localStorage.getItem("citizenforge_contacts");
+    const stored = localStorage.getItem("checkmyrep_contacts");
     if (stored) {
       const contacts: ContactLogEntry[] = JSON.parse(stored);
       const repDrafts = contacts.filter((c) => c.repId === slug || c.repName?.toLowerCase().includes(slug.replace(/-/g, " ")));
@@ -87,7 +89,7 @@ export default function RepProfilePage() {
 
   async function sendDirectEmail() {
     if (!rep || !latestDraft?.content) return;
-    const configStr = localStorage.getItem("citizenforge_email_config");
+    const configStr = localStorage.getItem("checkmyrep_email_config");
     if (!configStr) return;
     const config: EmailServiceConfig = JSON.parse(configStr);
     setEmailSending(true);
@@ -549,7 +551,7 @@ export default function RepProfilePage() {
               {hasApiKey && !lobbyAnalysis && !lobbyAnalysisLoading && (
                 <button
                   onClick={() => {
-                    const apiKey = localStorage.getItem("citizenforge_api_key");
+                    const apiKey = localStorage.getItem("checkmyrep_api_key");
                     if (!apiKey || !rep?.lobbyingFilings) return;
                     setLobbyAnalysisLoading(true);
                     const filingsSummary = rep.lobbyingFilings.map((f) =>
@@ -962,7 +964,7 @@ export default function RepProfilePage() {
               </button>
 
               {latestDraft?.content && (() => {
-                const configStr = typeof window !== "undefined" ? localStorage.getItem("citizenforge_email_config") : null;
+                const configStr = typeof window !== "undefined" ? localStorage.getItem("checkmyrep_email_config") : null;
                 return configStr ? (
                   <button
                     onClick={sendDirectEmail}
@@ -986,6 +988,16 @@ export default function RepProfilePage() {
                 }`}>
                   {emailResult.ok ? "\u2705" : "\u274C"} {emailResult.message}
                 </div>
+              )}
+
+              {latestDraft?.content && (
+                <button
+                  onClick={() => setMailModalOpen(true)}
+                  className="w-full px-5 py-4 font-headline uppercase text-base text-center cursor-pointer transition-colors border-3"
+                  style={{ backgroundColor: "#111", color: "#fff", borderColor: "#111" }}
+                >
+                  Mail This Letter — $1.50
+                </button>
               )}
             </div>
 
@@ -1074,7 +1086,7 @@ export default function RepProfilePage() {
                 hasApiKey ? (
                   <button
                     onClick={() => {
-                      const apiKey = localStorage.getItem("citizenforge_api_key");
+                      const apiKey = localStorage.getItem("checkmyrep_api_key");
                       if (!apiKey || !rep) return;
                       setAiLoading(true);
 
@@ -1178,7 +1190,7 @@ RULES:
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
-                      const apiKey = localStorage.getItem("citizenforge_api_key");
+                      const apiKey = localStorage.getItem("checkmyrep_api_key");
                       if (!apiKey || !followUp.trim() || aiLoading) return;
                       const newMessages = [...aiMessages, { role: "user", content: followUp.trim() }];
                       setAiMessages(newMessages);
@@ -1500,6 +1512,18 @@ RULES:
           </section>
         </div>
       </div>
+
+      {/* Mail Letter Modal */}
+      {mailModalOpen && latestDraft?.content && (
+        <MailLetterModal
+          isOpen={mailModalOpen}
+          onClose={() => setMailModalOpen(false)}
+          letterContent={latestDraft.content}
+          rep={rep}
+          contactLogId={latestDraft.id}
+          issue={latestDraft.issue}
+        />
+      )}
     </div>
   );
 }

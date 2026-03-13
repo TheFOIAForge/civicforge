@@ -9,6 +9,7 @@ import { buildSystemPrompt } from "@/lib/prompts";
 import type { Representative } from "@/data/types";
 import { useMyReps } from "@/lib/my-reps-context";
 import { useUserMode } from "@/lib/user-mode-context";
+import MailLetterModal from "@/components/MailLetterModal";
 
 type Mode = "letter" | "call" | "social";
 
@@ -70,6 +71,9 @@ function DraftInner() {
   const [showResults, setShowResults] = useState(false);
   const [highlightIdx, setHighlightIdx] = useState(-1);
   const [step, setStep] = useState(1);
+  const [mailModalOpen, setMailModalOpen] = useState(false);
+  const [mailSuccess, setMailSuccess] = useState(false);
+  const [lastLogId, setLastLogId] = useState("");
 
   const isActivist = userMode === "activist";
 
@@ -82,7 +86,7 @@ function DraftInner() {
         const repParam = searchParams.get("rep");
         if (repParam) {
           const match = data.find((r: Representative) => r.slug === repParam);
-          if (match) { setSelectedRep(match); setStep(2); }
+          if (match) { setSelectedRep(match); setStep(3); }
         }
       })
       .catch(() => {});
@@ -99,9 +103,35 @@ function DraftInner() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  // Handle Stripe redirect back
+  useEffect(() => {
+    const mailSuccessParam = searchParams.get("mail_success");
+    if (mailSuccessParam) {
+      setMailSuccess(true);
+      // Update contact log entry
+      try {
+        const pending = sessionStorage.getItem("checkmyrep_pending_mail");
+        if (pending) {
+          const { contactLogId } = JSON.parse(pending);
+          const logs = JSON.parse(localStorage.getItem("checkmyrep_contacts") || "[]");
+          const idx = logs.findIndex((l: Record<string, string>) => l.id === contactLogId);
+          if (idx !== -1) {
+            logs[idx].deliveryStatus = "mailed";
+            logs[idx].mailedAt = new Date().toISOString();
+            logs[idx].stripeSessionId = mailSuccessParam;
+            localStorage.setItem("checkmyrep_contacts", JSON.stringify(logs));
+          }
+          sessionStorage.removeItem("checkmyrep_pending_mail");
+        }
+      } catch { /* ignore */ }
+      // Clean URL
+      window.history.replaceState({}, "", "/draft");
+    }
+  }, [searchParams]);
+
   // Auto-advance step when rep is selected
   useEffect(() => {
-    if (selectedRep && step === 1) setStep(2);
+    if (selectedRep && step < 3) setStep(3);
   }, [selectedRep, step]);
 
   const selectedIssue = selectedIssueSlug ? getIssueBySlug(selectedIssueSlug) : undefined;
@@ -135,7 +165,8 @@ function DraftInner() {
       setShowResults(false);
       setRepSearch("");
       setShowAllReps(false);
-      setStep(2);
+      setStep(3);
+      setTimeout(() => document.getElementById("step-3-topics")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
     } else if (e.key === "Escape") {
       setShowResults(false);
     }
@@ -145,7 +176,7 @@ function DraftInner() {
 
   function getApiKey(): string | null {
     if (typeof window === "undefined") return null;
-    return localStorage.getItem("citizenforge_api_key");
+    return localStorage.getItem("checkmyrep_api_key");
   }
 
   async function handleGenerate() {
@@ -205,9 +236,11 @@ function DraftInner() {
       }, 100);
 
       try {
-        const logs = JSON.parse(localStorage.getItem("citizenforge_contacts") || "[]");
+        const logs = JSON.parse(localStorage.getItem("checkmyrep_contacts") || "[]");
+        const logId = Date.now().toString();
+        setLastLogId(logId);
         const logEntry: Record<string, unknown> = {
-          id: Date.now().toString(),
+          id: logId,
           repId: selectedRep.id,
           repName: selectedRep.fullName,
           method: mode,
@@ -222,7 +255,7 @@ function DraftInner() {
           logEntry.billId = selectedIssue.legislation[0].id;
         }
         logs.push(logEntry);
-        localStorage.setItem("citizenforge_contacts", JSON.stringify(logs));
+        localStorage.setItem("checkmyrep_contacts", JSON.stringify(logs));
       } catch {
         // Silently fail on storage errors
       }
@@ -261,6 +294,45 @@ function DraftInner() {
     }
   }
 
+  function handleUseOwn() {
+    if (!selectedRep) {
+      setError("Pick a representative first.");
+      return;
+    }
+    if (!concern.trim()) {
+      setError("Write or paste your message above first.");
+      return;
+    }
+    setOutput(concern);
+    setError("");
+    // Save to contact log
+    try {
+      const logs = JSON.parse(localStorage.getItem("checkmyrep_contacts") || "[]");
+      const logId = Date.now().toString();
+      setLastLogId(logId);
+      const logEntry: Record<string, unknown> = {
+        id: logId,
+        repId: selectedRep.id,
+        repName: selectedRep.fullName,
+        method: mode,
+        issue: selectedIssue?.name || "General",
+        date: new Date().toISOString().split("T")[0],
+        status: "sent",
+        notes: concern.slice(0, 100),
+        content: concern.slice(0, 500),
+      };
+      if (selectedIssue?.legislation && selectedIssue.legislation.length > 0) {
+        logEntry.billNumber = selectedIssue.legislation[0].billNumber;
+        logEntry.billId = selectedIssue.legislation[0].id;
+      }
+      logs.push(logEntry);
+      localStorage.setItem("checkmyrep_contacts", JSON.stringify(logs));
+    } catch { /* ignore */ }
+    setTimeout(() => {
+      outputRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  }
+
   function handlePrint() {
     window.print();
   }
@@ -294,7 +366,7 @@ function DraftInner() {
               Write Congress
             </h1>
             <p className="mt-2 font-body text-base" style={{ color: "rgba(255,255,255,0.8)" }}>
-              Pick a rep, choose an issue, hit generate. AI does the rest.
+              Pick a rep, write or paste your message, and send it.
             </p>
           </div>
         </div>
@@ -419,7 +491,7 @@ function DraftInner() {
                     {myReps.map((rep) => (
                       <button
                         key={rep.id}
-                        onClick={() => { setSelectedRep(rep); setStep(2); }}
+                        onClick={() => { setSelectedRep(rep); setStep(3); setTimeout(() => document.getElementById("step-3-topics")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150); }}
                         className="flex items-center gap-3 p-4 text-left cursor-pointer transition-all"
                         style={{
                           backgroundColor: "rgba(0,0,0,0.03)",
@@ -586,7 +658,8 @@ function DraftInner() {
                                   setSelectedRep(rep);
                                   setShowResults(false);
                                   setRepSearch("");
-                                  setStep(2);
+                                  setStep(3);
+                                  setTimeout(() => document.getElementById("step-3-topics")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
                                 }}
                                 onMouseEnter={() => setHighlightIdx(idx)}
                                 className="w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer transition-colors"
@@ -632,7 +705,7 @@ function DraftInner() {
             </div>
 
             {/* ── STEP 3: What's on your mind? ── */}
-            <div>
+            <div id="step-3-topics">
               <div className="flex items-center gap-3 mb-4">
                 <div
                   className="w-8 h-8 flex items-center justify-center font-headline text-base shrink-0"
@@ -648,27 +721,40 @@ function DraftInner() {
                 </h2>
               </div>
 
-              {/* Quick topic cards — full-width with illustration */}
-              <div className="grid grid-cols-2 gap-3 mb-4">
+              {/* Quick topic cards — pick a topic to pre-fill */}
+              <p className="font-mono text-[11px] mb-2 font-bold" style={{ color: "rgba(0,0,0,0.4)" }}>
+                TAP A TOPIC TO GET STARTED
+              </p>
+              <div className="grid grid-cols-2 gap-3">
                 {quickTopics.map((topic) => {
                   const isSelected = selectedIssueSlug === topic.slug;
                   return (
                     <button
                       key={topic.slug}
                       onClick={() => {
-                        setSelectedIssueSlug(topic.slug);
-                        if (!concern.trim()) {
-                          const iss = getIssueBySlug(topic.slug);
-                          if (iss && iss.talkingPoints.length > 0) {
-                            setConcern(iss.talkingPoints[0]);
-                          }
+                        const wasSelected = selectedIssueSlug === topic.slug;
+                        if (wasSelected) {
+                          setSelectedIssueSlug("");
+                          setConcern("");
+                          return;
                         }
+                        setSelectedIssueSlug(topic.slug);
+                        const iss = getIssueBySlug(topic.slug);
+                        if (iss && iss.talkingPoints.length > 0) {
+                          setConcern(iss.talkingPoints[0]);
+                        }
+                        // Scroll textarea into view and focus
+                        setTimeout(() => {
+                          const ta = document.getElementById("draft-concern");
+                          if (ta) { ta.scrollIntoView({ behavior: "smooth", block: "center" }); ta.focus(); }
+                        }, 100);
                       }}
                       className="relative text-left overflow-hidden cursor-pointer transition-all"
                       style={{
                         border: isSelected ? "2px solid #C1272D" : "2px solid rgba(0,0,0,0.08)",
                         backgroundColor: "#000",
                         height: "100px",
+                        boxShadow: isSelected ? "0 0 12px rgba(193,39,45,0.3)" : "none",
                       }}
                     >
                       {/* Full background illustration */}
@@ -705,24 +791,25 @@ function DraftInner() {
                 })}
               </div>
 
+
               {/* Concern textarea */}
               <label
                 htmlFor="draft-concern"
                 className="font-mono text-xs block mb-2 font-bold"
-                style={{ color: "rgba(0,0,0,0.5)" }}
+                style={{ color: selectedIssueSlug ? "#C1272D" : "rgba(0,0,0,0.5)" }}
               >
-                YOUR CONCERN — EVEN A FEW WORDS, THE AI WILL EXPAND IT
+                WRITE YOUR LETTER OR DESCRIBE YOUR CONCERN
               </label>
               <textarea
                 id="draft-concern"
                 value={concern}
                 onChange={(e) => setConcern(e.target.value)}
-                placeholder="Example: I'm worried about rising healthcare costs and want my rep to support the Affordable Insulin Now Act..."
+                placeholder="Write your full letter here, paste one you've already written, or just describe your concern and use 'Generate with AI' to draft it for you..."
                 rows={3}
-                className="w-full px-4 py-3 font-body text-base focus:outline-none resize-none"
+                className="w-full px-4 py-3 font-body text-base focus:outline-none resize-none transition-all"
                 style={{
-                  backgroundColor: "rgba(0,0,0,0.04)",
-                  border: "2px solid rgba(0,0,0,0.12)",
+                  backgroundColor: selectedIssueSlug ? "rgba(193,39,45,0.03)" : "rgba(0,0,0,0.04)",
+                  border: selectedIssueSlug ? "2px solid #C1272D" : "2px solid rgba(0,0,0,0.12)",
                   color: "#111827",
                 }}
               />
@@ -744,27 +831,35 @@ function DraftInner() {
               </div>
             )}
 
-            {/* ── GENERATE BUTTON — Massive, unmissable ── */}
-            <button
-              onClick={handleGenerate}
-              disabled={loading || !canGenerate}
-              className="w-full py-5 font-headline uppercase text-xl tracking-wider cursor-pointer transition-all"
-              style={{
-                backgroundColor: loading ? "#999" : canGenerate ? "#C1272D" : "rgba(0,0,0,0.08)",
-                color: loading ? "#fff" : canGenerate ? "#fff" : "rgba(0,0,0,0.3)",
-                border: "none",
-                textShadow: canGenerate ? "0 2px 8px rgba(0,0,0,0.5)" : "none",
-                boxShadow: canGenerate && !loading ? "0 0 30px rgba(193,39,45,0.4)" : "none",
-              }}
-            >
-              {loading
-                ? "Drafting with AI..."
-                : canGenerate
-                  ? modeConfig[mode].action
-                  : !selectedRep
-                    ? "↑ Pick a rep first"
-                    : "↑ Describe your concern above"}
-            </button>
+            {/* ── ACTION BUTTONS ── */}
+            <div className="flex gap-3">
+              <button
+                onClick={handleUseOwn}
+                disabled={!canGenerate}
+                className="flex-1 py-5 font-headline uppercase text-xl tracking-wider cursor-pointer transition-all"
+                style={{
+                  backgroundColor: canGenerate ? "#111" : "rgba(0,0,0,0.08)",
+                  color: canGenerate ? "#fff" : "rgba(0,0,0,0.3)",
+                  border: "none",
+                }}
+              >
+                {!selectedRep ? "↑ Pick a rep first" : !concern.trim() ? "↑ Write your message" : "SEND AS-IS"}
+              </button>
+              <button
+                onClick={handleGenerate}
+                disabled={loading || !canGenerate}
+                className="flex-1 py-5 font-headline uppercase text-lg tracking-wider cursor-pointer transition-all"
+                style={{
+                  backgroundColor: loading ? "#999" : canGenerate ? "#C1272D" : "rgba(0,0,0,0.08)",
+                  color: loading ? "#fff" : canGenerate ? "#fff" : "rgba(0,0,0,0.3)",
+                  border: "none",
+                  textShadow: canGenerate ? "0 2px 8px rgba(0,0,0,0.5)" : "none",
+                  boxShadow: canGenerate && !loading ? "0 0 30px rgba(193,39,45,0.4)" : "none",
+                }}
+              >
+                {loading ? "Drafting..." : "GENERATE WITH AI"}
+              </button>
+            </div>
 
             {/* Loading state */}
             {loading && (
@@ -816,6 +911,18 @@ function DraftInner() {
                     SEND EMAIL
                   </a>
                 )}
+                {mode === "letter" && selectedRep && (
+                  <button
+                    onClick={() => setMailModalOpen(true)}
+                    className="flex items-center gap-2 px-5 py-3 font-mono text-sm font-bold cursor-pointer"
+                    style={{ backgroundColor: "#fff", color: "#111", border: "none" }}
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    MAIL LETTER — $1.50
+                  </button>
+                )}
                 {(selectedRep?.contactForm || selectedRep?.website) && mode === "letter" && (
                   <button
                     onClick={handleOpenContactForm}
@@ -862,6 +969,15 @@ function DraftInner() {
                   >
                     SEND EMAIL
                   </a>
+                )}
+                {mode === "letter" && selectedRep && (
+                  <button
+                    onClick={() => setMailModalOpen(true)}
+                    className="flex-1 px-4 py-3 font-mono text-xs font-bold cursor-pointer"
+                    style={{ backgroundColor: "#111", color: "#fff", border: "none" }}
+                  >
+                    MAIL LETTER — $1.50
+                  </button>
                 )}
                 <button
                   onClick={handleCopy}
@@ -931,7 +1047,31 @@ function DraftInner() {
                 </Link>.
               </p>
             </div>
+
+            {/* Mail success banner */}
+            {mailSuccess && (
+              <div className="p-4" style={{ backgroundColor: "rgba(22,163,74,0.1)", borderTop: "3px solid #16a34a" }} data-print-hide>
+                <p className="font-headline text-lg" style={{ color: "#16a34a" }}>
+                  Letter Mailed!
+                </p>
+                <p className="font-mono text-xs mt-1" style={{ color: "rgba(0,0,0,0.6)" }}>
+                  Your letter to {selectedRep?.fullName} is being printed and will arrive in 3-5 business days via USPS First Class.
+                </p>
+              </div>
+            )}
           </div>
+        )}
+
+        {/* Mail Letter Modal */}
+        {mailModalOpen && selectedRep && (
+          <MailLetterModal
+            isOpen={mailModalOpen}
+            onClose={() => setMailModalOpen(false)}
+            letterContent={output}
+            rep={selectedRep}
+            contactLogId={lastLogId}
+            issue={selectedIssue?.name || concern.slice(0, 50) || "General"}
+          />
         )}
       </div>
     );
@@ -944,7 +1084,7 @@ function DraftInner() {
       <div className="mb-6" data-print-hide>
         <h1 className="font-headline text-4xl md:text-5xl mb-1">Write Congress</h1>
         <p className="font-mono text-xs text-gray-mid font-bold">
-          AI-DRAFTED WITH REP VOTING CONTEXT — YOUR API KEY STAYS IN YOUR BROWSER
+          WRITE YOUR OWN OR USE AI TO DRAFT — YOUR DATA STAYS IN YOUR BROWSER
         </p>
       </div>
 
@@ -1207,13 +1347,13 @@ function DraftInner() {
 
             {/* Concern textarea */}
             <label htmlFor="draft-concern" className="font-mono text-[10px] text-gray-mid block mb-1.5 font-bold">
-              YOUR CONCERN (EVEN A FEW WORDS — THE AI WILL EXPAND IT)
+              WRITE YOUR LETTER OR DESCRIBE YOUR CONCERN
             </label>
             <textarea
               id="draft-concern"
               value={concern}
               onChange={(e) => setConcern(e.target.value)}
-              placeholder="Example: I'm worried about rising healthcare costs and want my rep to support the Affordable Insulin Now Act..."
+              placeholder="Write your full letter here, paste one you've already written, or describe your concern and use 'Generate with AI'..."
               rows={3}
               className="w-full px-4 py-3 border-3 border-border bg-cream font-body text-base focus:outline-none focus:border-red resize-none"
             />
@@ -1231,26 +1371,33 @@ function DraftInner() {
             </div>
           )}
 
-          {/* Generate button — BIG, unmissable */}
-          <button
-            onClick={handleGenerate}
-            disabled={loading || !canGenerate}
-            className={`w-full px-6 py-5 font-headline uppercase text-xl tracking-wider border-3 cursor-pointer transition-colors ${
-              loading
-                ? "bg-gray-mid text-white border-gray-mid"
-                : canGenerate
-                  ? "bg-red text-white border-red hover:bg-red-dark hover:border-red-dark"
+          {/* Action buttons */}
+          <div className="flex gap-3">
+            <button
+              onClick={handleUseOwn}
+              disabled={!canGenerate}
+              className={`flex-1 px-6 py-5 font-headline uppercase text-xl tracking-wider border-3 cursor-pointer transition-colors ${
+                canGenerate
+                  ? "bg-black text-white border-black hover:bg-red hover:border-red"
                   : "bg-gray-light text-gray-mid border-gray-light cursor-not-allowed"
-            }`}
-          >
-            {loading
-              ? "Drafting with AI..."
-              : canGenerate
-                ? modeConfig[mode].action
-                : selectedRep
-                  ? "Describe your concern above"
-                  : "Pick a rep to get started"}
-          </button>
+              }`}
+            >
+              {!selectedRep ? "Pick a rep first" : !concern.trim() ? "Write your message" : "SEND AS-IS"}
+            </button>
+            <button
+              onClick={handleGenerate}
+              disabled={loading || !canGenerate}
+              className={`flex-1 px-6 py-5 font-headline uppercase text-lg tracking-wider border-3 cursor-pointer transition-colors ${
+                loading
+                  ? "bg-gray-mid text-white border-gray-mid"
+                  : canGenerate
+                    ? "bg-red text-white border-red hover:bg-red-dark hover:border-red-dark"
+                    : "bg-gray-light text-gray-mid border-gray-light cursor-not-allowed"
+              }`}
+            >
+              {loading ? "Drafting..." : "GENERATE WITH AI"}
+            </button>
+          </div>
 
           {/* Loading state */}
           {loading && (
@@ -1312,6 +1459,14 @@ function DraftInner() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
                         COPY &amp; OPEN FORM
+                      </button>
+                    )}
+                    {selectedRep && (
+                      <button
+                        onClick={() => setMailModalOpen(true)}
+                        className="flex items-center gap-2 px-4 py-3 bg-black text-white font-mono text-sm font-bold cursor-pointer hover:bg-white hover:text-black transition-colors"
+                      >
+                        MAIL LETTER — $1.50
                       </button>
                     )}
                   </>
@@ -1450,6 +1605,30 @@ function DraftInner() {
             </Link>.
           </p>
         </div>
+      )}
+
+      {/* Mail success banner (informed/power mode) */}
+      {mailSuccess && (
+        <div className="border-3 border-green bg-green-light p-4 mt-4">
+          <p className="font-headline text-lg" style={{ color: "#16a34a" }}>
+            Letter Mailed!
+          </p>
+          <p className="font-mono text-xs mt-1" style={{ color: "rgba(0,0,0,0.6)" }}>
+            Your letter is being printed and will arrive in 3-5 business days via USPS First Class.
+          </p>
+        </div>
+      )}
+
+      {/* Mail Letter Modal (informed/power mode) */}
+      {mailModalOpen && selectedRep && (
+        <MailLetterModal
+          isOpen={mailModalOpen}
+          onClose={() => setMailModalOpen(false)}
+          letterContent={output}
+          rep={selectedRep}
+          contactLogId={lastLogId}
+          issue={selectedIssue?.name || concern.slice(0, 50) || "General"}
+        />
       )}
     </div>
   );

@@ -119,42 +119,21 @@ export default function Nav() {
               </button>
               <Link href="/" className="no-underline text-white hover:text-white/80 focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black">
                 <span className="font-headline text-3xl tracking-tight uppercase">
-                  Citizen<span className="text-red">Forge</span>
+                  Check<span className="text-red">My</span>Rep
                 </span>
                 <span className="block font-mono text-xs text-white/40 uppercase tracking-widest -mt-1">
-                  A project of FOIAForge
+                  They Work For You
                 </span>
               </Link>
             </div>
 
             {/* Quick-access top bar icons */}
             <div className="flex items-center gap-5">
-              <ModeSelector />
               {myReps.length > 0 && (
                 <span className="font-mono text-xs text-white/40 hidden sm:block">
                   {myReps.length} REP{myReps.length !== 1 ? "S" : ""} SAVED
                 </span>
               )}
-              <Link
-                href="/alerts"
-                className="text-white/60 hover:text-white no-underline transition-colors relative p-2 focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-                aria-label="Alerts"
-              >
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                </svg>
-              </Link>
-              <Link
-                href="/settings"
-                className="text-white/60 hover:text-white no-underline transition-colors p-2 focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-                aria-label="Settings"
-              >
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                  <circle cx="12" cy="12" r="3" />
-                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                </svg>
-              </Link>
             </div>
           </div>
         </div>
@@ -189,10 +168,10 @@ export default function Nav() {
             className="no-underline text-white hover:text-white/80 focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           >
             <span className="font-headline text-3xl tracking-tight uppercase">
-              Citizen<span className="text-red">Forge</span>
+              Check<span className="text-red">My</span>Rep
             </span>
             <span className="block font-mono text-xs text-white/40 uppercase tracking-widest -mt-1">
-              A project of FOIAForge
+              They Work For You
             </span>
           </Link>
           <button

@@ -108,7 +108,7 @@ export default function OnboardingModal() {
               Welcome to
             </p>
             <h1 className="font-headline text-5xl md:text-7xl text-white leading-none">
-              CITIZEN<span style={{ color: "#C1272D", textShadow: "0 0 40px rgba(193,39,45,0.5)" }}>FORGE</span>
+              CHECK<span style={{ color: "#C1272D", textShadow: "0 0 40px rgba(193,39,45,0.5)" }}>MY</span>REP
             </h1>
             <div className="mt-4 h-1 w-24 mx-auto" style={{ backgroundColor: "#C1272D" }} />
             <p className="mt-4 font-body text-lg md:text-xl text-white/90 max-w-lg mx-auto" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}>
