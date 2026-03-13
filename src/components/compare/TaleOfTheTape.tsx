@@ -121,6 +121,77 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
           )}
           <p className="font-body text-sm text-black/60 mt-3 max-w-lg mx-auto">{overall.overallSummary}</p>
         </div>
+
+        {/* Score Breakdown — how each category was decided */}
+        <div className="border-t-3 border-black bg-white px-6 py-4">
+          <div className="font-mono text-[10px] text-black/40 uppercase tracking-wider mb-3 text-center font-bold">
+            How the score was decided — 8 categories, each worth 1 point
+          </div>
+          <div className="space-y-0">
+            {categories.map(cat => {
+              const v = cat.verdict;
+              const winnerRep = v.winner === "A" ? repA : v.winner === "B" ? repB : null;
+              const isTie = v.winner === "tie";
+              const isNoData = v.winnerName === "No Data";
+
+              return (
+                <a
+                  key={cat.key}
+                  href={`#sec-${cat.key === "partyLoyalty" ? "loyalty" : cat.key === "votingRecord" ? "voting" : cat.key === "keyVotes" ? "keyvotes" : cat.key}`}
+                  className="flex items-center gap-3 px-3 py-2.5 no-underline hover:bg-black/3 transition-colors border-b border-black/5 last:border-b-0 group"
+                >
+                  {/* Icon */}
+                  <span className="text-base w-6 text-center flex-shrink-0">{cat.icon}</span>
+
+                  {/* Category name */}
+                  <span className="font-mono text-xs font-bold uppercase w-24 flex-shrink-0 text-black/70">{cat.label}</span>
+
+                  {/* Winner indicator */}
+                  <span className="flex-shrink-0 w-20 text-center">
+                    {isNoData ? (
+                      <span className="inline-block px-2 py-0.5 bg-black/5 font-mono text-[10px] text-black/30 font-bold">NO DATA</span>
+                    ) : isTie ? (
+                      <span className="inline-block px-2 py-0.5 bg-black/10 font-mono text-[10px] text-black/40 font-bold">TIE</span>
+                    ) : (
+                      <span
+                        className="inline-block px-2 py-0.5 font-mono text-[10px] font-bold text-white"
+                        style={{ backgroundColor: PC[winnerRep!.party] }}
+                      >
+                        {winnerRep!.lastName.toUpperCase()}
+                      </span>
+                    )}
+                  </span>
+
+                  {/* Score values */}
+                  <span className="flex-shrink-0 font-mono text-[10px] text-black/40 w-28 text-center">
+                    {v.labelA} vs {v.labelB}
+                  </span>
+
+                  {/* Margin badge */}
+                  <span className={`flex-shrink-0 font-mono text-[10px] uppercase ${
+                    v.margin === "decisive" ? "text-red font-bold" :
+                    v.margin === "moderate" ? "text-black/60 font-bold" :
+                    v.margin === "slight" ? "text-black/40" : "text-black/25"
+                  }`}>
+                    {v.margin === "decisive" ? "▓▓▓" :
+                     v.margin === "moderate" ? "▓▓░" :
+                     v.margin === "slight" ? "▓░░" : "░░░"}
+                    <span className="ml-1">{v.margin}</span>
+                  </span>
+
+                  {/* Arrow to section */}
+                  <span className="ml-auto text-black/20 group-hover:text-black/50 transition-colors flex-shrink-0">→</span>
+                </a>
+              );
+            })}
+          </div>
+          <div className="mt-3 flex justify-center gap-6 font-mono text-[9px] text-black/30 uppercase">
+            <span>▓▓▓ Decisive (&gt;20pt gap)</span>
+            <span>▓▓░ Moderate (10–20pt)</span>
+            <span>▓░░ Slight (3–10pt)</span>
+            <span>░░░ Negligible (&lt;3pt)</span>
+          </div>
+        </div>
       </div>
     );
   }
