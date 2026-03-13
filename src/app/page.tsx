@@ -50,7 +50,7 @@ const issueImage: Record<string, string> = {
 
 const issuePosition: Record<string, string> = {
   environment: "center top",
-  immigration: "left bottom",
+  immigration: "center",
 };
 
 interface FeedItem {
