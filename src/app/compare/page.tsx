@@ -9,6 +9,17 @@ import RepSelector from "@/components/compare/RepSelector";
 import TaleOfTheTape from "@/components/compare/TaleOfTheTape";
 import ShareToolbar from "@/components/compare/ShareToolbar";
 import AllComparisonSections from "@/components/compare/ComparisonSections";
+import dynamic from "next/dynamic";
+
+const AdvancedAnalytics = dynamic(
+  () => import("@/components/compare/AdvancedAnalytics"),
+  { ssr: false, loading: () => (
+    <div className="mt-10 border-3 border-black bg-white p-8 text-center">
+      <div className="font-headline text-xl uppercase mb-2">Loading Advanced Analytics...</div>
+      <p className="font-mono text-xs text-black/40">Preparing 8 visualization tabs</p>
+    </div>
+  )}
+);
 
 // ── Loading state ──
 
@@ -264,6 +275,9 @@ function ComparePageInner() {
               repB={enrichedB}
               verdicts={verdicts}
             />
+
+            {/* Advanced Analytics — 8-tab deep analysis */}
+            <AdvancedAnalytics repA={enrichedA} repB={enrichedB} />
 
             {/* Bottom CTA */}
             <div className="border-3 border-black bg-cream p-8 text-center mt-8" data-print-hide>
