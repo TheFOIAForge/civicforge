@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 /* eslint-disable @next/next/no-img-element */
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { issues } from "@/data/issues";
 import type { Representative, ContactLogEntry } from "@/data/types";
 import { useMyReps } from "@/lib/my-reps-context";
@@ -355,7 +355,7 @@ export default function Home() {
             <div className="mt-8 flex flex-wrap justify-center gap-3" style={{ animation: "fadeInUp 0.8s ease-out 0.6s both" }}>
               <Link
                 href="/draft"
-                className="px-6 py-3 font-mono text-base font-bold uppercase tracking-wider no-underline transition-all"
+                className="px-6 py-3 font-mono text-base font-bold uppercase tracking-wider no-underline transition-all hover:scale-105 hover:brightness-125 hover:shadow-[0_0_20px_rgba(193,39,45,0.5)]"
                 style={{
                   border: "2px solid #C1272D",
                   color: "#fff",
@@ -366,7 +366,7 @@ export default function Home() {
               </Link>
               <Link
                 href="/draft?mode=call"
-                className="px-6 py-3 font-mono text-base font-bold uppercase tracking-wider no-underline transition-all"
+                className="px-6 py-3 font-mono text-base font-bold uppercase tracking-wider no-underline transition-all hover:scale-105 hover:bg-white/30 hover:border-white"
                 style={{
                   border: "2px solid rgba(255,255,255,0.5)",
                   color: "#fff",
@@ -377,7 +377,7 @@ export default function Home() {
               </Link>
               <Link
                 href="/draft?mode=email"
-                className="px-6 py-3 font-mono text-base font-bold uppercase tracking-wider no-underline transition-all"
+                className="px-6 py-3 font-mono text-base font-bold uppercase tracking-wider no-underline transition-all hover:scale-105 hover:bg-white/30 hover:border-white"
                 style={{
                   border: "2px solid rgba(255,255,255,0.5)",
                   color: "#fff",
@@ -388,7 +388,7 @@ export default function Home() {
               </Link>
               <Link
                 href="/issues"
-                className="px-6 py-3 font-mono text-base font-bold uppercase tracking-wider no-underline transition-all"
+                className="px-6 py-3 font-mono text-base font-bold uppercase tracking-wider no-underline transition-all hover:scale-105 hover:bg-white/30 hover:border-white"
                 style={{
                   border: "2px solid rgba(255,255,255,0.5)",
                   color: "#fff",
@@ -396,17 +396,6 @@ export default function Home() {
                 }}
               >
                 Browse Issues
-              </Link>
-              <Link
-                href="/my-reps"
-                className="px-6 py-3 font-mono text-base font-bold uppercase tracking-wider no-underline transition-all"
-                style={{
-                  border: "2px solid rgba(255,255,255,0.5)",
-                  color: "#fff",
-                  backgroundColor: "rgba(255,255,255,0.15)",
-                }}
-              >
-                My Saved Reps
               </Link>
             </div>
           </div>
@@ -670,29 +659,37 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Visual break — community illustration */}
-        <section className="relative h-64 md:h-80 overflow-hidden animate-on-scroll">
+        {/* Visual break — dramatic divider */}
+        <section className="relative h-48 md:h-64 overflow-hidden" style={{ backgroundColor: "#111827" }}>
+          {/* Animated grid overlay */}
+          <div
+            className="absolute inset-0 opacity-[0.06]"
+            style={{
+              backgroundImage: "linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)",
+              backgroundSize: "60px 60px",
+            }}
+          />
+          {/* Red accent glow */}
           <div
             className="absolute inset-0"
             style={{
-              backgroundImage: "url(/images/community-protest.jpg)",
-              backgroundSize: "cover",
-              backgroundPosition: "center 25%",
+              background: "radial-gradient(ellipse 60% 100% at 50% 50%, rgba(193,39,45,0.15) 0%, transparent 70%)",
             }}
           />
-          <div
-            className="absolute inset-0"
-            style={{
-              background: "linear-gradient(180deg, #111827 0%, rgba(17,24,39,0.3) 30%, rgba(17,24,39,0.3) 70%, #111827 100%)",
-            }}
-          />
-          <div className="relative z-10 h-full flex items-center justify-center">
-            <p
-              className="font-mono text-base tracking-[0.4em] uppercase font-bold"
-              style={{ color: "#FFFFFF", textShadow: "0 2px 12px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.6)" }}
-            >
-              Your neighbors are already showing up
-            </p>
+          {/* Horizontal rule accents */}
+          <div className="absolute left-0 right-0 top-0 h-px" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(193,39,45,0.4) 50%, transparent 100%)" }} />
+          <div className="absolute left-0 right-0 bottom-0 h-px" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(193,39,45,0.4) 50%, transparent 100%)" }} />
+          <div className="relative z-10 h-full flex flex-col items-center justify-center gap-3">
+            <div className="flex items-center gap-4">
+              <div className="h-px w-12 md:w-24" style={{ backgroundColor: "rgba(193,39,45,0.6)" }} />
+              <p
+                className="font-mono text-sm md:text-base tracking-[0.4em] uppercase font-bold"
+                style={{ color: "rgba(255,255,255,0.7)" }}
+              >
+                Your neighbors are already showing up
+              </p>
+              <div className="h-px w-12 md:w-24" style={{ backgroundColor: "rgba(193,39,45,0.6)" }} />
+            </div>
           </div>
         </section>
 

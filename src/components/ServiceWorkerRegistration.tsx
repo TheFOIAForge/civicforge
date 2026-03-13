@@ -22,9 +22,9 @@ export default function ServiceWorkerRegistration() {
           }
           // Register fresh SW
           const newReg = await navigator.serviceWorker.register("/sw.js");
-          console.log("Service Worker registered (clean):", newReg.scope);
-        } catch (err) {
-          console.log("Service Worker registration failed:", err);
+          void newReg;
+        } catch {
+          // SW registration failed — non-critical
         }
       })();
     }
