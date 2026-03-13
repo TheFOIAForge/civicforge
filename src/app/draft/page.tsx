@@ -664,19 +664,21 @@ function DraftInner() {
                         height: "100px",
                       }}
                     >
-                      {/* Icon illustration — centered background */}
+                      {/* Full background illustration */}
                       <img
-                        src={`/images/icons/topics/${topic.slug}.png`}
+                        src={`/images/icons/topics/${topic.slug}.jpg`}
                         alt=""
-                        className="absolute inset-0 m-auto h-[85%] object-contain"
-                        style={{ opacity: isSelected ? 0.35 : 0.25 }}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        style={{ opacity: isSelected ? 1 : 0.6 }}
                       />
-                      {/* Label — centered */}
-                      <div className="relative z-10 h-full flex items-center justify-center p-3">
+                      {/* Dark overlay for text readability */}
+                      <div className="absolute inset-0" style={{ background: "linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.1) 100%)" }} />
+                      {/* Label — bottom left */}
+                      <div className="relative z-10 h-full flex items-end p-3">
                         <span
-                          className="font-headline text-lg uppercase leading-tight text-center"
+                          className="font-headline text-lg uppercase leading-tight"
                           style={{
-                            color: isSelected ? "#fff" : "rgba(255,255,255,0.9)",
+                            color: "#fff",
                             textShadow: "0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.7)",
                           }}
                         >
