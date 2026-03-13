@@ -26,8 +26,11 @@ const issueColor: Record<string, string> = {
 };
 
 const issuePosition: Record<string, string> = {
-  environment: "center top",
-  immigration: "center",
+  environment: "15% 20%",
+};
+
+const issueZoom: Record<string, string> = {
+  environment: "180%",
 };
 
 const issueSummary: Record<string, string> = {
@@ -64,6 +67,7 @@ export default function IssuesPage() {
           const accent = issueColor[issue.id] || "#1a1a2e";
           const bgImage = issueImage[issue.id];
           const bgPos = issuePosition[issue.id] || "center";
+          const bgSize = issueZoom[issue.id] || "cover";
           const summary = issueSummary[issue.id] || issue.description;
           return (
             <Link
@@ -83,7 +87,7 @@ export default function IssuesPage() {
                   className="absolute inset-0 transition-transform duration-500 group-hover:scale-110"
                   style={{
                     backgroundImage: `url(${bgImage})`,
-                    backgroundSize: "cover",
+                    backgroundSize: bgSize,
                     backgroundPosition: bgPos,
                   }}
                 />

@@ -49,8 +49,11 @@ const issueImage: Record<string, string> = {
 };
 
 const issuePosition: Record<string, string> = {
-  environment: "center top",
-  immigration: "center",
+  environment: "15% 20%",
+};
+
+const issueZoom: Record<string, string> = {
+  environment: "180%",
 };
 
 interface FeedItem {
@@ -614,6 +617,7 @@ export default function Home() {
                 const accent = issueColor[issue.id] || "#1a1a2e";
                 const bgImage = issueImage[issue.id];
                 const bgPos = issuePosition[issue.id] || "center";
+                const bgSize = issueZoom[issue.id] || "cover";
                 return (
                   <Link
                     key={issue.id}
@@ -631,7 +635,7 @@ export default function Home() {
                         className="absolute inset-0 transition-transform duration-500 group-hover:scale-110"
                         style={{
                           backgroundImage: `url(${bgImage})`,
-                          backgroundSize: "cover",
+                          backgroundSize: bgSize,
                           backgroundPosition: bgPos,
                         }}
                       />
