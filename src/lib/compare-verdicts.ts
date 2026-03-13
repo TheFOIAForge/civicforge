@@ -115,8 +115,8 @@ function partyLoyaltyVerdict(a: Representative, b: Representative): CategoryVerd
     winner, margin, summary,
     winnerName: winner === "tie" ? "Tie" : wRep.fullName,
     loserName: winner === "tie" ? "" : lRep.fullName,
-    labelA: pct(a.partyLoyalty), labelB: pct(b.partyLoyalty),
-    valueA: a.partyLoyalty, valueB: b.partyLoyalty,
+    labelA: pct(100 - a.partyLoyalty), labelB: pct(100 - b.partyLoyalty),
+    valueA: 100 - a.partyLoyalty, valueB: 100 - b.partyLoyalty,
   };
 }
 
