@@ -16,7 +16,7 @@ export default function ServiceWorkerRegistration() {
           // Clear any stale caches from previous SW versions
           const keys = await caches.keys();
           for (const key of keys) {
-            if (key.startsWith("citizenforge-")) {
+            if (key.startsWith("checkmyrep-")) {
               await caches.delete(key);
             }
           }

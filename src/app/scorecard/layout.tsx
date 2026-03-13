@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "My Scorecard — CitizenForge",
+  title: "My Scorecard — CheckMyRep",
 };
 
 export default function ScorecardLayout({ children }: { children: React.ReactNode }) {

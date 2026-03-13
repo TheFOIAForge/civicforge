@@ -118,7 +118,7 @@ export default function CongressInfoGraphics() {
 
   // Load cached data from localStorage on mount
   useEffect(() => {
-    const cached = localStorage.getItem("citizenforge_member_stats");
+    const cached = localStorage.getItem("checkmyrep_member_stats");
     if (cached) {
       try {
         const parsed = JSON.parse(cached) as MemberStatsPayload;
@@ -152,7 +152,7 @@ export default function CongressInfoGraphics() {
       if (statsRes.ok) {
         const freshData = await statsRes.json() as MemberStatsPayload;
         setData(freshData);
-        localStorage.setItem("citizenforge_member_stats", JSON.stringify(freshData));
+        localStorage.setItem("checkmyrep_member_stats", JSON.stringify(freshData));
         setUpdateSuccess(`Updated ${result.membersUpdated} members`);
       }
     } catch (err) {

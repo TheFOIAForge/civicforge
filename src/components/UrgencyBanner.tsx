@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { UrgentAction } from "@/data/types";
 import staticActions from "@/data/urgent-actions.json";
 
-const DISMISSED_KEY = "citizenforge_dismissed_alerts";
+const DISMISSED_KEY = "checkmyrep_dismissed_alerts";
 const CYCLE_INTERVAL = 6000; // 6 seconds per item
 
 function getDismissedIds(): string[] {

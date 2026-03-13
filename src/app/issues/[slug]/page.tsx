@@ -91,7 +91,7 @@ export default function IssueDetailPage() {
   const searchKeyword = issueSearchKeywords[slug] || slug;
 
   useEffect(() => {
-    setHasApiKey(!!localStorage.getItem("citizenforge_api_key"));
+    setHasApiKey(!!localStorage.getItem("checkmyrep_api_key"));
     fetch("/api/members?featured=true")
       .then((r) => r.json())
       .then((reps: Representative[]) => setFeaturedReps(reps.slice(0, 4)))
@@ -158,7 +158,7 @@ export default function IssueDetailPage() {
       prev ? { ...prev, phase: "loading", selectedMember: member } : null
     );
 
-    const apiKey = localStorage.getItem("citizenforge_api_key");
+    const apiKey = localStorage.getItem("checkmyrep_api_key");
     if (!apiKey) {
       setBillAI((prev) =>
         prev ? { ...prev, phase: "error", analysis: "No API key found. Add your key in Settings." } : null
@@ -199,7 +199,7 @@ ${lobbying || "None found"}
       // Continue with basic data
     }
 
-    const systemPrompt = `You are an investigative government accountability analyst for CitizenForge. You cross-reference bill data with campaign finance, lobbying disclosures, and committee assignments to reveal connections the average citizen would miss.
+    const systemPrompt = `You are an investigative government accountability analyst for CheckMyRep. You cross-reference bill data with campaign finance, lobbying disclosures, and committee assignments to reveal connections the average citizen would miss.
 
 BILL DATA:
 - Bill: ${bill.billNumber} — "${bill.title}"

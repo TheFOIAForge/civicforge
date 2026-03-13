@@ -828,7 +828,7 @@ function FederalRegisterContent() {
         <div className="border-2 border-border p-5 bg-cream-dark">
           <h3 className="font-headline text-xl normal-case mb-2">Draft Your Comment</h3>
           <p className="font-body text-sm text-gray-mid leading-relaxed mb-3">
-            Use CitizenForge&apos;s AI-powered letter writer to draft a well-structured
+            Use CheckMyRep&apos;s AI-powered letter writer to draft a well-structured
             public comment. Click &ldquo;Draft Comment&rdquo; on any open comment period above.
           </p>
           <Link

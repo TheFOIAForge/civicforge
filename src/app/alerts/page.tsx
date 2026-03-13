@@ -23,8 +23,8 @@ interface Alert {
   actionLabel?: string;
 }
 
-const STORAGE_KEY = "citizenforge_alerts";
-const SETTINGS_KEY = "citizenforge_alert_settings";
+const STORAGE_KEY = "checkmyrep_alerts";
+const SETTINGS_KEY = "checkmyrep_alert_settings";
 
 const DEFAULT_SETTINGS: AlertSetting[] = [
   {

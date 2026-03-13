@@ -34,7 +34,7 @@ const ScorecardContext = createContext<ScorecardContextType>({
   hasVoted: () => null,
 });
 
-const STORAGE_KEY = "citizenforge_user_votes";
+const STORAGE_KEY = "checkmyrep_user_votes";
 
 function normalizeBillId(bill: string): string {
   return bill.replace(/[.\s]/g, "").toLowerCase();

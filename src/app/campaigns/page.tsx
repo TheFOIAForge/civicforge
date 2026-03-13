@@ -19,7 +19,7 @@ export default function CampaignsPage() {
       .then((r) => r.json())
       .then(setAllReps)
       .catch(() => {});
-    const stored = localStorage.getItem("citizenforge_campaigns");
+    const stored = localStorage.getItem("checkmyrep_campaigns");
     if (stored) {
       setCampaigns(JSON.parse(stored));
     }
@@ -27,7 +27,7 @@ export default function CampaignsPage() {
 
   function save(updated: Campaign[]) {
     setCampaigns(updated);
-    localStorage.setItem("citizenforge_campaigns", JSON.stringify(updated));
+    localStorage.setItem("checkmyrep_campaigns", JSON.stringify(updated));
   }
 
   function handleCreate() {

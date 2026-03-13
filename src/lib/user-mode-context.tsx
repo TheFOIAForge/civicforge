@@ -22,8 +22,8 @@ interface UserModeContextType {
   completeOnboarding: () => void;
 }
 
-const STORAGE_KEY = "citizenforge_user_mode";
-const ONBOARDING_KEY = "citizenforge_onboarding_done";
+const STORAGE_KEY = "checkmyrep_user_mode";
+const ONBOARDING_KEY = "checkmyrep_onboarding_done";
 
 const UserModeContext = createContext<UserModeContextType>({
   mode: "power",

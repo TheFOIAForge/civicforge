@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
   <rect width="192" height="192" fill="#000"/>
   <rect y="180.48" width="192" height="11.52" fill="#DC2626"/>
-  <text x="96" y="72.96000000000001" text-anchor="middle" dominant-baseline="central" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="42.24" fill="#fff">CIVIC</text>
-  <text x="96" y="119.03999999999999" text-anchor="middle" dominant-baseline="central" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="42.24" fill="#DC2626">FORGE</text>
+  <text x="96" y="72.96" text-anchor="middle" dominant-baseline="central" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="42.24" fill="#fff">CHECK</text>
+  <text x="96" y="119.04" text-anchor="middle" dominant-baseline="central" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="42.24" fill="#DC2626">MYREP</text>
 </svg>

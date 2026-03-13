@@ -1,5 +1,5 @@
 export function buildAnswerPrompt(dataContext: string): string {
-  return `You are Mind Palace, CitizenForge's AI research assistant for government accountability and civic engagement. You answer questions using real data from Congress.gov, OpenFEC, USAspending, the Federal Register, and other official sources.
+  return `You are Mind Palace, CheckMyRep's AI research assistant for government accountability and civic engagement. You answer questions using real data from Congress.gov, OpenFEC, USAspending, the Federal Register, and other official sources.
 
 DATA CONTEXT (use ONLY this data to answer — never fabricate numbers):
 ${dataContext}

@@ -79,21 +79,21 @@ export default function SupportPage() {
       {/* Header */}
       <h1 className="font-headline text-5xl md:text-6xl mb-2">Support This Project</h1>
       <p className="font-mono text-sm text-gray-mid mb-8 font-bold">
-        CITIZENFORGE IS FREE AND ALWAYS WILL BE. BUT IF YOU FIND IT USEFUL, YOU CAN HELP KEEP IT RUNNING.
+        CHECKMYREP IS FREE AND ALWAYS WILL BE. BUT IF YOU FIND IT USEFUL, YOU CAN HELP KEEP IT RUNNING.
       </p>
 
       {/* Mission statement */}
       <section className="border-3 border-border bg-surface p-6 md:p-8 mb-8">
-        <h2 className="font-headline text-2xl mb-3">Why CitizenForge Is Free</h2>
+        <h2 className="font-headline text-2xl mb-3">Why CheckMyRep Is Free</h2>
         <p className="font-body text-base text-gray-mid leading-relaxed mb-4">
-          Government accountability shouldn&apos;t be behind a paywall. CitizenForge uses
+          Government accountability shouldn&apos;t be behind a paywall. CheckMyRep uses
           publicly funded data sources — Congress.gov, the Federal Register, GovInfo,
           OpenFEC — because this information belongs to all of us. The AI features use
           a bring-your-own-key model so there are no recurring server costs for AI.
         </p>
         <p className="font-body text-base text-gray-mid leading-relaxed mb-4">
           That said, hosting, domain registration, API development, and the hundreds of
-          hours building this platform aren&apos;t free. If CitizenForge has helped you
+          hours building this platform aren&apos;t free. If CheckMyRep has helped you
           research a representative, draft a letter, submit a public comment, or just
           understand how government works — consider leaving a tip.
         </p>
@@ -103,7 +103,7 @@ export default function SupportPage() {
             <p className="font-headline text-lg normal-case mb-1">100% goes to keeping this running</p>
             <p className="font-body text-sm text-gray-mid">
               Every dollar goes directly to hosting costs, API fees, and development time.
-              CitizenForge is a project of{" "}
+              CheckMyRep is a project of{" "}
               <a
                 href="https://www.thefoiaforge.org"
                 target="_blank"
@@ -146,7 +146,7 @@ export default function SupportPage() {
               <h3 className="font-headline text-lg normal-case mb-1">Donation Links Coming Soon</h3>
               <p className="font-body text-sm text-gray-mid leading-relaxed">
                 Support platforms are being set up. In the meantime, the best way to support
-                CitizenForge is to <strong>share it with others</strong>, <strong>use it to contact your reps</strong>,
+                CheckMyRep is to <strong>share it with others</strong>, <strong>use it to contact your reps</strong>,
                 and <strong>spread the word</strong> about government accountability.
               </p>
             </div>
@@ -277,7 +277,7 @@ export default function SupportPage() {
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="border-2 border-border p-4 bg-cream-dark">
-            <h3 className="font-headline text-lg normal-case mb-1">Share CitizenForge</h3>
+            <h3 className="font-headline text-lg normal-case mb-1">Share CheckMyRep</h3>
             <p className="font-body text-sm text-gray-mid leading-relaxed">
               Tell a friend, post on social media, or share in community groups. More users
               means more civic engagement.
@@ -300,7 +300,7 @@ export default function SupportPage() {
           <div className="border-2 border-border p-4 bg-cream-dark">
             <h3 className="font-headline text-lg normal-case mb-1">Contribute Code</h3>
             <p className="font-body text-sm text-gray-mid leading-relaxed">
-              CitizenForge is open source. Developers can contribute features, fix bugs, or
+              CheckMyRep is open source. Developers can contribute features, fix bugs, or
               improve accessibility. Every PR helps.
             </p>
           </div>
@@ -313,7 +313,7 @@ export default function SupportPage() {
           href="/"
           className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white font-mono text-sm font-bold no-underline hover:bg-red transition-colors"
         >
-          &larr; BACK TO CITIZENFORGE
+          &larr; BACK TO CHECKMYREP
         </Link>
       </div>
     </div>

@@ -43,7 +43,7 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
           {/* Top label */}
           <div style={{ position: "relative", textAlign: "center", paddingTop: 20, paddingBottom: 8 }}>
             <div className="font-mono" style={{ fontSize: 10, letterSpacing: "0.3em", color: "rgba(255,255,255,0.5)", textTransform: "uppercase" }}>
-              CitizenForge Congressional Comparison
+              CheckMyRep Congressional Comparison
             </div>
             <h2 className="font-headline" style={{ fontSize: 28, textTransform: "uppercase", letterSpacing: "0.1em", marginTop: 4, color: "#fff" }}>
               Head to Head
@@ -302,7 +302,7 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
               )}
             </div>
             <div className="font-mono" style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-              CitizenForge
+              CheckMyRep
             </div>
           </div>
         </div>

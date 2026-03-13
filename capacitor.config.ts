@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: "org.thefoiaforge.civic",
-  appName: "CitizenForge",
+  appId: "us.checkmyrep.app",
+  appName: "CheckMyRep",
   webDir: "out",
   server: {
     // In production, point to your deployed URL so API routes work

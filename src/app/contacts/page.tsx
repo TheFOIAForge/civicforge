@@ -78,7 +78,7 @@ export default function ContactsPage() {
   const outcomeChecked = useRef(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem("citizenforge_contacts");
+    const stored = localStorage.getItem("checkmyrep_contacts");
     if (stored) {
       const parsed = JSON.parse(stored) as ContactLogEntry[];
       setContacts(parsed);
@@ -90,19 +90,19 @@ export default function ContactsPage() {
         if (contactsWithBills.length > 0) {
           checkOutcomes(parsed).then((updated) => {
             setContacts(updated);
-            localStorage.setItem("citizenforge_contacts", JSON.stringify(updated));
+            localStorage.setItem("checkmyrep_contacts", JSON.stringify(updated));
           }).catch(() => {
             // Silently fail
           });
         }
       }
     }
-    setHasEmailConfig(!!localStorage.getItem("citizenforge_email_config"));
+    setHasEmailConfig(!!localStorage.getItem("checkmyrep_email_config"));
   }, []);
 
   function save(updated: ContactLogEntry[]) {
     setContacts(updated);
-    localStorage.setItem("citizenforge_contacts", JSON.stringify(updated));
+    localStorage.setItem("checkmyrep_contacts", JSON.stringify(updated));
   }
 
   function handleDelete(id: string) {
@@ -148,7 +148,7 @@ export default function ContactsPage() {
   }
 
   async function handleEmailViaService(entry: ContactLogEntry) {
-    const configStr = localStorage.getItem("citizenforge_email_config");
+    const configStr = localStorage.getItem("checkmyrep_email_config");
     if (!configStr || !entry.content) return;
     const config: EmailServiceConfig = JSON.parse(configStr);
     setSendingId(entry.id);
@@ -259,7 +259,7 @@ export default function ContactsPage() {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = "citizenforge-contacts.csv";
+                a.download = "checkmyrep-contacts.csv";
                 a.click();
                 URL.revokeObjectURL(url);
               }}

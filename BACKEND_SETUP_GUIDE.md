@@ -1,6 +1,6 @@
-# CitizenForge Backend Setup Guide
+# CheckMyRep Backend Setup Guide
 
-Step-by-step beginner instructions for getting all API keys, setting up the server, and wiring real data into CitizenForge.
+Step-by-step beginner instructions for getting all API keys, setting up the server, and wiring real data into CheckMyRep.
 
 ---
 
@@ -21,7 +21,7 @@ Step-by-step beginner instructions for getting all API keys, setting up the serv
 
 ## 1. Overview
 
-Right now CitizenForge runs entirely in the browser with mock data. To get real data, we need:
+Right now CheckMyRep runs entirely in the browser with mock data. To get real data, we need:
 
 | Data Source | What It Provides | Cost |
 |---|---|---|
@@ -118,7 +118,7 @@ Sign in with your Google account. If you've never used Google Cloud before, you 
 1. Click the project dropdown at the top of the page (it might say "Select a project" or show an existing project name)
 2. Click **New Project** in the popup
 3. Enter these details:
-   - **Project name**: `citizenforge` (or whatever you want)
+   - **Project name**: `checkmyrep` (or whatever you want)
    - **Organization**: Leave as default
 4. Click **Create**
 5. Wait a few seconds, then make sure the new project is selected in the dropdown
@@ -193,7 +193,7 @@ https://www.opensecrets.org/api/admin/index.php?function=signup
 Fill out:
 - **Name**: Your name
 - **Email**: Your email
-- **Organization**: `CitizenForge` (or personal)
+- **Organization**: `CheckMyRep` (or personal)
 - **Intended use**: Something like "Civic engagement app showing campaign finance data to citizens"
 
 ### Step 2: Get your API key
@@ -340,7 +340,7 @@ Now that you have all your API keys, let's store them securely in your project.
 
 In your terminal:
 ```bash
-cd /Users/macbook/Desktop/citizenforge
+cd /Users/macbook/Desktop/checkmyrep
 ```
 
 Create a file called `.env.local`:
@@ -405,7 +405,7 @@ Browser  -->  /api/reps?zip=10001  -->  Google Civic API  -->  back to browser
 ### Step 1: Create the API directory
 
 ```bash
-mkdir -p /Users/macbook/Desktop/citizenforge/src/app/api
+mkdir -p /Users/macbook/Desktop/checkmyrep/src/app/api
 ```
 
 ### Step 2: What routes we'll need
@@ -500,22 +500,22 @@ npm install -g vercel
 If you haven't already:
 
 ```bash
-cd /Users/macbook/Desktop/citizenforge
+cd /Users/macbook/Desktop/checkmyrep
 git init
 git add -A
-git commit -m "Initial CitizenForge build"
+git commit -m "Initial CheckMyRep build"
 ```
 
 Then create a repo on GitHub:
 1. Go to https://github.com/new
-2. Name it `citizenforge`
+2. Name it `checkmyrep`
 3. Leave it public or private (your choice)
 4. DON'T initialize with README (you already have code)
 5. Click **Create repository**
 
 GitHub will show you commands. Run:
 ```bash
-git remote add origin https://github.com/YOUR_USERNAME/citizenforge.git
+git remote add origin https://github.com/YOUR_USERNAME/checkmyrep.git
 git branch -M main
 git push -u origin main
 ```
@@ -524,7 +524,7 @@ git push -u origin main
 
 1. Go to https://vercel.com and sign up with your GitHub account
 2. Click **Add New** > **Project**
-3. Find and select your `citizenforge` repository
+3. Find and select your `checkmyrep` repository
 4. Vercel will auto-detect it's a Next.js project
 5. Before clicking Deploy, expand **Environment Variables**
 6. Add each of your API keys:
@@ -535,7 +535,7 @@ git push -u origin main
    - `PROPUBLICA_API_KEY` = your key
 7. Click **Deploy**
 
-Vercel will build and deploy your app. You'll get a URL like `citizenforge.vercel.app`.
+Vercel will build and deploy your app. You'll get a URL like `checkmyrep.vercel.app`.
 
 ### Step 4: Set up automatic deploys
 
@@ -545,7 +545,7 @@ This happens automatically. Every time you push to `main` on GitHub, Vercel rebu
 
 ## 10. Connecting Your Domain
 
-To make CitizenForge available at `civic.thefoiaforge.org`:
+To make CheckMyRep available at `civic.thefoiaforge.org`:
 
 ### Step 1: Add the domain in Vercel
 
@@ -570,7 +570,7 @@ DNS changes can take 1-60 minutes. Vercel will automatically detect the CNAME an
 
 ### Step 4: Verify
 
-Once DNS propagates, visit `https://civic.thefoiaforge.org` — you should see CitizenForge.
+Once DNS propagates, visit `https://civic.thefoiaforge.org` — you should see CheckMyRep.
 
 ---
 

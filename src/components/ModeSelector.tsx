@@ -3,8 +3,8 @@
 import { useUserMode, type UserMode } from "@/lib/user-mode-context";
 
 const modes: { value: UserMode; label: string; icon: string }[] = [
-  { value: "activist", label: "ACT", icon: "\u270A" },
-  { value: "informed", label: "INFO", icon: "\uD83D\uDCF0" },
+  { value: "activist", label: "SIMPLE", icon: "\u270A" },
+  { value: "informed", label: "DETAIL", icon: "\uD83D\uDCF0" },
   { value: "power", label: "PRO", icon: "\u26A1" },
 ];
 

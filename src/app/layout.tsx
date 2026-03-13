@@ -7,14 +7,14 @@ import { ScorecardProvider } from "@/lib/scorecard-context";
 import AppShell from "@/components/AppShell";
 
 export const metadata: Metadata = {
-  title: "CitizenForge — They Work For You",
+  title: "CheckMyRep — They Work For You",
   description:
-    "Find your representatives, draft AI-powered letters, track your contacts, and organize campaigns. A civic engagement hub by FOIAForge.",
+    "Find your representatives, draft AI-powered letters, track your contacts, and organize campaigns. A civic engagement hub by CheckMyRep.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "CitizenForge",
+    title: "CheckMyRep",
   },
   other: {
     "mobile-web-app-capable": "yes",

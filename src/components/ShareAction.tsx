@@ -18,8 +18,8 @@ export default function ShareAction({ action, repName, issue }: ShareActionProps
     `I just ${action}`,
     repName ? `to ${repName}` : "",
     issue ? `about ${issue}` : "",
-    "using @CitizenForge. Your voice matters too.",
-    "https://civic.thefoiaforge.org",
+    "using @CheckMyRep. Your voice matters too.",
+    "https://checkmyrep.us",
   ]
     .filter(Boolean)
     .join(" ");

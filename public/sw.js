@@ -1,5 +1,5 @@
-// CivicForge Service Worker
-const CACHE_NAME = "civicforge-v2";
+// CheckMyRep Service Worker
+const CACHE_NAME = "checkmyrep-v2";
 const OFFLINE_URL = "/";
 
 // Static assets to pre-cache

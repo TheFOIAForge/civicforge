@@ -1,7 +1,7 @@
 {
-  "name": "CitizenForge — They Work For You",
-  "short_name": "CitizenForge",
-  "description": "Find your representatives, draft AI-powered letters, track contacts, and hold Congress accountable. A project of FOIAForge.",
+  "name": "CheckMyRep — They Work For You",
+  "short_name": "CheckMyRep",
+  "description": "Find your representatives, draft AI-powered letters, track contacts, and hold Congress accountable. A project of CheckMyRep.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#F5F0E8",
