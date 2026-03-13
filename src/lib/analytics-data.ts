@@ -353,14 +353,25 @@ export function generateSankeyData(a: Representative, b: Representative): {
   nodes: SankeyNode[];
   links: SankeyLink[];
 } {
+  // Generic occupation categories from FEC data — not real industry donors
+  const GENERIC = new Set([
+    "retired", "homemaker", "housewife", "attorney", "physician",
+    "self-employed", "not employed", "student", "farmer", "teacher",
+    "engineer", "consultant", "real estate", "investor", "dentist",
+    "none", "n/a", "information requested", "unemployed",
+    "real estate agent", "sales", "manager", "professor",
+  ]);
+
   // Nodes: [Industries...] → [PAC types...] → [Rep A, Rep B]
   const allIndustries = new Map<string, { amountA: number; amountB: number }>();
 
   for (const d of a.topIndustries) {
+    if (GENERIC.has(d.name.toLowerCase())) continue;
     const amt = parseDollars(d.amount);
     allIndustries.set(d.name, { amountA: amt, amountB: 0 });
   }
   for (const d of b.topIndustries) {
+    if (GENERIC.has(d.name.toLowerCase())) continue;
     const amt = parseDollars(d.amount);
     const existing = allIndustries.get(d.name);
     if (existing) {

@@ -274,8 +274,24 @@ function FinanceSection({ a, b, verdict }: { a: Representative; b: Representativ
   const totalA = parseDollars(a.totalFundraising);
   const totalB = parseDollars(b.totalFundraising);
 
-  const donorsA = new Set(a.topDonors.map(d => d.name.toLowerCase()));
-  const sharedDonors = b.topDonors.filter(d => donorsA.has(d.name.toLowerCase()));
+  // Generic occupation/employment categories that appear in FEC data —
+  // these are NOT real "shared donors" even if both reps list them.
+  const GENERIC_DONORS = new Set([
+    "retired", "homemaker", "housewife", "attorney", "physician",
+    "self-employed", "not employed", "student", "farmer", "teacher",
+    "engineer", "consultant", "real estate", "investor", "dentist",
+    "none", "n/a", "information requested", "unemployed",
+    "real estate agent", "sales", "manager", "professor",
+  ]);
+
+  const donorsA = new Set(
+    a.topDonors
+      .map(d => d.name.toLowerCase())
+      .filter(n => !GENERIC_DONORS.has(n))
+  );
+  const sharedDonors = b.topDonors.filter(
+    d => !GENERIC_DONORS.has(d.name.toLowerCase()) && donorsA.has(d.name.toLowerCase())
+  );
 
   return (
     <Section title="Follow the Money" icon="💰" id="sec-finance">
