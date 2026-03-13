@@ -25,13 +25,11 @@ const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
   : null;
 
 function parseStoredAddress(): Partial<MailingAddress> {
-  // Try structured address first
   try {
     const stored = localStorage.getItem("checkmyrep_sender_address");
     if (stored) return JSON.parse(stored);
   } catch { /* ignore */ }
 
-  // Try parsing the raw address string "123 Main St, City, ST 12345"
   const raw = localStorage.getItem("checkmyrep_address");
   if (raw) {
     const parts = raw.split(",").map((s) => s.trim());
@@ -48,10 +46,19 @@ function parseStoredAddress(): Partial<MailingAddress> {
   return {};
 }
 
+function getRepOffice(rep: Representative, idx: number) {
+  return rep.offices[idx] || rep.offices[0];
+}
+
 export default function MailLetterModal({ isOpen, onClose, letterContent, rep, reps, contactLogId, issue }: MailLetterModalProps) {
   const allReps = reps && reps.length > 0 ? reps : [rep];
   const [step, setStep] = useState<Step>("preview");
-  const [selectedOfficeIdx, setSelectedOfficeIdx] = useState(0);
+  // Per-rep office selection: { [repId]: officeIndex }
+  const [officePerRep, setOfficePerRep] = useState<Record<string, number>>(() => {
+    const m: Record<string, number> = {};
+    allReps.forEach((r) => { m[r.id] = 0; });
+    return m;
+  });
   const [senderName, setSenderName] = useState("");
   const [senderLine1, setSenderLine1] = useState("");
   const [senderLine2, setSenderLine2] = useState("");
@@ -61,8 +68,8 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
   const [verifyStatus, setVerifyStatus] = useState<"idle" | "loading" | "deliverable" | "warning" | "error">("idle");
   const [verifyMsg, setVerifyMsg] = useState("");
   const [payError, setPayError] = useState("");
+  const [previewIdx, setPreviewIdx] = useState(0);
 
-  // Pre-fill sender address
   useEffect(() => {
     const saved = parseStoredAddress();
     if (saved.name) setSenderName(saved.name);
@@ -75,16 +82,6 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
 
   if (!isOpen) return null;
 
-  const office = rep.offices[selectedOfficeIdx] || rep.offices[0];
-
-  const recipientAddress: MailingAddress = {
-    name: `${rep.title} ${rep.fullName}`,
-    address_line1: office?.street || "",
-    address_city: office?.city || "",
-    address_state: office?.state || "",
-    address_zip: office?.zip || "",
-  };
-
   const senderAddress: MailingAddress = {
     name: senderName,
     address_line1: senderLine1,
@@ -95,6 +92,14 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
   };
 
   const senderValid = senderName && senderLine1 && senderCity && senderState && senderZip;
+
+  // Current preview rep
+  const previewRep = allReps[previewIdx] || allReps[0];
+  const previewOffice = getRepOffice(previewRep, officePerRep[previewRep.id] || 0);
+
+  function setRepOffice(repId: string, idx: number) {
+    setOfficePerRep((prev) => ({ ...prev, [repId]: idx }));
+  }
 
   async function handleVerify() {
     setVerifyStatus("loading");
@@ -120,7 +125,6 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
       if (data.deliverability === "deliverable") {
         setVerifyStatus("deliverable");
         setVerifyMsg("Address verified");
-        // Apply corrected values
         if (data.primary_line) setSenderLine1(data.primary_line);
         if (data.city) setSenderCity(data.city);
         if (data.state) setSenderState(data.state);
@@ -154,7 +158,7 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
               Mail This Letter
             </h2>
             <p className="font-mono text-[10px] text-white/70 mt-1">
-              PHYSICAL LETTER VIA USPS — {allReps.length > 1 ? `${allReps.length} RECIPIENTS` : rep.fullName.toUpperCase()}
+              PHYSICAL LETTER VIA USPS — {allReps.length} RECIPIENT{allReps.length !== 1 ? "S" : ""}
             </p>
           </div>
           <button
@@ -190,16 +194,40 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
         {/* Step: Preview */}
         {step === "preview" && (
           <div className="p-5">
+            {/* Rep selector tabs (multi-rep) */}
+            {allReps.length > 1 && (
+              <div className="mb-4">
+                <p className="font-mono text-xs font-bold mb-2" style={{ color: "rgba(0,0,0,0.5)" }}>
+                  PREVIEW LETTER TO:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {allReps.map((r, i) => (
+                    <button
+                      key={r.id}
+                      onClick={() => setPreviewIdx(i)}
+                      className="px-3 py-2 font-mono text-xs font-bold cursor-pointer border-2 transition-colors"
+                      style={{
+                        backgroundColor: previewIdx === i ? "#111" : "transparent",
+                        color: previewIdx === i ? "#fff" : "#111",
+                        borderColor: previewIdx === i ? "#111" : "rgba(0,0,0,0.15)",
+                      }}
+                    >
+                      {r.title} {r.lastName}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Envelope mockup */}
             <p className="font-mono text-xs font-bold mb-3" style={{ color: "rgba(0,0,0,0.5)" }}>
-              YOUR ENVELOPE
+              ENVELOPE — {previewRep.title.toUpperCase()} {previewRep.fullName.toUpperCase()}
             </p>
             <div
               className="relative mb-6 overflow-hidden"
               style={{
                 backgroundColor: "#f5f0e8",
                 border: "2px solid rgba(0,0,0,0.12)",
-                borderRadius: "2px",
                 padding: "20px 24px",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.1), inset 0 0 40px rgba(0,0,0,0.03)",
                 aspectRatio: "9.5 / 4.125",
@@ -221,14 +249,14 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
                 </div>
               </div>
 
-              {/* Return address (top-left) */}
+              {/* Return address */}
               <div style={{ fontSize: "9px", fontFamily: "monospace", color: "rgba(0,0,0,0.5)", lineHeight: "1.4" }}>
                 <div style={{ fontWeight: "bold" }}>{senderName || "Your Name"}</div>
                 <div>{senderLine1 || "Your Street Address"}</div>
                 <div>{senderCity || "City"}, {senderState || "ST"} {senderZip || "ZIP"}</div>
               </div>
 
-              {/* Recipient address (center) */}
+              {/* Recipient address */}
               <div
                 className="absolute"
                 style={{
@@ -241,18 +269,17 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
                   color: "#111",
                 }}
               >
-                <div style={{ fontWeight: "bold" }}>{rep.title} {rep.fullName}</div>
-                <div>{office?.street}</div>
-                <div>{office?.city}, {office?.state} {office?.zip}</div>
+                <div style={{ fontWeight: "bold" }}>{previewRep.title} {previewRep.fullName}</div>
+                <div>{previewOffice?.street}</div>
+                <div>{previewOffice?.city}, {previewOffice?.state} {previewOffice?.zip}</div>
               </div>
 
-              {/* Envelope texture lines */}
               <div className="absolute bottom-3 left-4 right-4" style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }} />
             </div>
 
             {/* Letter mockup */}
             <p className="font-mono text-xs font-bold mb-3" style={{ color: "rgba(0,0,0,0.5)" }}>
-              YOUR LETTER
+              LETTER — {previewRep.title.toUpperCase()} {previewRep.lastName.toUpperCase()}
             </p>
             <div
               className="relative overflow-hidden"
@@ -265,32 +292,26 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
                 overflowY: "auto",
               }}
             >
-              {/* Paper edge effect */}
               <div className="absolute top-0 left-0 right-0 h-1" style={{ background: "linear-gradient(90deg, rgba(0,0,0,0.03), rgba(0,0,0,0.01), rgba(0,0,0,0.03))" }} />
 
-              {/* Date */}
               <div style={{ marginBottom: "20px", fontFamily: "'Times New Roman', Times, serif", fontSize: "11pt", color: "rgba(0,0,0,0.7)" }}>
                 {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
               </div>
 
-              {/* Recipient block */}
               <div style={{ marginBottom: "20px", fontFamily: "'Times New Roman', Times, serif", fontSize: "11pt", lineHeight: "1.4", color: "rgba(0,0,0,0.7)" }}>
-                <div>{rep.title} {rep.fullName}</div>
-                <div>{office?.street}</div>
-                <div>{office?.city}, {office?.state} {office?.zip}</div>
+                <div>{previewRep.title} {previewRep.fullName}</div>
+                <div>{previewOffice?.street}</div>
+                <div>{previewOffice?.city}, {previewOffice?.state} {previewOffice?.zip}</div>
               </div>
 
-              {/* Salutation */}
               <div style={{ marginBottom: "16px", fontFamily: "'Times New Roman', Times, serif", fontSize: "11pt", color: "#111" }}>
-                Dear {rep.title} {rep.lastName},
+                Dear {previewRep.title} {previewRep.lastName},
               </div>
 
-              {/* Body */}
               <div className="whitespace-pre-wrap" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: "11pt", lineHeight: "1.6", color: "#111" }}>
                 {letterContent}
               </div>
 
-              {/* Closing */}
               <div style={{ marginTop: "24px", fontFamily: "'Times New Roman', Times, serif", fontSize: "11pt", color: "#111" }}>
                 <div style={{ marginBottom: "28px" }}>Respectfully,</div>
                 <div>{senderName || "Your Name"}</div>
@@ -306,10 +327,14 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
               </div>
               <div>
                 <p className="font-mono text-xs font-bold" style={{ color: "#C1272D" }}>
-                  RE: {issue.toUpperCase()} — USPS FIRST CLASS
+                  {allReps.length > 1
+                    ? `${allReps.length} IDENTICAL LETTERS — RE: ${issue.toUpperCase()}`
+                    : `RE: ${issue.toUpperCase()} — USPS FIRST CLASS`}
                 </p>
                 <p className="font-mono text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.5)" }}>
-                  Printed on quality paper, folded, sealed in envelope, and mailed. Arrives in 3-5 business days.
+                  {allReps.length > 1
+                    ? "Same letter sent to each recipient at their office address. Arrives in 3-5 business days."
+                    : "Printed on quality paper, folded, sealed in envelope, and mailed. Arrives in 3-5 business days."}
                 </p>
               </div>
             </div>
@@ -327,35 +352,51 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
         {/* Step: Addresses */}
         {step === "addresses" && (
           <div className="p-5">
-            {/* Recipient address */}
+            {/* Recipient addresses — one per rep */}
             <div className="mb-6">
-              <p className="font-mono text-xs font-bold mb-2" style={{ color: "rgba(0,0,0,0.5)" }}>
-                SENDING TO — {rep.title.toUpperCase()} {rep.fullName.toUpperCase()}
+              <p className="font-mono text-xs font-bold mb-3" style={{ color: "rgba(0,0,0,0.5)" }}>
+                SENDING TO — {allReps.length} RECIPIENT{allReps.length !== 1 ? "S" : ""}
               </p>
 
-              {rep.offices.length > 1 && (
-                <div className="flex gap-2 mb-3">
-                  {rep.offices.map((o, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setSelectedOfficeIdx(i)}
-                      className="px-3 py-2 font-mono text-xs font-bold cursor-pointer border-2"
-                      style={{
-                        backgroundColor: selectedOfficeIdx === i ? "#111" : "transparent",
-                        color: selectedOfficeIdx === i ? "#fff" : "#111",
-                        borderColor: selectedOfficeIdx === i ? "#111" : "rgba(0,0,0,0.15)",
-                      }}
-                    >
-                      {o.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <div className="space-y-3">
+                {allReps.map((r) => {
+                  const oIdx = officePerRep[r.id] || 0;
+                  const o = getRepOffice(r, oIdx);
+                  return (
+                    <div key={r.id} className="p-3 border-2" style={{ borderColor: "rgba(0,0,0,0.1)", backgroundColor: "rgba(0,0,0,0.02)" }}>
+                      <p className="font-mono text-xs font-bold mb-1" style={{ color: "#111" }}>
+                        {r.title} {r.fullName}
+                      </p>
 
-              <div className="p-3 border-2" style={{ borderColor: "rgba(0,0,0,0.1)", backgroundColor: "rgba(0,0,0,0.02)" }}>
-                <p className="font-body text-sm">{recipientAddress.name}</p>
-                <p className="font-body text-sm">{recipientAddress.address_line1}</p>
-                <p className="font-body text-sm">{recipientAddress.address_city}, {recipientAddress.address_state} {recipientAddress.address_zip}</p>
+                      {/* Office selector */}
+                      {r.offices.length > 1 && (
+                        <div className="flex gap-1 mb-2">
+                          {r.offices.map((office, i) => (
+                            <button
+                              key={i}
+                              onClick={() => setRepOffice(r.id, i)}
+                              className="px-2 py-1 font-mono text-[10px] font-bold cursor-pointer border"
+                              style={{
+                                backgroundColor: oIdx === i ? "#111" : "transparent",
+                                color: oIdx === i ? "#fff" : "rgba(0,0,0,0.5)",
+                                borderColor: oIdx === i ? "#111" : "rgba(0,0,0,0.12)",
+                              }}
+                            >
+                              {office.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      <p className="font-body text-sm" style={{ color: "rgba(0,0,0,0.6)" }}>
+                        {o?.street}
+                      </p>
+                      <p className="font-body text-sm" style={{ color: "rgba(0,0,0,0.6)" }}>
+                        {o?.city}, {o?.state} {o?.zip}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -420,7 +461,6 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
                 </div>
               </div>
 
-              {/* Verify button */}
               {senderValid && (
                 <button
                   onClick={handleVerify}
@@ -462,19 +502,16 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
           </div>
         )}
 
-        {/* Step: Pay — Embedded Checkout with letter preview */}
+        {/* Step: Pay */}
         {step === "pay" && (
           <PayStep
-            rep={rep}
             allReps={allReps}
-            office={office}
-            recipientAddress={recipientAddress}
+            officePerRep={officePerRep}
             senderAddress={senderAddress}
             letterContent={letterContent}
             contactLogId={contactLogId}
             issue={issue}
             senderName={senderName}
-            selectedOfficeIdx={selectedOfficeIdx}
             payError={payError}
             setPayError={setPayError}
           />
@@ -484,35 +521,28 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
   );
 }
 
-/* ── Pay Step (separated to manage its own checkout state) ── */
+/* ── Pay Step ── */
 function PayStep({
-  rep,
   allReps,
-  office,
-  recipientAddress,
+  officePerRep,
   senderAddress,
   letterContent,
   contactLogId,
   issue,
   senderName,
-  selectedOfficeIdx,
   payError,
   setPayError,
 }: {
-  rep: Representative;
   allReps: Representative[];
-  office: Representative["offices"][0];
-  recipientAddress: MailingAddress;
+  officePerRep: Record<string, number>;
   senderAddress: MailingAddress;
   letterContent: string;
   contactLogId: string;
   issue: string;
   senderName: string;
-  selectedOfficeIdx: number;
   payError: string;
   setPayError: (s: string) => void;
 }) {
-  // Save structured sender address
   useEffect(() => {
     try {
       localStorage.setItem("checkmyrep_sender_address", JSON.stringify(senderAddress));
@@ -534,7 +564,7 @@ function PayStep({
       body: JSON.stringify({
         contactLogId,
         recipients: allReps.map((r) => {
-          const o = r.offices[selectedOfficeIdx] || r.offices[0];
+          const o = getRepOffice(r, officePerRep[r.id] || 0);
           return {
             repName: r.fullName,
             repOfficeAddress: {
@@ -556,37 +586,34 @@ function PayStep({
       throw new Error(data.error);
     }
     return data.clientSecret;
-  }, [contactLogId, allReps, selectedOfficeIdx, senderAddress, letterContent, setPayError]);
+  }, [contactLogId, allReps, officePerRep, senderAddress, letterContent, setPayError]);
 
   const totalCost = (allReps.length * 1.5).toFixed(2);
 
   return (
     <div className="p-5">
-      {/* Compact letter preview */}
       <p className="font-mono text-xs font-bold mb-3" style={{ color: "rgba(0,0,0,0.5)" }}>
         {allReps.length > 1 ? `${allReps.length} LETTERS TO SEND` : "LETTER PREVIEW"}
       </p>
 
-      {/* Recipient list for multi-rep */}
-      {allReps.length > 1 && (
-        <div className="mb-4 space-y-1">
-          {allReps.map((r) => {
-            const o = r.offices[selectedOfficeIdx] || r.offices[0];
-            return (
-              <div
-                key={r.id}
-                className="flex items-center justify-between p-2"
-                style={{ backgroundColor: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.08)", fontSize: "11px", fontFamily: "monospace" }}
-              >
-                <span style={{ fontWeight: "bold", color: "#111" }}>{r.title} {r.fullName}</span>
-                <span style={{ color: "rgba(0,0,0,0.4)" }}>{o?.city}, {o?.state}</span>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      {/* All recipients with their addresses */}
+      <div className="mb-4 space-y-1">
+        {allReps.map((r) => {
+          const o = getRepOffice(r, officePerRep[r.id] || 0);
+          return (
+            <div
+              key={r.id}
+              className="flex items-center justify-between p-2"
+              style={{ backgroundColor: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.08)", fontSize: "11px", fontFamily: "monospace" }}
+            >
+              <span style={{ fontWeight: "bold", color: "#111" }}>{r.title} {r.fullName}</span>
+              <span style={{ color: "rgba(0,0,0,0.4)" }}>{o?.city}, {o?.state}</span>
+            </div>
+          );
+        })}
+      </div>
 
-      {/* Mini envelope (show first rep) */}
+      {/* Mini envelope for first rep */}
       <div
         className="relative mb-4 overflow-hidden"
         style={{
@@ -604,9 +631,17 @@ function PayStep({
             <div>{senderAddress.address_city}, {senderAddress.address_state} {senderAddress.address_zip}</div>
           </div>
           <div style={{ color: "#111", lineHeight: "1.4", textAlign: "right" }}>
-            <div style={{ fontWeight: "bold" }}>{rep.title} {rep.fullName}</div>
-            <div>{office?.street}</div>
-            <div>{office?.city}, {office?.state} {office?.zip}</div>
+            {(() => {
+              const firstRep = allReps[0];
+              const o = getRepOffice(firstRep, officePerRep[firstRep.id] || 0);
+              return (
+                <>
+                  <div style={{ fontWeight: "bold" }}>{firstRep.title} {firstRep.fullName}</div>
+                  <div>{o?.street}</div>
+                  <div>{o?.city}, {o?.state} {o?.zip}</div>
+                </>
+              );
+            })()}
           </div>
         </div>
         {allReps.length > 1 && (
@@ -629,7 +664,7 @@ function PayStep({
         }}
       >
         <div style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: "10pt", color: "rgba(0,0,0,0.7)", marginBottom: "8px" }}>
-          Dear {rep.title} {rep.lastName},
+          Dear {allReps[0].title} {allReps[0].lastName},
         </div>
         <div className="whitespace-pre-wrap" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: "10pt", lineHeight: "1.5", color: "#111" }}>
           {letterContent.length > 500 ? letterContent.slice(0, 500) + "..." : letterContent}
@@ -660,7 +695,6 @@ function PayStep({
         </div>
       )}
 
-      {/* Embedded Stripe Checkout */}
       {stripePromise ? (
         <div className="rounded overflow-hidden border" style={{ borderColor: "rgba(0,0,0,0.1)" }}>
           <EmbeddedCheckoutProvider stripe={stripePromise} options={{ fetchClientSecret }}>
