@@ -290,7 +290,7 @@ RULES:
 
       {/* Header */}
       <div className="mt-4 bg-black text-white border-3 border-border p-8">
-        <span className="text-5xl block mb-4">{emoji}</span>
+        <span className="block mb-4" style={{ fontSize: 80 }}>{emoji}</span>
         <h1 className="font-headline text-5xl md:text-6xl normal-case text-white">
           {issue.name}
         </h1>
