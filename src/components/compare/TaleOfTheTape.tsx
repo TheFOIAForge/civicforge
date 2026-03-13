@@ -6,7 +6,6 @@ import type { Representative } from "@/data/types";
 import type { ComparisonVerdicts } from "@/lib/compare-verdicts";
 
 const PC: Record<string, string> = { R: "#C1272D", D: "#1a3a6b", I: "#6b5b3e" };
-const PCLight: Record<string, string> = { R: "#fde8e8", D: "#e8edf5", I: "#f0ece4" };
 const PARTY_FULL: Record<string, string> = { R: "Republican", D: "Democrat", I: "Independent" };
 
 function sectionAnchor(key: string): string {
@@ -22,168 +21,162 @@ interface TaleOfTheTapeProps {
 const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
   function TaleOfTheTape({ repA, repB, verdicts }, ref) {
     const { overall, categories } = verdicts;
-    const totalCats = categories.length;
 
-    // Who's winning overall
     const overallWinner =
       overall.winsA > overall.winsB ? repA :
       overall.winsB > overall.winsA ? repB : null;
 
     return (
-      <div ref={ref} className="mb-8 overflow-hidden" id="tale-of-tape">
-        {/* ════════════════════════════════════════════════════════════════
-            TOP SECTION: Dark dramatic header with face-off
-            ════════════════════════════════════════════════════════════════ */}
-        <div className="bg-[#0a0a0a] text-white relative overflow-hidden">
-          {/* Subtle diagonal split background */}
-          <div className="absolute inset-0 opacity-[0.07]">
-            <div className="absolute top-0 left-0 w-1/2 h-full" style={{ backgroundColor: PC[repA.party] }} />
-            <div className="absolute top-0 right-0 w-1/2 h-full" style={{ backgroundColor: PC[repB.party] }} />
+      <div ref={ref} className="mb-8 overflow-hidden border-3 border-black" id="head-to-head">
+        {/* ═══════════════════════════════════════════════════════
+            TOP: Dark header with face-off
+            ═══════════════════════════════════════════════════════ */}
+        <div style={{ background: "#0a0a0a", color: "#fff", position: "relative", overflow: "hidden" }}>
+          {/* Subtle party-colored split */}
+          <div style={{ position: "absolute", inset: 0, opacity: 0.07, pointerEvents: "none" }}>
+            <div style={{ position: "absolute", top: 0, left: 0, width: "50%", height: "100%", backgroundColor: PC[repA.party] }} />
+            <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", backgroundColor: PC[repB.party] }} />
           </div>
 
           {/* Top label */}
-          <div className="relative text-center pt-5 pb-2">
-            <div className="font-mono text-[10px] tracking-[0.3em] text-white/30 uppercase">
+          <div style={{ position: "relative", textAlign: "center", paddingTop: 20, paddingBottom: 8 }}>
+            <div className="font-mono" style={{ fontSize: 10, letterSpacing: "0.3em", color: "rgba(255,255,255,0.3)", textTransform: "uppercase" }}>
               CivicForge Congressional Comparison
             </div>
-            <h2 className="font-headline text-2xl md:text-3xl uppercase tracking-wider mt-1">
-              Tale of the Tape
+            <h2 className="font-headline" style={{ fontSize: 28, textTransform: "uppercase", letterSpacing: "0.1em", marginTop: 4, color: "#fff" }}>
+              Head to Head
             </h2>
           </div>
 
           {/* Face-off row */}
-          <div className="relative grid grid-cols-[1fr_auto_1fr] items-center px-6 md:px-10 pb-8 pt-4 gap-2 md:gap-6">
+          <div style={{ position: "relative", display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", padding: "16px 24px 32px", gap: 8 }}>
             {/* Rep A */}
-            <div className="text-center">
-              <div className="relative inline-block mb-3">
+            <div style={{ textAlign: "center" }}>
+              <div style={{ position: "relative", display: "inline-block", marginBottom: 12 }}>
                 {repA.photoUrl ? (
                   <img
                     src={repA.photoUrl} alt=""
-                    className="w-28 h-28 md:w-36 md:h-36 object-cover border-4"
-                    style={{ borderColor: PC[repA.party] }}
+                    style={{ width: 120, height: 120, objectFit: "cover", border: `4px solid ${PC[repA.party]}` }}
                   />
                 ) : (
                   <div
-                    className="w-28 h-28 md:w-36 md:h-36 flex items-center justify-center font-headline text-4xl md:text-5xl text-white border-4"
-                    style={{ backgroundColor: PC[repA.party], borderColor: PC[repA.party] }}
+                    className="font-headline"
+                    style={{ width: 120, height: 120, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, color: "#fff", backgroundColor: PC[repA.party], border: `4px solid ${PC[repA.party]}` }}
                   >
                     {repA.firstName[0]}{repA.lastName[0]}
                   </div>
                 )}
-                {/* Party badge */}
                 <div
-                  className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-0.5 font-mono text-[10px] font-bold text-white tracking-wider"
-                  style={{ backgroundColor: PC[repA.party] }}
+                  className="font-mono"
+                  style={{ position: "absolute", bottom: -8, left: "50%", transform: "translateX(-50%)", padding: "2px 12px", fontSize: 10, fontWeight: 700, color: "#fff", letterSpacing: "0.1em", backgroundColor: PC[repA.party], whiteSpace: "nowrap" }}
                 >
                   {PARTY_FULL[repA.party]}
                 </div>
               </div>
-              <div className="font-headline text-xl md:text-2xl uppercase mt-2 leading-tight">
+              <div className="font-headline" style={{ fontSize: 20, textTransform: "uppercase", marginTop: 8, lineHeight: 1.2, color: "#fff" }}>
                 {repA.fullName}
               </div>
-              <div className="font-mono text-xs text-white/40 mt-1">
+              <div className="font-mono" style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>
                 {repA.stateAbbr} · {repA.title}
               </div>
-              <p className="font-body text-xs text-white/30 mt-2 leading-relaxed max-w-[200px] mx-auto italic hidden md:block">
+              <p className="font-body hidden md:block" style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", marginTop: 8, lineHeight: 1.5, maxWidth: 200, marginLeft: "auto", marginRight: "auto", fontStyle: "italic" }}>
                 {overall.characterizationA}
               </p>
             </div>
 
             {/* Center VS */}
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center border-3 border-white/20 rotate-45">
-                <span className="font-headline text-2xl md:text-3xl text-red -rotate-45">VS</span>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+              <div style={{ width: 64, height: 64, display: "flex", alignItems: "center", justifyContent: "center", border: "3px solid rgba(255,255,255,0.2)", transform: "rotate(45deg)" }}>
+                <span className="font-headline" style={{ fontSize: 24, color: "#C1272D", transform: "rotate(-45deg)" }}>VS</span>
               </div>
             </div>
 
             {/* Rep B */}
-            <div className="text-center">
-              <div className="relative inline-block mb-3">
+            <div style={{ textAlign: "center" }}>
+              <div style={{ position: "relative", display: "inline-block", marginBottom: 12 }}>
                 {repB.photoUrl ? (
                   <img
                     src={repB.photoUrl} alt=""
-                    className="w-28 h-28 md:w-36 md:h-36 object-cover border-4"
-                    style={{ borderColor: PC[repB.party] }}
+                    style={{ width: 120, height: 120, objectFit: "cover", border: `4px solid ${PC[repB.party]}` }}
                   />
                 ) : (
                   <div
-                    className="w-28 h-28 md:w-36 md:h-36 flex items-center justify-center font-headline text-4xl md:text-5xl text-white border-4"
-                    style={{ backgroundColor: PC[repB.party], borderColor: PC[repB.party] }}
+                    className="font-headline"
+                    style={{ width: 120, height: 120, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, color: "#fff", backgroundColor: PC[repB.party], border: `4px solid ${PC[repB.party]}` }}
                   >
                     {repB.firstName[0]}{repB.lastName[0]}
                   </div>
                 )}
                 <div
-                  className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-0.5 font-mono text-[10px] font-bold text-white tracking-wider"
-                  style={{ backgroundColor: PC[repB.party] }}
+                  className="font-mono"
+                  style={{ position: "absolute", bottom: -8, left: "50%", transform: "translateX(-50%)", padding: "2px 12px", fontSize: 10, fontWeight: 700, color: "#fff", letterSpacing: "0.1em", backgroundColor: PC[repB.party], whiteSpace: "nowrap" }}
                 >
                   {PARTY_FULL[repB.party]}
                 </div>
               </div>
-              <div className="font-headline text-xl md:text-2xl uppercase mt-2 leading-tight">
+              <div className="font-headline" style={{ fontSize: 20, textTransform: "uppercase", marginTop: 8, lineHeight: 1.2, color: "#fff" }}>
                 {repB.fullName}
               </div>
-              <div className="font-mono text-xs text-white/40 mt-1">
+              <div className="font-mono" style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>
                 {repB.stateAbbr} · {repB.title}
               </div>
-              <p className="font-body text-xs text-white/30 mt-2 leading-relaxed max-w-[200px] mx-auto italic hidden md:block">
+              <p className="font-body hidden md:block" style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", marginTop: 8, lineHeight: 1.5, maxWidth: 200, marginLeft: "auto", marginRight: "auto", fontStyle: "italic" }}>
                 {overall.characterizationB}
               </p>
             </div>
           </div>
         </div>
 
-        {/* ════════════════════════════════════════════════════════════════
-            SCORE: Big dramatic scoreboard
-            ════════════════════════════════════════════════════════════════ */}
-        <div className="bg-[#111] text-white border-t border-white/10">
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center">
-            {/* Rep A score side */}
-            <div className="py-5 text-center" style={{ backgroundColor: overall.winsA >= overall.winsB ? PC[repA.party] : "transparent" }}>
-              <div className="font-headline text-6xl md:text-7xl leading-none">
+        {/* ═══════════════════════════════════════════════════════
+            SCORE: Big scoreboard
+            ═══════════════════════════════════════════════════════ */}
+        <div style={{ background: "#111", color: "#fff", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center" }}>
+            {/* Rep A score */}
+            <div style={{ padding: "20px 0", textAlign: "center", backgroundColor: overall.winsA >= overall.winsB ? PC[repA.party] : "transparent" }}>
+              <div className="font-headline" style={{ fontSize: 64, lineHeight: 1, color: "#fff" }}>
                 {overall.winsA}
               </div>
-              <div className="font-mono text-xs tracking-wider uppercase mt-1 text-white/60">
+              <div className="font-mono" style={{ fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 4, color: "rgba(255,255,255,0.6)" }}>
                 {repA.lastName}
               </div>
             </div>
 
-            {/* Center divider */}
-            <div className="py-5 px-4 md:px-8 text-center">
-              <div className="font-headline text-2xl text-white/20">—</div>
+            {/* Center */}
+            <div style={{ padding: "20px 16px", textAlign: "center" }}>
+              <div className="font-headline" style={{ fontSize: 24, color: "rgba(255,255,255,0.2)" }}>—</div>
               {overall.ties > 0 && (
-                <div className="font-mono text-[10px] text-white/30 mt-1 uppercase">
+                <div className="font-mono" style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 4, textTransform: "uppercase" }}>
                   {overall.ties} tie{overall.ties > 1 ? "s" : ""}
                 </div>
               )}
             </div>
 
-            {/* Rep B score side */}
-            <div className="py-5 text-center" style={{ backgroundColor: overall.winsB >= overall.winsA ? PC[repB.party] : "transparent" }}>
-              <div className="font-headline text-6xl md:text-7xl leading-none">
+            {/* Rep B score */}
+            <div style={{ padding: "20px 0", textAlign: "center", backgroundColor: overall.winsB >= overall.winsA ? PC[repB.party] : "transparent" }}>
+              <div className="font-headline" style={{ fontSize: 64, lineHeight: 1, color: "#fff" }}>
                 {overall.winsB}
               </div>
-              <div className="font-mono text-xs tracking-wider uppercase mt-1 text-white/60">
+              <div className="font-mono" style={{ fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 4, color: "rgba(255,255,255,0.6)" }}>
                 {repB.lastName}
               </div>
             </div>
           </div>
 
-          {/* Summary line */}
-          <div className="text-center px-6 pb-4">
-            <p className="font-body text-sm text-white/50 max-w-lg mx-auto">
+          {/* Summary */}
+          <div style={{ textAlign: "center", padding: "0 24px 16px" }}>
+            <p className="font-body" style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", maxWidth: 480, margin: "0 auto" }}>
               {overall.overallSummary}
             </p>
           </div>
         </div>
 
-        {/* ════════════════════════════════════════════════════════════════
-            CATEGORY BREAKDOWN: Visual fight-card rows
-            ════════════════════════════════════════════════════════════════ */}
-        <div className="bg-[#0a0a0a] border-t border-white/10">
-          {/* Section header */}
-          <div className="text-center py-3 border-b border-white/5">
-            <span className="font-mono text-[10px] tracking-[0.25em] text-white/25 uppercase">
+        {/* ═══════════════════════════════════════════════════════
+            CATEGORY BREAKDOWN
+            ═══════════════════════════════════════════════════════ */}
+        <div style={{ background: "#0a0a0a", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+          <div style={{ textAlign: "center", padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+            <span className="font-mono" style={{ fontSize: 10, letterSpacing: "0.25em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" }}>
               Category-by-Category Breakdown
             </span>
           </div>
@@ -194,7 +187,6 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
             const isTie = v.winner === "tie";
             const isNoData = v.winnerName === "No Data";
 
-            // Calculate a visual "bar" for each side based on values
             const maxVal = Math.max(v.valueA, v.valueB, 1);
             const pctA = (v.valueA / maxVal) * 100;
             const pctB = (v.valueB / maxVal) * 100;
@@ -203,56 +195,42 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
               <a
                 key={cat.key}
                 href={sectionAnchor(cat.key)}
-                className="block no-underline group border-b border-white/5 last:border-b-0 hover:bg-white/[0.02] transition-colors"
+                style={{ display: "block", textDecoration: "none", borderBottom: i < categories.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}
               >
-                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-0">
-                  {/* LEFT: Rep A value + bar */}
-                  <div className="flex items-center justify-end gap-3 pr-3 py-3 pl-4">
-                    <div className="text-right">
-                      <span className={`font-mono text-lg md:text-xl font-bold ${
-                        v.winner === "A" ? "text-white" : "text-white/30"
-                      }`}>
-                        {v.labelA}
-                      </span>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center" }}>
+                  {/* LEFT: Rep A */}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 12, padding: "12px 12px 12px 16px" }}>
+                    <span className="font-mono" style={{ fontSize: 18, fontWeight: 700, color: v.winner === "A" ? "#fff" : "rgba(255,255,255,0.3)" }}>
+                      {v.labelA}
+                    </span>
+                    <div className="hidden md:block" style={{ width: 112, height: 12, background: "rgba(255,255,255,0.05)", position: "relative", overflow: "hidden" }}>
+                      <div style={{ position: "absolute", right: 0, top: 0, height: "100%", width: `${pctA}%`, backgroundColor: v.winner === "A" ? PC[repA.party] : "rgba(255,255,255,0.15)", transition: "width 0.7s" }} />
                     </div>
-                    {/* Bar from right edge */}
-                    <div className="hidden md:block w-28 h-3 bg-white/5 relative overflow-hidden">
-                      <div
-                        className="absolute right-0 top-0 h-full transition-all duration-700"
-                        style={{
-                          width: `${pctA}%`,
-                          backgroundColor: v.winner === "A" ? PC[repA.party] : "rgba(255,255,255,0.15)",
-                        }}
-                      />
-                    </div>
-                    {/* Winner marker */}
                     {v.winner === "A" && (
-                      <div className="w-2 h-2 flex-shrink-0" style={{ backgroundColor: PC[repA.party] }} />
+                      <div style={{ width: 8, height: 8, flexShrink: 0, backgroundColor: PC[repA.party] }} />
                     )}
                   </div>
 
-                  {/* CENTER: Category label */}
-                  <div className="py-3 px-3 md:px-5 text-center min-w-[140px] md:min-w-[180px]">
-                    <div className="flex items-center justify-center gap-2">
-                      <span className="text-xl">{cat.icon}</span>
-                      <span className="font-headline text-sm md:text-base uppercase text-white/80">
+                  {/* CENTER: Category */}
+                  <div style={{ padding: "12px 12px", textAlign: "center", minWidth: 140 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                      <span style={{ fontSize: 20 }}>{cat.icon}</span>
+                      <span className="font-headline" style={{ fontSize: 14, textTransform: "uppercase", color: "rgba(255,255,255,0.8)" }}>
                         {cat.label}
                       </span>
                     </div>
-                    {/* Margin indicator */}
-                    <div className="mt-1 flex items-center justify-center gap-1">
+                    <div style={{ marginTop: 4, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
                       {isNoData ? (
-                        <span className="font-mono text-[10px] text-white/20 uppercase">No Data</span>
+                        <span className="font-mono" style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", textTransform: "uppercase" }}>No Data</span>
                       ) : isTie ? (
-                        <span className="font-mono text-[10px] text-white/25 uppercase">Draw</span>
+                        <span className="font-mono" style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", textTransform: "uppercase" }}>Draw</span>
                       ) : (
                         <>
-                          {/* Strength dots */}
                           {[0, 1, 2].map((dot) => (
                             <div
                               key={dot}
-                              className="w-1.5 h-1.5"
                               style={{
+                                width: 6, height: 6,
                                 backgroundColor:
                                   v.margin === "decisive" || (v.margin === "moderate" && dot < 2) || (v.margin === "slight" && dot < 1)
                                     ? PC[winnerRep!.party]
@@ -260,9 +238,7 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
                               }}
                             />
                           ))}
-                          <span className={`font-mono text-[10px] ml-1 uppercase ${
-                            v.margin === "decisive" ? "text-red" : "text-white/30"
-                          }`}>
+                          <span className="font-mono" style={{ fontSize: 10, marginLeft: 4, textTransform: "uppercase", color: v.margin === "decisive" ? "#C1272D" : "rgba(255,255,255,0.3)" }}>
                             {v.margin}
                           </span>
                         </>
@@ -270,27 +246,17 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
                     </div>
                   </div>
 
-                  {/* RIGHT: Rep B value + bar */}
-                  <div className="flex items-center justify-start gap-3 pl-3 py-3 pr-4">
+                  {/* RIGHT: Rep B */}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: 12, padding: "12px 16px 12px 12px" }}>
                     {v.winner === "B" && (
-                      <div className="w-2 h-2 flex-shrink-0" style={{ backgroundColor: PC[repB.party] }} />
+                      <div style={{ width: 8, height: 8, flexShrink: 0, backgroundColor: PC[repB.party] }} />
                     )}
-                    <div className="hidden md:block w-28 h-3 bg-white/5 relative overflow-hidden">
-                      <div
-                        className="absolute left-0 top-0 h-full transition-all duration-700"
-                        style={{
-                          width: `${pctB}%`,
-                          backgroundColor: v.winner === "B" ? PC[repB.party] : "rgba(255,255,255,0.15)",
-                        }}
-                      />
+                    <div className="hidden md:block" style={{ width: 112, height: 12, background: "rgba(255,255,255,0.05)", position: "relative", overflow: "hidden" }}>
+                      <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${pctB}%`, backgroundColor: v.winner === "B" ? PC[repB.party] : "rgba(255,255,255,0.15)", transition: "width 0.7s" }} />
                     </div>
-                    <div className="text-left">
-                      <span className={`font-mono text-lg md:text-xl font-bold ${
-                        v.winner === "B" ? "text-white" : "text-white/30"
-                      }`}>
-                        {v.labelB}
-                      </span>
-                    </div>
+                    <span className="font-mono" style={{ fontSize: 18, fontWeight: 700, color: v.winner === "B" ? "#fff" : "rgba(255,255,255,0.3)" }}>
+                      {v.labelB}
+                    </span>
                   </div>
                 </div>
               </a>
@@ -298,24 +264,24 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
           })}
         </div>
 
-        {/* ════════════════════════════════════════════════════════════════
-            FOOTER: Branding + verdict
-            ════════════════════════════════════════════════════════════════ */}
-        <div className="bg-[#0a0a0a] border-t border-white/10 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="font-mono text-[10px] text-white/20 uppercase tracking-wider">
+        {/* ═══════════════════════════════════════════════════════
+            FOOTER
+            ═══════════════════════════════════════════════════════ */}
+        <div style={{ background: "#0a0a0a", borderTop: "1px solid rgba(255,255,255,0.1)", padding: "16px 24px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div className="font-mono" style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
               {overall.winsA + overall.winsB + overall.ties} Categories Analyzed
             </div>
-            <div className="font-headline text-sm uppercase tracking-wider">
+            <div className="font-headline" style={{ fontSize: 14, textTransform: "uppercase", letterSpacing: "0.1em" }}>
               {overallWinner ? (
                 <span style={{ color: PC[overallWinner.party] }}>
                   {overallWinner.lastName} Leads {Math.max(overall.winsA, overall.winsB)}-{Math.min(overall.winsA, overall.winsB)}
                 </span>
               ) : (
-                <span className="text-white/40">Even Match</span>
+                <span style={{ color: "rgba(255,255,255,0.4)" }}>Even Match</span>
               )}
             </div>
-            <div className="font-mono text-[10px] text-white/20 uppercase tracking-wider">
+            <div className="font-mono" style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
               CivicForge
             </div>
           </div>
