@@ -33,103 +33,89 @@ const issueZoom: Record<string, string> = {
   environment: "180%",
 };
 
-const issueSummary: Record<string, string> = {
-  healthcare:
-    "Drug prices are 2-3x higher than peer nations. The $35 insulin cap only covers Medicare. Rural ERs are closing. Mental health parity is law but rarely enforced.",
-  environment:
-    "$369B in climate investment is now law — but implementation is stalling. Extreme weather cost $90B+ last year alone. Clean energy jobs are outpacing fossil fuels in most states.",
-  housing:
-    "7 million affordable homes short. Rent up 30% since 2019. Only 1 in 4 eligible families get federal help. Record homelessness in 2023 — over 650,000 in a single night.",
-  immigration:
-    "3 million case backlog, 4-year average wait. DACA covers 580K people but faces legal challenges. The last major reform was in 1986. A bipartisan border deal failed in early 2024.",
-  education:
-    "$1.7 trillion in student debt across 43 million borrowers. Pell Grants cover 30% of tuition, down from 80% in the 1970s. Teachers earn 26% less than other college grads.",
-  economy:
-    "Federal minimum wage frozen at $7.25 since 2009. CEO-to-worker pay ratio: 272:1. The top 1% holds more wealth than the bottom 50%. National debt interest now exceeds $1T/year.",
-  "civil-rights":
-    "1.9 million incarcerated — highest rate on Earth. Black Americans imprisoned at 5x the rate. The Voting Rights Act was gutted in 2013. 28 states lack LGBTQ+ housing protections.",
-  defense:
-    "$886B defense budget — more than the next 10 nations combined. Foreign aid is under 1% of the budget. The PACT Act expanded VA care for 3.4M veterans with toxic exposure.",
+const issueStat: Record<string, string> = {
+  healthcare: "Drug prices 2-3x higher than peer nations",
+  environment: "$369B climate investment — implementation stalling",
+  housing: "7M affordable homes short, rent up 30%",
+  immigration: "3M case backlog, 4-year average wait",
+  education: "$1.7T student debt across 43M borrowers",
+  economy: "Minimum wage frozen since 2009 at $7.25",
+  "civil-rights": "1.9M incarcerated — highest rate on Earth",
+  defense: "$886B budget — more than next 10 nations",
 };
 
 export default function IssuesPage() {
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="font-headline text-5xl md:text-6xl mb-2">
+    <div className="max-w-6xl mx-auto px-4 py-6">
+      <h1 className="font-headline text-4xl md:text-5xl mb-1">
         The Issues
       </h1>
-      <p className="font-mono text-sm text-gray-500 mb-10 font-bold">
+      <p className="font-mono text-xs text-gray-500 mb-5 font-bold">
         REAL NUMBERS. REAL STAKES. PICK AN ISSUE AND DIG IN.
       </p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {issues.map((issue) => {
           const accent = issueColor[issue.id] || "#1a1a2e";
           const bgImage = issueImage[issue.id];
           const bgPos = issuePosition[issue.id] || "center";
           const bgSize = issueZoom[issue.id] || "cover";
-          const summary = issueSummary[issue.id] || issue.description;
+          const stat = issueStat[issue.id];
           return (
             <Link
               key={issue.id}
               href={`/issues/${issue.slug}`}
               className="no-underline group relative overflow-hidden transition-all hover:shadow-xl"
-              style={{
-                border: "2px solid rgba(0,0,0,0.1)",
-                minHeight: "320px",
-                display: "flex",
-                flexDirection: "column",
-              }}
+              style={{ height: "220px" }}
             >
-              {/* Background image */}
-              <div className="relative w-full" style={{ height: "180px" }}>
-                <div
-                  className="absolute inset-0 transition-transform duration-500 group-hover:scale-110"
+              {/* Full-bleed background */}
+              <div
+                className="absolute inset-0 transition-transform duration-500 group-hover:scale-110"
+                style={{
+                  backgroundImage: `url(${bgImage})`,
+                  backgroundSize: bgSize,
+                  backgroundPosition: bgPos,
+                }}
+              />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: `linear-gradient(180deg, rgba(0,0,0,0) 20%, rgba(0,0,0,0.65) 100%)`,
+                }}
+              />
+              {/* Accent bar */}
+              <div
+                className="absolute top-0 left-0 right-0 h-1"
+                style={{ backgroundColor: accent }}
+              />
+              {/* Content overlay */}
+              <div className="absolute bottom-0 left-0 right-0 p-3">
+                <h2
+                  className="font-headline text-lg md:text-xl uppercase leading-tight"
                   style={{
-                    backgroundImage: `url(${bgImage})`,
-                    backgroundSize: bgSize,
-                    backgroundPosition: bgPos,
+                    color: "#fff",
+                    textShadow: "0 2px 6px rgba(0,0,0,0.8)",
                   }}
-                />
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background: `linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 100%)`,
-                  }}
-                />
-                {/* Accent bar at top */}
-                <div
-                  className="absolute top-0 left-0 right-0 h-1.5"
-                  style={{ backgroundColor: accent }}
-                />
-                {/* Issue name overlay */}
-                <div className="absolute bottom-0 left-0 right-0 p-5">
-                  <h2
-                    className="font-headline text-2xl md:text-3xl uppercase"
+                >
+                  {issue.name}
+                </h2>
+                {stat && (
+                  <p
+                    className="font-mono text-[10px] md:text-xs mt-1 leading-snug"
                     style={{
-                      color: "#fff",
-                      textShadow:
-                        "0 2px 8px rgba(0,0,0,0.7), 0 0 20px rgba(0,0,0,0.4)",
+                      color: "rgba(255,255,255,0.85)",
+                      textShadow: "0 1px 4px rgba(0,0,0,0.9)",
                     }}
                   >
-                    {issue.name}
-                  </h2>
-                </div>
-              </div>
-
-              {/* Content area */}
-              <div className="flex-1 flex flex-col p-5 bg-white">
-                <p className="font-body text-sm text-gray-600 leading-relaxed flex-1">
-                  {summary}
-                </p>
-                <div className="mt-4 flex items-center justify-between">
-                  <span
-                    className="font-headline text-lg tracking-wider group-hover:translate-x-2 transition-transform"
-                    style={{ color: accent }}
-                  >
-                    EXPLORE &rarr;
-                  </span>
-                </div>
+                    {stat}
+                  </p>
+                )}
+                <span
+                  className="inline-block mt-1.5 font-headline text-xs tracking-wider group-hover:translate-x-1 transition-transform"
+                  style={{ color: accent }}
+                >
+                  EXPLORE &rarr;
+                </span>
               </div>
             </Link>
           );

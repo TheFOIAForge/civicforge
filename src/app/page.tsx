@@ -358,59 +358,76 @@ export default function Home() {
               </button>
             </form>
 
-            {/* Quick action pills — top 3 same width */}
-            <div className="mt-8 flex flex-col items-center gap-3 max-w-xl mx-auto" style={{ animation: "fadeInUp 0.8s ease-out 0.6s both" }}>
+            {/* CTA hierarchy — primary / secondary / tertiary */}
+            <div className="mt-8 flex flex-col items-center gap-4 w-full max-w-[600px] mx-auto" style={{ animation: "fadeInUp 0.8s ease-out 0.6s both" }}>
+              {/* Primary CTA — Write a Letter (highest impact) */}
+              <Link
+                href="/draft"
+                className="group w-full py-5 font-headline text-xl uppercase tracking-[0.15em] no-underline text-center transition-all hover:scale-[1.02] relative overflow-hidden"
+                style={{
+                  backgroundColor: "#8B1A1A",
+                  color: "#fff",
+                  boxShadow: "0 4px 20px rgba(139,26,26,0.4), 0 2px 8px rgba(0,0,0,0.2)",
+                  letterSpacing: "0.15em",
+                }}
+              >
+                <span className="relative z-10 flex items-center justify-center gap-3">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Write a Letter
+                </span>
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/30" />
+              </Link>
+
+              {/* Secondary CTAs — Call & Email (lower friction) */}
               <div className="flex w-full gap-3">
                 <Link
-                  href="/draft"
-                  className="flex-1 py-3 font-mono text-base font-bold uppercase tracking-wider no-underline transition-all hover:scale-105 hover:brightness-125 text-center"
-                  style={{
-                    border: "2px solid #C1272D",
-                    color: "#fff",
-                    backgroundColor: "#C1272D",
-                  }}
-                >
-                  Write a Letter
-                </Link>
-                <Link
                   href="/draft?mode=call"
-                  className="flex-1 py-3 font-mono text-base font-bold uppercase tracking-wider no-underline transition-all hover:scale-105 hover:brightness-110 text-center"
+                  className="flex-1 py-3.5 font-mono text-sm font-bold uppercase tracking-wider no-underline text-center transition-all hover:brightness-125"
                   style={{
-                    border: "2px solid #1a3a6b",
+                    backgroundColor: "#1B2A4A",
                     color: "#fff",
-                    backgroundColor: "#1a3a6b",
+                    border: "2px solid #1B2A4A",
                   }}
                 >
-                  Make a Call
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    Make a Call
+                  </span>
                 </Link>
                 <Link
                   href="/draft?mode=email"
-                  className="flex-1 py-3 font-mono text-base font-bold uppercase tracking-wider no-underline transition-all hover:scale-105 hover:bg-gray-100 text-center"
+                  className="flex-1 py-3.5 font-mono text-sm font-bold uppercase tracking-wider no-underline text-center transition-all hover:bg-gray-50"
                   style={{
-                    border: "2px solid rgba(0,0,0,0.2)",
-                    color: "#111827",
-                    backgroundColor: "#ffffff",
+                    border: "2px solid #1B2A4A",
+                    color: "#1B2A4A",
+                    backgroundColor: "transparent",
                   }}
                 >
-                  Send an Email
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                    Send an Email
+                  </span>
                 </Link>
               </div>
-              {/* Browse Issues — full width flag bar */}
+
+              {/* Tertiary — Browse Issues (discovery) */}
               <Link
                 href="/issues"
-                className="relative w-full py-4 font-mono text-lg font-bold uppercase tracking-wider no-underline transition-all hover:scale-[1.02] hover:brightness-110 text-center overflow-hidden"
+                className="w-full py-2.5 font-mono text-xs font-bold uppercase tracking-[0.2em] no-underline text-center transition-all hover:bg-gray-100 group"
                 style={{
-                  background: "linear-gradient(90deg, #C1272D 0%, #C1272D 33%, #ffffff 33%, #ffffff 66%, #1a3a6b 66%, #1a3a6b 100%)",
-                  color: "#fff",
-                  border: "2px solid rgba(0,0,0,0.1)",
-                  textShadow: "0 1px 4px rgba(0,0,0,0.5), 0 0 10px rgba(0,0,0,0.3)",
+                  color: "rgba(0,0,0,0.45)",
+                  borderTop: "1px solid rgba(0,0,0,0.1)",
                 }}
               >
-                {/* Stars overlay */}
-                <span className="absolute inset-0 flex items-center justify-around pointer-events-none opacity-20 text-white text-2xl" aria-hidden="true">
-                  ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★
+                <span className="group-hover:tracking-[0.3em] transition-all">
+                  Browse All Issues &rarr;
                 </span>
-                <span className="relative z-10">Browse Issues</span>
               </Link>
             </div>
           </div>
