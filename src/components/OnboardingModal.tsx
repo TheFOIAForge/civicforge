@@ -30,7 +30,7 @@ const options: ModeOption[] = [
         <path d="M22 22l20 20M42 22L22 42" stroke="#fff" strokeWidth="2" strokeLinecap="round" opacity="0.4" />
       </svg>
     ),
-    features: ["Write letters in 60 seconds", "One-tap call scripts", "Share on social instantly"],
+    features: ["Write Letters In 60 Seconds", "One-Tap Call Scripts", "Share On Social Instantly"],
   },
   {
     value: "informed",
@@ -49,7 +49,7 @@ const options: ModeOption[] = [
         <path d="M46 50l6 6" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
       </svg>
     ),
-    features: ["Bill tracking & vote records", "Campaign management", "Federal Register alerts"],
+    features: ["Bill Tracking & Vote Records", "Campaign Management", "Federal Register Alerts"],
   },
   {
     value: "power",
@@ -64,7 +64,7 @@ const options: ModeOption[] = [
         <circle cx="32" cy="32" r="28" stroke="#fff" strokeWidth="1" opacity="0.2" strokeDasharray="4 4" />
       </svg>
     ),
-    features: ["AI Mind Palace research", "Alignment scorecards", "Outcome tracking & analytics"],
+    features: ["AI Mind Palace Research", "Alignment Scorecards", "Outcome Tracking & Analytics"],
   },
 ];
 
@@ -111,9 +111,10 @@ export default function OnboardingModal() {
               CITIZEN<span style={{ color: "#C1272D", textShadow: "0 0 40px rgba(193,39,45,0.5)" }}>FORGE</span>
             </h1>
             <div className="mt-4 h-1 w-24 mx-auto" style={{ backgroundColor: "#C1272D" }} />
-            <p className="mt-6 font-body text-xl md:text-2xl text-white max-w-lg mx-auto" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}>
+            <p className="mt-4 font-body text-lg md:text-xl text-white/90 max-w-lg mx-auto" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}>
               Democracy works better when you show up.
-              <br className="hidden md:block" />
+            </p>
+            <p className="mt-3 font-headline text-2xl md:text-3xl text-white max-w-lg mx-auto" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}>
               How do you want to use this tool?
             </p>
           </div>
@@ -139,7 +140,7 @@ export default function OnboardingModal() {
                 onMouseLeave={() => setHoveredIdx(null)}
                 className="relative text-left border-none cursor-pointer transition-all duration-300 overflow-hidden group"
                 style={{
-                  background: isHovered ? opt.gradient : "#0a0a0a",
+                  background: opt.gradient,
                   minHeight: "320px",
                   borderRight: idx < 2 ? "1px solid rgba(255,255,255,0.08)" : "none",
                 }}
@@ -170,18 +171,18 @@ export default function OnboardingModal() {
 
                   {/* Large background number */}
                   <div
-                    className="font-headline text-[100px] leading-none absolute top-4 right-6 transition-opacity duration-300"
+                    className="font-headline text-[120px] leading-none absolute top-2 right-6"
                     style={{
-                      color: "rgba(255,255,255,0.03)",
-                      WebkitTextStroke: isHovered ? `1px ${opt.accentColor}40` : "1px rgba(255,255,255,0.05)",
+                      color: "rgba(255,255,255,0.15)",
+                      WebkitTextStroke: `2px rgba(255,255,255,0.2)`,
                     }}
                   >
                     {idx + 1}
                   </div>
 
                   <h2
-                    className="font-headline text-3xl md:text-4xl leading-none text-white mb-1 transition-transform duration-300 group-hover:translate-x-1"
-                    style={{ textShadow: "0 2px 8px rgba(0,0,0,0.6)" }}
+                    className="font-headline text-3xl md:text-4xl leading-none mb-1 transition-transform duration-300 group-hover:translate-x-1"
+                    style={{ color: "#FFFFFF", textShadow: "0 2px 10px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)" }}
                   >
                     {opt.headline}
                   </h2>

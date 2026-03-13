@@ -445,7 +445,7 @@ export default function Home() {
                   SAVE AS MY REPS
                 </button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 stagger-children">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {results.map((rep) => (
                   <Link
                     key={rep.id}
@@ -531,7 +531,7 @@ export default function Home() {
                   WRITE TO THEM
                 </Link>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 stagger-children">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {myReps.map((rep) => (
                   <Link
                     key={rep.id}
