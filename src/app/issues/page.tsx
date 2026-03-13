@@ -25,6 +25,11 @@ const issueColor: Record<string, string> = {
   defense: "#1a1a2e",
 };
 
+const issuePosition: Record<string, string> = {
+  environment: "center top",
+  immigration: "left bottom",
+};
+
 const issueSummary: Record<string, string> = {
   healthcare:
     "Drug prices are 2-3x higher than peer nations. The $35 insulin cap only covers Medicare. Rural ERs are closing. Mental health parity is law but rarely enforced.",
@@ -58,6 +63,7 @@ export default function IssuesPage() {
         {issues.map((issue) => {
           const accent = issueColor[issue.id] || "#1a1a2e";
           const bgImage = issueImage[issue.id];
+          const bgPos = issuePosition[issue.id] || "center";
           const summary = issueSummary[issue.id] || issue.description;
           return (
             <Link
@@ -78,7 +84,7 @@ export default function IssuesPage() {
                   style={{
                     backgroundImage: `url(${bgImage})`,
                     backgroundSize: "cover",
-                    backgroundPosition: "center",
+                    backgroundPosition: bgPos,
                   }}
                 />
                 <div

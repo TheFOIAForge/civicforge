@@ -48,6 +48,11 @@ const issueImage: Record<string, string> = {
   defense: "/images/issues/defense.jpg",
 };
 
+const issuePosition: Record<string, string> = {
+  environment: "center top",
+  immigration: "left bottom",
+};
+
 interface FeedItem {
   id: string;
   type: string;
@@ -608,6 +613,7 @@ export default function Home() {
               {issues.map((issue) => {
                 const accent = issueColor[issue.id] || "#1a1a2e";
                 const bgImage = issueImage[issue.id];
+                const bgPos = issuePosition[issue.id] || "center";
                 return (
                   <Link
                     key={issue.id}
@@ -626,7 +632,7 @@ export default function Home() {
                         style={{
                           backgroundImage: `url(${bgImage})`,
                           backgroundSize: "cover",
-                          backgroundPosition: "center",
+                          backgroundPosition: bgPos,
                         }}
                       />
                     )}
