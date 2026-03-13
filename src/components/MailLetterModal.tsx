@@ -15,6 +15,7 @@ interface MailLetterModalProps {
   onClose: () => void;
   letterContent: string;
   rep: Representative;
+  reps?: Representative[];
   contactLogId: string;
   issue: string;
 }
@@ -47,7 +48,8 @@ function parseStoredAddress(): Partial<MailingAddress> {
   return {};
 }
 
-export default function MailLetterModal({ isOpen, onClose, letterContent, rep, contactLogId, issue }: MailLetterModalProps) {
+export default function MailLetterModal({ isOpen, onClose, letterContent, rep, reps, contactLogId, issue }: MailLetterModalProps) {
+  const allReps = reps && reps.length > 0 ? reps : [rep];
   const [step, setStep] = useState<Step>("preview");
   const [selectedOfficeIdx, setSelectedOfficeIdx] = useState(0);
   const [senderName, setSenderName] = useState("");
@@ -152,7 +154,7 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, c
               Mail This Letter
             </h2>
             <p className="font-mono text-[10px] text-white/70 mt-1">
-              PHYSICAL LETTER VIA USPS — {rep.fullName.toUpperCase()}
+              PHYSICAL LETTER VIA USPS — {allReps.length > 1 ? `${allReps.length} RECIPIENTS` : rep.fullName.toUpperCase()}
             </p>
           </div>
           <button
@@ -464,6 +466,7 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, c
         {step === "pay" && (
           <PayStep
             rep={rep}
+            allReps={allReps}
             office={office}
             recipientAddress={recipientAddress}
             senderAddress={senderAddress}
@@ -471,6 +474,7 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, c
             contactLogId={contactLogId}
             issue={issue}
             senderName={senderName}
+            selectedOfficeIdx={selectedOfficeIdx}
             payError={payError}
             setPayError={setPayError}
           />
@@ -483,6 +487,7 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, c
 /* ── Pay Step (separated to manage its own checkout state) ── */
 function PayStep({
   rep,
+  allReps,
   office,
   recipientAddress,
   senderAddress,
@@ -490,10 +495,12 @@ function PayStep({
   contactLogId,
   issue,
   senderName,
+  selectedOfficeIdx,
   payError,
   setPayError,
 }: {
   rep: Representative;
+  allReps: Representative[];
   office: Representative["offices"][0];
   recipientAddress: MailingAddress;
   senderAddress: MailingAddress;
@@ -501,6 +508,7 @@ function PayStep({
   contactLogId: string;
   issue: string;
   senderName: string;
+  selectedOfficeIdx: number;
   payError: string;
   setPayError: (s: string) => void;
 }) {
@@ -512,12 +520,12 @@ function PayStep({
     try {
       sessionStorage.setItem("checkmyrep_pending_mail", JSON.stringify({
         contactLogId,
-        repId: rep.id,
-        repName: rep.fullName,
+        repIds: allReps.map((r) => r.id),
+        repNames: allReps.map((r) => r.fullName),
         issue,
       }));
     } catch { /* ignore */ }
-  }, [senderAddress, contactLogId, rep.id, rep.fullName, issue]);
+  }, [senderAddress, contactLogId, allReps, issue]);
 
   const fetchClientSecret = useCallback(async () => {
     const res = await fetch("/api/mail/create-checkout", {
@@ -525,8 +533,19 @@ function PayStep({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contactLogId,
-        repName: rep.fullName,
-        repOfficeAddress: recipientAddress,
+        recipients: allReps.map((r) => {
+          const o = r.offices[selectedOfficeIdx] || r.offices[0];
+          return {
+            repName: r.fullName,
+            repOfficeAddress: {
+              name: `${r.title} ${r.fullName}`,
+              address_line1: o?.street || "",
+              address_city: o?.city || "",
+              address_state: o?.state || "",
+              address_zip: o?.zip || "",
+            },
+          };
+        }),
         senderAddress,
         letterContent,
       }),
@@ -537,16 +556,37 @@ function PayStep({
       throw new Error(data.error);
     }
     return data.clientSecret;
-  }, [contactLogId, rep.fullName, recipientAddress, senderAddress, letterContent, setPayError]);
+  }, [contactLogId, allReps, selectedOfficeIdx, senderAddress, letterContent, setPayError]);
+
+  const totalCost = (allReps.length * 1.5).toFixed(2);
 
   return (
     <div className="p-5">
       {/* Compact letter preview */}
       <p className="font-mono text-xs font-bold mb-3" style={{ color: "rgba(0,0,0,0.5)" }}>
-        LETTER PREVIEW
+        {allReps.length > 1 ? `${allReps.length} LETTERS TO SEND` : "LETTER PREVIEW"}
       </p>
 
-      {/* Mini envelope */}
+      {/* Recipient list for multi-rep */}
+      {allReps.length > 1 && (
+        <div className="mb-4 space-y-1">
+          {allReps.map((r) => {
+            const o = r.offices[selectedOfficeIdx] || r.offices[0];
+            return (
+              <div
+                key={r.id}
+                className="flex items-center justify-between p-2"
+                style={{ backgroundColor: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.08)", fontSize: "11px", fontFamily: "monospace" }}
+              >
+                <span style={{ fontWeight: "bold", color: "#111" }}>{r.title} {r.fullName}</span>
+                <span style={{ color: "rgba(0,0,0,0.4)" }}>{o?.city}, {o?.state}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Mini envelope (show first rep) */}
       <div
         className="relative mb-4 overflow-hidden"
         style={{
@@ -569,6 +609,11 @@ function PayStep({
             <div>{office?.city}, {office?.state} {office?.zip}</div>
           </div>
         </div>
+        {allReps.length > 1 && (
+          <div className="mt-2 pt-2" style={{ borderTop: "1px dashed rgba(0,0,0,0.15)", color: "rgba(0,0,0,0.4)", fontSize: "8px" }}>
+            + {allReps.length - 1} more identical letter{allReps.length - 1 > 1 ? "s" : ""} to other recipients
+          </div>
+        )}
       </div>
 
       {/* Compact letter body */}
@@ -597,7 +642,11 @@ function PayStep({
       {/* Cost info */}
       <div className="mb-4 p-3 flex items-center justify-between" style={{ backgroundColor: "rgba(193,39,45,0.06)", border: "1px solid rgba(193,39,45,0.15)" }}>
         <div>
-          <p className="font-mono text-xs font-bold" style={{ color: "#C1272D" }}>USPS FIRST CLASS — $1.50</p>
+          <p className="font-mono text-xs font-bold" style={{ color: "#C1272D" }}>
+            {allReps.length > 1
+              ? `${allReps.length} LETTERS × $1.50 = $${totalCost}`
+              : "USPS FIRST CLASS — $1.50"}
+          </p>
           <p className="font-mono text-[10px]" style={{ color: "rgba(0,0,0,0.5)" }}>Includes printing, envelope, and postage</p>
         </div>
         <p className="font-mono text-[10px]" style={{ color: "rgba(0,0,0,0.4)" }}>3-5 business days</p>

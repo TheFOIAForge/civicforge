@@ -13,10 +13,10 @@ import MailLetterModal from "@/components/MailLetterModal";
 
 type Mode = "letter" | "call" | "social";
 
-const modeConfig: Record<Mode, { label: string; emoji: string; desc: string; action: string; hint: string }> = {
-  letter: { label: "Letter", emoji: "\u{2709}\u{FE0F}", desc: "Formal email to their office", action: "GENERATE LETTER", hint: "Best for policy requests & detailed concerns" },
-  call: { label: "Call Script", emoji: "\u{1F4DE}", desc: "Talking points for a phone call", action: "GENERATE SCRIPT", hint: "Fastest way to get a staffer's attention" },
-  social: { label: "Social Post", emoji: "\u{1F4F1}", desc: "Tag them publicly online", action: "GENERATE POSTS", hint: "Public pressure adds accountability" },
+const modeConfig: Record<Mode, { label: string; emoji: string; desc: string; action: string; hint: string; icon: string }> = {
+  letter: { label: "Mail a Letter", emoji: "\u{2709}\u{FE0F}", desc: "Physical letter via USPS", action: "GENERATE LETTER", hint: "Strongest impact — lands on their desk", icon: "mail" },
+  call: { label: "Make a Call", emoji: "\u{1F4DE}", desc: "Talking points for a phone call", action: "GENERATE SCRIPT", hint: "Fastest way to get a staffer's attention", icon: "phone" },
+  social: { label: "Send an Email", emoji: "\u{1F4F1}", desc: "Email their office directly", action: "GENERATE EMAIL", hint: "Quick and convenient digital contact", icon: "email" },
 };
 
 const quickTopics = [
@@ -51,10 +51,13 @@ function DraftInner() {
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const [allReps, setAllReps] = useState<Representative[]>([]);
-  const [mode, setMode] = useState<Mode>(
-    (searchParams.get("mode") as Mode) || "letter"
+  const [selectedModes, setSelectedModes] = useState<Set<Mode>>(
+    new Set([(searchParams.get("mode") as Mode) || "letter"])
   );
-  const [selectedRep, setSelectedRep] = useState<Representative | null>(null);
+  const mode: Mode = selectedModes.has("letter") ? "letter" : selectedModes.has("call") ? "call" : "social";
+  const [selectedReps, setSelectedReps] = useState<Representative[]>([]);
+  // Convenience: first selected rep (for backwards compat with single-rep logic)
+  const selectedRep = selectedReps.length > 0 ? selectedReps[0] : null;
   const [selectedIssueSlug, setSelectedIssueSlug] = useState(
     searchParams.get("issue") || ""
   );
@@ -86,7 +89,7 @@ function DraftInner() {
         const repParam = searchParams.get("rep");
         if (repParam) {
           const match = data.find((r: Representative) => r.slug === repParam);
-          if (match) { setSelectedRep(match); setStep(3); }
+          if (match) { setSelectedReps([match]); setStep(3); }
         }
       })
       .catch(() => {});
@@ -161,7 +164,12 @@ function DraftInner() {
       setHighlightIdx(i => Math.max(i - 1, 0));
     } else if (e.key === "Enter" && highlightIdx >= 0 && dropdownReps[highlightIdx]) {
       e.preventDefault();
-      setSelectedRep(dropdownReps[highlightIdx]);
+      const rep = dropdownReps[highlightIdx];
+      if (isActivist) {
+        setSelectedReps((prev) => prev.some((r) => r.id === rep.id) ? prev.filter((r) => r.id !== rep.id) : [...prev, rep]);
+      } else {
+        setSelectedReps([rep]);
+      }
       setShowResults(false);
       setRepSearch("");
       setShowAllReps(false);
@@ -295,8 +303,8 @@ function DraftInner() {
   }
 
   function handleUseOwn() {
-    if (!selectedRep) {
-      setError("Pick a representative first.");
+    if (selectedReps.length === 0) {
+      setError("Pick at least one representative first.");
       return;
     }
     if (!concern.trim()) {
@@ -305,27 +313,29 @@ function DraftInner() {
     }
     setOutput(concern);
     setError("");
-    // Save to contact log
+    // Save to contact log for each selected rep
     try {
       const logs = JSON.parse(localStorage.getItem("checkmyrep_contacts") || "[]");
       const logId = Date.now().toString();
       setLastLogId(logId);
-      const logEntry: Record<string, unknown> = {
-        id: logId,
-        repId: selectedRep.id,
-        repName: selectedRep.fullName,
-        method: mode,
-        issue: selectedIssue?.name || "General",
-        date: new Date().toISOString().split("T")[0],
-        status: "sent",
-        notes: concern.slice(0, 100),
-        content: concern.slice(0, 500),
-      };
-      if (selectedIssue?.legislation && selectedIssue.legislation.length > 0) {
-        logEntry.billNumber = selectedIssue.legislation[0].billNumber;
-        logEntry.billId = selectedIssue.legislation[0].id;
+      for (const rep of selectedReps) {
+        const logEntry: Record<string, unknown> = {
+          id: `${logId}-${rep.id}`,
+          repId: rep.id,
+          repName: rep.fullName,
+          method: mode,
+          issue: selectedIssue?.name || "General",
+          date: new Date().toISOString().split("T")[0],
+          status: "sent",
+          notes: concern.slice(0, 100),
+          content: concern.slice(0, 500),
+        };
+        if (selectedIssue?.legislation && selectedIssue.legislation.length > 0) {
+          logEntry.billNumber = selectedIssue.legislation[0].billNumber;
+          logEntry.billId = selectedIssue.legislation[0].id;
+        }
+        logs.push(logEntry);
       }
-      logs.push(logEntry);
       localStorage.setItem("checkmyrep_contacts", JSON.stringify(logs));
     } catch { /* ignore */ }
     setTimeout(() => {
@@ -375,7 +385,7 @@ function DraftInner() {
         {!output ? (
           <div className="px-4 py-6 space-y-6" data-print-hide>
 
-            {/* ── STEP 1: Choose how to reach them ── */}
+            {/* ── STEP 1: Choose how to reach them (multi-select) ── */}
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <div
@@ -388,17 +398,32 @@ function DraftInner() {
                   How do you want to reach them?
                 </h2>
               </div>
+              <p className="font-mono text-[11px] mb-3 font-bold" style={{ color: "rgba(0,0,0,0.4)" }}>
+                SELECT ONE OR MORE — WE&apos;LL HANDLE THE REST
+              </p>
               <div className="grid grid-cols-1 gap-3">
                 {(["letter", "call", "social"] as Mode[]).map((m) => {
+                  const isSelected = selectedModes.has(m);
                   const actionImg = m === "letter" ? "/images/actions/write-letter.jpg" : m === "call" ? "/images/actions/call-script.jpg" : "/images/actions/social-post.jpg";
                   return (
                     <button
                       key={m}
-                      onClick={() => { setMode(m); setOutput(""); }}
+                      onClick={() => {
+                        setSelectedModes((prev) => {
+                          const next = new Set(prev);
+                          if (next.has(m)) {
+                            if (next.size > 1) next.delete(m);
+                          } else {
+                            next.add(m);
+                          }
+                          return next;
+                        });
+                        setOutput("");
+                      }}
                       className="relative text-left overflow-hidden border-2 cursor-pointer transition-all"
                       style={{
-                        borderColor: mode === m ? "#C1272D" : "rgba(0,0,0,0.12)",
-                        backgroundColor: mode === m ? "rgba(193,39,45,0.15)" : "rgba(0,0,0,0.03)",
+                        borderColor: isSelected ? "#C1272D" : "rgba(0,0,0,0.12)",
+                        backgroundColor: isSelected ? "rgba(193,39,45,0.15)" : "rgba(0,0,0,0.03)",
                         height: "90px",
                       }}
                     >
@@ -406,13 +431,13 @@ function DraftInner() {
                         <div className="flex-1 px-4 py-3 relative z-10">
                           <span
                             className="block font-headline text-lg uppercase"
-                            style={{ color: mode === m ? "#111827" : "rgba(0,0,0,0.7)" }}
+                            style={{ color: isSelected ? "#111827" : "rgba(0,0,0,0.7)" }}
                           >
                             {modeConfig[m].label}
                           </span>
                           <span
                             className="block font-mono text-xs mt-1"
-                            style={{ color: mode === m ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.4)" }}
+                            style={{ color: isSelected ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.4)" }}
                           >
                             {modeConfig[m].hint}
                           </span>
@@ -421,18 +446,30 @@ function DraftInner() {
                           <img src={actionImg} alt="" className="absolute inset-0 w-full h-full object-cover" />
                           <div className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.4) 30%, transparent 100%)" }} />
                         </div>
-                        {mode === m && (
-                          <div className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center z-10" style={{ backgroundColor: "#C1272D" }}>
+                        {/* Checkbox indicator */}
+                        <div
+                          className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center z-10 border-2"
+                          style={{
+                            backgroundColor: isSelected ? "#C1272D" : "transparent",
+                            borderColor: isSelected ? "#C1272D" : "rgba(0,0,0,0.3)",
+                          }}
+                        >
+                          {isSelected && (
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
                     </button>
                   );
                 })}
               </div>
+              {selectedModes.size > 1 && (
+                <p className="font-mono text-[11px] mt-2 font-bold" style={{ color: "#C1272D" }}>
+                  {selectedModes.size} METHODS SELECTED — WRITE ONCE, SEND {selectedModes.size} WAYS
+                </p>
+              )}
             </div>
 
             {/* ── STEP 2: Pick your rep ── */}
@@ -449,55 +486,47 @@ function DraftInner() {
                 </h2>
               </div>
 
-              {/* Selected rep card */}
-              {selectedRep && (
-                <div
-                  className="p-4 mb-4 flex items-center justify-between"
-                  style={{ backgroundColor: "rgba(193,39,45,0.2)", border: "2px solid #C1272D" }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-12 h-12 ${partyBg(selectedRep.party)} flex items-center justify-center shrink-0 overflow-hidden relative`}>
-                      <span className="font-headline text-lg text-white">{selectedRep.firstName[0]}{selectedRep.lastName[0]}</span>
-                      {selectedRep.photoUrl && (
-                        <img src={selectedRep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                      )}
-                    </div>
-                    <div>
-                      <span className="block font-headline text-lg normal-case" style={{ color: "#111827" }}>
-                        {selectedRep.fullName}
-                      </span>
-                      <span className="block font-mono text-xs" style={{ color: "rgba(0,0,0,0.5)" }}>
-                        {selectedRep.title} — {selectedRep.state}{selectedRep.district ? `, ${selectedRep.district}` : ""}
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => { setSelectedRep(null); setStep(1); }}
-                    className="px-3 py-2 font-mono text-xs font-bold cursor-pointer transition-colors"
-                    style={{ color: "#C1272D", border: "1px solid rgba(193,39,45,0.4)", backgroundColor: "transparent" }}
-                  >
-                    CHANGE
-                  </button>
-                </div>
-              )}
-
-              {/* Saved reps — big tap targets */}
-              {!selectedRep && hasSavedReps && (
+              {/* Saved reps — multi-select */}
+              {hasSavedReps && (
                 <div className="mb-4">
                   <p className="font-mono text-xs font-bold mb-3" style={{ color: "rgba(0,0,0,0.5)" }}>
-                    YOUR SAVED REPRESENTATIVES — TAP TO SELECT
+                    YOUR SAVED REPRESENTATIVES — TAP TO SELECT (MULTIPLE OK)
                   </p>
                   <div className="grid grid-cols-1 gap-2">
-                    {myReps.map((rep) => (
+                    {myReps.map((rep) => {
+                      const isRepSelected = selectedReps.some((r) => r.id === rep.id);
+                      return (
                       <button
                         key={rep.id}
-                        onClick={() => { setSelectedRep(rep); setStep(3); setTimeout(() => document.getElementById("step-3-topics")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150); }}
+                        onClick={() => {
+                          setSelectedReps((prev) => {
+                            const exists = prev.some((r) => r.id === rep.id);
+                            const next = exists ? prev.filter((r) => r.id !== rep.id) : [...prev, rep];
+                            if (next.length > 0) setStep(3);
+                            return next;
+                          });
+                          setTimeout(() => document.getElementById("step-3-topics")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+                        }}
                         className="flex items-center gap-3 p-4 text-left cursor-pointer transition-all"
                         style={{
-                          backgroundColor: "rgba(0,0,0,0.03)",
-                          border: "2px solid rgba(0,0,0,0.1)",
+                          backgroundColor: isRepSelected ? "rgba(193,39,45,0.1)" : "rgba(0,0,0,0.03)",
+                          border: isRepSelected ? "2px solid #C1272D" : "2px solid rgba(0,0,0,0.1)",
                         }}
                       >
+                        {/* Checkbox */}
+                        <div
+                          className="w-6 h-6 flex items-center justify-center shrink-0 border-2"
+                          style={{
+                            backgroundColor: isRepSelected ? "#C1272D" : "transparent",
+                            borderColor: isRepSelected ? "#C1272D" : "rgba(0,0,0,0.3)",
+                          }}
+                        >
+                          {isRepSelected && (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </div>
                         <div className={`w-12 h-12 ${partyBg(rep.party)} flex items-center justify-center shrink-0 overflow-hidden relative`}>
                           <span className="font-headline text-lg text-white">{rep.firstName[0]}{rep.lastName[0]}</span>
                           {rep.photoUrl && (
@@ -512,17 +541,20 @@ function DraftInner() {
                             {rep.party === "D" ? "Democrat" : rep.party === "R" ? "Republican" : "Independent"} — {rep.chamber}
                           </span>
                         </div>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
                       </button>
-                    ))}
+                      );
+                    })}
                   </div>
+                  {selectedReps.length > 1 && (
+                    <p className="font-mono text-[11px] mt-2 font-bold" style={{ color: "#C1272D" }}>
+                      {selectedReps.length} REPRESENTATIVES SELECTED
+                    </p>
+                  )}
                 </div>
               )}
 
               {/* Search for other reps */}
-              {!selectedRep && (
+              {(
                 <div ref={resultsRef}>
                   {hasSavedReps && !showAllReps ? (
                     <button
@@ -655,7 +687,10 @@ function DraftInner() {
                               <button
                                 key={rep.id}
                                 onClick={() => {
-                                  setSelectedRep(rep);
+                                  setSelectedReps((prev) => {
+                                    const exists = prev.some((r) => r.id === rep.id);
+                                    return exists ? prev.filter((r) => r.id !== rep.id) : [...prev, rep];
+                                  });
                                   setShowResults(false);
                                   setRepSearch("");
                                   setStep(3);
@@ -843,7 +878,7 @@ function DraftInner() {
                   border: "none",
                 }}
               >
-                {!selectedRep ? "↑ Pick a rep first" : !concern.trim() ? "↑ Write your message" : "SEND AS-IS"}
+                {selectedReps.length === 0 ? "↑ Pick a rep first" : !concern.trim() ? "↑ Write your message" : selectedReps.length > 1 ? `SEND TO ${selectedReps.length} REPS` : "SEND AS-IS"}
               </button>
               <button
                 onClick={handleGenerate}
@@ -893,25 +928,21 @@ function DraftInner() {
             <div className="p-4 mb-0" style={{ backgroundColor: "#C1272D" }} data-print-hide>
               <div className="mb-3">
                 <p className="font-headline text-lg normal-case" style={{ color: "#fff" }}>
-                  Your {modeConfig[mode].label} to {selectedRep?.fullName}
+                  Your Message to {selectedReps.length > 1 ? `${selectedReps.length} Representatives` : selectedRep?.fullName}
                 </p>
+                {selectedReps.length > 1 && (
+                  <p className="font-mono text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.8)" }}>
+                    {selectedReps.map((r) => r.fullName).join(" · ")}
+                  </p>
+                )}
                 <p className="font-mono text-[10px]" style={{ color: "rgba(255,255,255,0.7)" }}>
-                  {selectedIssue ? selectedIssue.name.toUpperCase() : "GENERAL CONCERN"} — Generated just now
+                  {selectedIssue ? selectedIssue.name.toUpperCase() : "GENERAL CONCERN"} — {selectedModes.size} delivery method{selectedModes.size > 1 ? "s" : ""} selected
                 </p>
               </div>
+
+              {/* Delivery method buttons — one for each selected mode */}
               <div className="flex gap-2 flex-wrap">
-                {mode === "letter" && (
-                  <a
-                    href={getMailtoLink()}
-                    className="flex items-center gap-2 px-5 py-3 bg-white text-black font-mono text-sm font-bold no-underline"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    SEND EMAIL
-                  </a>
-                )}
-                {mode === "letter" && selectedRep && (
+                {selectedModes.has("letter") && selectedRep && (
                   <button
                     onClick={() => setMailModalOpen(true)}
                     className="flex items-center gap-2 px-5 py-3 font-mono text-sm font-bold cursor-pointer"
@@ -920,10 +951,34 @@ function DraftInner() {
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    MAIL LETTER — $1.50
+                    {selectedReps.length > 1 ? `MAIL ${selectedReps.length} LETTERS — $${(selectedReps.length * 1.5).toFixed(2)}` : "MAIL LETTER — $1.50"}
                   </button>
                 )}
-                {(selectedRep?.contactForm || selectedRep?.website) && mode === "letter" && (
+                {selectedModes.has("call") && selectedRep && (
+                  <a
+                    href={`tel:${selectedRep.offices?.[0]?.phone || ""}`}
+                    className="flex items-center gap-2 px-5 py-3 font-mono text-sm font-bold no-underline"
+                    style={{ backgroundColor: "#fff", color: "#111" }}
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    CALL NOW
+                  </a>
+                )}
+                {selectedModes.has("social") && (
+                  <a
+                    href={getMailtoLink()}
+                    className="flex items-center gap-2 px-5 py-3 font-mono text-sm font-bold no-underline"
+                    style={{ backgroundColor: "#fff", color: "#111" }}
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    SEND EMAIL
+                  </a>
+                )}
+                {(selectedRep?.contactForm || selectedRep?.website) && (
                   <button
                     onClick={handleOpenContactForm}
                     className="flex items-center gap-2 px-4 py-3 font-mono text-sm font-bold cursor-pointer"
@@ -932,15 +987,13 @@ function DraftInner() {
                     COPY & OPEN FORM
                   </button>
                 )}
-                {(mode === "letter" || mode === "call") && (
-                  <button
-                    onClick={handlePrint}
-                    className="flex items-center gap-2 px-4 py-3 font-mono text-sm font-bold cursor-pointer"
-                    style={{ backgroundColor: "rgba(0,0,0,0.3)", color: "#fff", border: "none" }}
-                  >
-                    PRINT
-                  </button>
-                )}
+                <button
+                  onClick={handlePrint}
+                  className="flex items-center gap-2 px-4 py-3 font-mono text-sm font-bold cursor-pointer"
+                  style={{ backgroundColor: "rgba(0,0,0,0.3)", color: "#fff", border: "none" }}
+                >
+                  PRINT
+                </button>
                 <button
                   onClick={handleCopy}
                   className="flex items-center gap-2 px-4 py-3 font-mono text-sm font-bold cursor-pointer"
@@ -961,23 +1014,32 @@ function DraftInner() {
             {/* Bottom actions */}
             <div className="p-4 flex flex-col gap-3" style={{ backgroundColor: "rgba(0,0,0,0.03)", borderTop: "1px solid rgba(0,0,0,0.1)" }} data-print-hide>
               <div className="flex gap-2 flex-wrap">
-                {mode === "letter" && (
-                  <a
-                    href={getMailtoLink()}
-                    className="flex-1 text-center px-4 py-3 font-mono text-xs font-bold no-underline"
-                    style={{ backgroundColor: "#C1272D", color: "#fff" }}
-                  >
-                    SEND EMAIL
-                  </a>
-                )}
-                {mode === "letter" && selectedRep && (
+                {selectedModes.has("letter") && selectedRep && (
                   <button
                     onClick={() => setMailModalOpen(true)}
                     className="flex-1 px-4 py-3 font-mono text-xs font-bold cursor-pointer"
-                    style={{ backgroundColor: "#111", color: "#fff", border: "none" }}
+                    style={{ backgroundColor: "#C1272D", color: "#fff", border: "none" }}
                   >
-                    MAIL LETTER — $1.50
+                    {selectedReps.length > 1 ? `MAIL ${selectedReps.length} LETTERS — $${(selectedReps.length * 1.5).toFixed(2)}` : "MAIL LETTER — $1.50"}
                   </button>
+                )}
+                {selectedModes.has("call") && selectedRep && (
+                  <a
+                    href={`tel:${selectedRep.offices?.[0]?.phone || ""}`}
+                    className="flex-1 text-center px-4 py-3 font-mono text-xs font-bold no-underline"
+                    style={{ backgroundColor: "#1B2A4A", color: "#fff" }}
+                  >
+                    CALL NOW
+                  </a>
+                )}
+                {selectedModes.has("social") && (
+                  <a
+                    href={getMailtoLink()}
+                    className="flex-1 text-center px-4 py-3 font-mono text-xs font-bold no-underline"
+                    style={{ backgroundColor: "#111", color: "#fff" }}
+                  >
+                    SEND EMAIL
+                  </a>
                 )}
                 <button
                   onClick={handleCopy}
@@ -992,7 +1054,7 @@ function DraftInner() {
               <div className="grid grid-cols-2 gap-2 mt-2">
                 {mode !== "call" && (
                   <button
-                    onClick={() => { setMode("call"); setOutput(""); }}
+                    onClick={() => { setSelectedModes(new Set(["call"])); setOutput(""); }}
                     className="p-3 text-left cursor-pointer"
                     style={{ backgroundColor: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)" }}
                   >
@@ -1005,7 +1067,7 @@ function DraftInner() {
                 )}
                 {mode !== "social" && (
                   <button
-                    onClick={() => { setMode("social"); setOutput(""); }}
+                    onClick={() => { setSelectedModes(new Set(["social"])); setOutput(""); }}
                     className="p-3 text-left cursor-pointer"
                     style={{ backgroundColor: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)" }}
                   >
@@ -1017,7 +1079,7 @@ function DraftInner() {
                   </button>
                 )}
                 <button
-                  onClick={() => { setOutput(""); setSelectedRep(null); }}
+                  onClick={() => { setOutput(""); setSelectedReps([]); }}
                   className="p-3 text-left cursor-pointer"
                   style={{ backgroundColor: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)" }}
                 >
@@ -1069,6 +1131,7 @@ function DraftInner() {
             onClose={() => setMailModalOpen(false)}
             letterContent={output}
             rep={selectedRep}
+            reps={selectedReps}
             contactLogId={lastLogId}
             issue={selectedIssue?.name || concern.slice(0, 50) || "General"}
           />
@@ -1096,7 +1159,7 @@ function DraftInner() {
             {(["letter", "call", "social"] as Mode[]).map((m) => (
               <button
                 key={m}
-                onClick={() => { setMode(m); setOutput(""); }}
+                onClick={() => { setSelectedModes(new Set([m])); setOutput(""); }}
                 className={`px-4 py-2 font-mono text-xs font-bold uppercase border-2 cursor-pointer transition-colors ${
                   mode === m
                     ? "bg-red text-white border-red"
@@ -1122,7 +1185,7 @@ function DraftInner() {
                   {myReps.map((rep) => (
                     <button
                       key={rep.id}
-                      onClick={() => setSelectedRep(rep)}
+                      onClick={() => setSelectedReps([rep])}
                       className={`flex items-center gap-2 px-4 py-3 border-3 cursor-pointer transition-all ${
                         selectedRep?.id === rep.id
                           ? "border-red bg-red-light"
@@ -1240,7 +1303,7 @@ function DraftInner() {
                       <button
                         key={rep.id}
                         onClick={() => {
-                          setSelectedRep(rep);
+                          setSelectedReps([rep]);
                           setShowResults(false);
                           setRepSearch("");
                         }}
@@ -1305,7 +1368,7 @@ function DraftInner() {
                 </div>
               </div>
               <button
-                onClick={() => setSelectedRep(null)}
+                onClick={() => setSelectedReps([])}
                 className="font-mono text-xs text-gray-mid font-bold cursor-pointer hover:text-red"
               >
                 CHANGE
@@ -1466,7 +1529,7 @@ function DraftInner() {
                         onClick={() => setMailModalOpen(true)}
                         className="flex items-center gap-2 px-4 py-3 bg-black text-white font-mono text-sm font-bold cursor-pointer hover:bg-white hover:text-black transition-colors"
                       >
-                        MAIL LETTER — $1.50
+                        {selectedReps.length > 1 ? `MAIL ${selectedReps.length} LETTERS — $${(selectedReps.length * 1.5).toFixed(2)}` : "MAIL LETTER — $1.50"}
                       </button>
                     )}
                   </>
@@ -1534,7 +1597,7 @@ function DraftInner() {
                 EDIT &amp; REGENERATE
               </button>
               <button
-                onClick={() => { setOutput(""); setSelectedRep(null); setConcern(""); setSelectedIssueSlug(""); setError(""); }}
+                onClick={() => { setOutput(""); setSelectedReps([]); setConcern(""); setSelectedIssueSlug(""); setError(""); }}
                 className="px-4 py-2.5 bg-surface text-gray-mid font-mono text-xs font-bold border-2 border-border cursor-pointer hover:border-red hover:text-red transition-colors"
               >
                 START OVER
@@ -1551,7 +1614,7 @@ function DraftInner() {
                   Letters + phone calls are 3x more effective than either alone.
                 </p>
                 <button
-                  onClick={() => { setMode("call"); setOutput(""); }}
+                  onClick={() => { setSelectedModes(new Set(["call"])); setOutput(""); }}
                   className="w-full px-3 py-2 bg-black text-white font-mono text-[10px] font-bold cursor-pointer hover:bg-red transition-colors"
                 >
                   GENERATE CALL SCRIPT
@@ -1563,7 +1626,7 @@ function DraftInner() {
                   Public posts add accountability pressure elected officials notice.
                 </p>
                 <button
-                  onClick={() => { setMode("social"); setOutput(""); }}
+                  onClick={() => { setSelectedModes(new Set(["social"])); setOutput(""); }}
                   className="w-full px-3 py-2 bg-black text-white font-mono text-[10px] font-bold cursor-pointer hover:bg-red transition-colors"
                 >
                   GENERATE SOCIAL POSTS
@@ -1575,7 +1638,7 @@ function DraftInner() {
                   Your voice is louder when both senators and your house rep hear it.
                 </p>
                 <button
-                  onClick={() => { setOutput(""); setSelectedRep(null); }}
+                  onClick={() => { setOutput(""); setSelectedReps([]); }}
                   className="w-full px-3 py-2 bg-black text-white font-mono text-[10px] font-bold cursor-pointer hover:bg-red transition-colors"
                 >
                   PICK ANOTHER REP
@@ -1626,6 +1689,7 @@ function DraftInner() {
           onClose={() => setMailModalOpen(false)}
           letterContent={output}
           rep={selectedRep}
+          reps={selectedReps}
           contactLogId={lastLogId}
           issue={selectedIssue?.name || concern.slice(0, 50) || "General"}
         />
