@@ -462,13 +462,12 @@ export default function RepProfilePage() {
                 <h3 className="font-mono text-sm text-gray-mid font-bold mb-3">COMMITTEES</h3>
                 <div className="flex flex-wrap gap-2">
                   {rep.committees.map((c, i) => (
-                    <Link
+                    <span
                       key={i}
-                      href={`/committees/${c.toLowerCase().replace(/['']/g, "").replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`}
-                      className="px-3 py-2 border-2 border-border-light font-mono text-sm bg-cream-dark text-gray-dark font-bold no-underline hover:bg-red hover:text-white hover:border-red transition-colors"
+                      className="px-3 py-2 border-2 border-border-light font-mono text-sm bg-cream-dark text-gray-dark font-bold"
                     >
                       {c}
-                    </Link>
+                    </span>
                   ))}
                 </div>
               </div>

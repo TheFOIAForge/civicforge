@@ -48,7 +48,7 @@ export async function GET() {
           urgency: daysLeft <= 7 ? "high" : daysLeft <= 14 ? "medium" : "low",
           url: doc.html_url,
           actionLabel: "SUBMIT COMMENT",
-          actionUrl: `/federal-register`,
+          actionUrl: `/issues`,
         });
       }
     }
@@ -77,7 +77,7 @@ export async function GET() {
           urgency: "low",
           url: doc.html_url,
           actionLabel: "READ RULE",
-          actionUrl: `/federal-register`,
+          actionUrl: `/issues`,
         });
       }
     }
@@ -109,7 +109,7 @@ export async function GET() {
           urgency: "low",
           url: `https://www.govinfo.gov/app/details/${pkg.packageId}`,
           actionLabel: "READ REPORT",
-          actionUrl: `/gao-reports`,
+          actionUrl: `/issues`,
         });
       }
     }
@@ -139,7 +139,7 @@ export async function GET() {
             urgency: "low",
             url: bill.url || "",
             actionLabel: "VIEW BILL",
-            actionUrl: `/bills`,
+            actionUrl: `/issues`,
           });
         }
       }

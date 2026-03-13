@@ -534,14 +534,13 @@ RULES:
                   </div>
                 ))}
 
-                {/* View more legislation link */}
+                {/* View more legislation label */}
                 {!isUsingFallback && (
-                  <Link
-                    href={`/bills?query=${encodeURIComponent(searchKeyword)}`}
-                    className="block mt-4 px-5 py-3 border-3 border-border text-center font-headline uppercase text-base no-underline text-black hover:bg-black hover:text-white transition-colors"
+                  <span
+                    className="block mt-4 px-5 py-3 border-3 border-border text-center font-headline uppercase text-base text-black"
                   >
                     View more legislation &rarr;
-                  </Link>
+                  </span>
                 )}
               </div>
             ) : null}

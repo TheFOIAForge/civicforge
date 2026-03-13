@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import ModeSelector from "./ModeSelector";
 
 export default function ActivistTopBar() {
   return (

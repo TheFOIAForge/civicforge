@@ -1,17 +1,10 @@
 "use client";
 
-import { useUserMode } from "@/lib/user-mode-context";
-import Nav from "@/components/Nav";
 import ActivistTopBar from "@/components/ActivistTopBar";
 import ActivistBottomNav from "@/components/ActivistBottomNav";
-import UrgencyBanner from "@/components/UrgencyBanner";
-import Footer from "@/components/Footer";
 import OnboardingModal from "@/components/OnboardingModal";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
-  const { mode, modeAtLeast } = useUserMode();
-  const isActivist = mode === "activist";
-
   return (
     <>
       <OnboardingModal />
@@ -21,16 +14,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       >
         Skip to main content
       </a>
-      {isActivist ? <ActivistTopBar /> : <Nav />}
-      {modeAtLeast("informed") && <UrgencyBanner />}
+      <ActivistTopBar />
       <main
         id="main-content"
         className="flex-1"
-        style={isActivist ? { paddingBottom: "5rem", backgroundColor: "#ffffff" } : undefined}
+        style={{ paddingBottom: "5rem", backgroundColor: "#ffffff" }}
       >
         {children}
       </main>
-      {isActivist ? <ActivistBottomNav /> : <Footer />}
+      <ActivistBottomNav />
     </>
   );
 }
