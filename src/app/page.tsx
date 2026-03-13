@@ -758,8 +758,8 @@ export default function Home() {
           <div className="absolute inset-0 grid-overlay" />
           <div className="relative z-10 max-w-xl mx-auto animate-on-scroll">
             <h2
-              className="font-headline text-4xl md:text-6xl text-white leading-none"
-              style={{ textShadow: "0 4px 30px rgba(0,0,0,0.5)" }}
+              className="font-headline text-4xl md:text-6xl leading-none"
+              style={{ color: "#ffffff", textShadow: "0 4px 30px rgba(0,0,0,0.5)" }}
             >
               Your Voice.
               <br />
@@ -1256,7 +1256,7 @@ export default function Home() {
       </section>}
 
       {/* CTA — informed+ only */}
-      {modeAtLeast("informed") && <section className="px-4 py-20 bg-cta text-white text-center">
+      {modeAtLeast("informed") && <section className="px-4 py-20 text-white text-center" style={{ backgroundColor: "#1a3a6b" }}>
         <div className="max-w-3xl mx-auto animate-on-scroll">
           <h2 className="font-headline text-5xl md:text-6xl text-white">
             Your Voice. Their Vote.
