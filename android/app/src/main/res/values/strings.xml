@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">CivicForge</string>
+    <string name="title_activity_main">CivicForge</string>
+    <string name="package_name">org.thefoiaforge.civic</string>
+    <string name="custom_url_scheme">org.thefoiaforge.civic</string>
+</resources>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
-import EcosystemBar from "@/components/EcosystemBar";
+// EcosystemBar removed — wasted vertical space on every page
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import { MyRepsProvider } from "@/lib/my-reps-context";
 
@@ -41,7 +41,6 @@ export default function RootLayout({
           >
             Skip to main content
           </a>
-          <EcosystemBar />
           <Nav />
           <main id="main-content" className="flex-1">{children}</main>
           <Footer />

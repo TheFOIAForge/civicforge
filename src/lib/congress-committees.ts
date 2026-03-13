@@ -75,13 +75,32 @@ export async function getAllCommittees(): Promise<Committee[]> {
     }
 
     // Cross-reference with our member data to populate committee members
+    // Matching is fuzzy because Congress.gov names differ from our local data
+    // Congress.gov: "Finance Committee" vs local: "Senate Committee on Finance"
+    function coreWords(name: string): string[] {
+      return name
+        .toLowerCase()
+        .replace(/committee/g, "")
+        .replace(/\b(on|of|the|and|for|in|to|select|special|permanent)\b/g, "")
+        .replace(/\b(senate|house|joint)\b/g, "")
+        .split(/\s+/)
+        .filter(w => w.length > 2);
+    }
+
     const allMembers = getAllMembers();
     for (const committee of committees) {
+      const cWords = coreWords(committee.name);
+      const cNameLower = committee.name.toLowerCase();
+
       const members = allMembers.filter((m) =>
         (m.committees || []).some((mc) => {
           const mcLower = mc.toLowerCase();
-          const cNameLower = committee.name.toLowerCase();
-          return mcLower === cNameLower || mcLower.includes(cNameLower) || cNameLower.includes(mcLower);
+          // Direct includes (either direction)
+          if (mcLower.includes(cNameLower) || cNameLower.includes(mcLower)) return true;
+          // Fuzzy: check if core words of the committee name appear in the member's committee string
+          const mcWords = coreWords(mc);
+          const matchCount = cWords.filter(w => mcWords.includes(w)).length;
+          return cWords.length > 0 && matchCount >= Math.min(cWords.length, 2) && matchCount / cWords.length >= 0.6;
         })
       );
 
