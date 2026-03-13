@@ -246,10 +246,12 @@ function votingRecordVerdict(a: Representative, b: Representative): CategoryVerd
   divergences.sort((x, y) => y.diff - x.diff);
 
   // No clear "winner" for issue voting — frame as similarity/difference
-  const margin: Margin = avgDivergence > 30 ? "decisive" : avgDivergence > 15 ? "moderate" : avgDivergence > 5 ? "slight" : "negligible";
+  const margin: Margin = sharedCount === 0 ? "negligible" : avgDivergence > 30 ? "decisive" : avgDivergence > 15 ? "moderate" : avgDivergence > 5 ? "slight" : "negligible";
 
   let summary: string;
-  if (avgDivergence <= 5) {
+  if (sharedCount === 0) {
+    summary = `Issue-by-issue voting data is not yet available for ${shortName(a)} and ${shortName(b)}. This will be populated when live vote data is connected.`;
+  } else if (avgDivergence <= 5) {
     summary = `${shortName(a)} and ${shortName(b)} vote remarkably similarly across issue categories, with minimal divergence.`;
   } else if (divergences.length > 0) {
     const top = divergences[0];
@@ -263,9 +265,10 @@ function votingRecordVerdict(a: Representative, b: Representative): CategoryVerd
 
   return {
     winner: "tie", margin, summary,
-    winnerName: "Different Priorities",
+    winnerName: sharedCount === 0 ? "No Data" : "Different Priorities",
     loserName: "",
-    labelA: `${sharedCount} shared categories`, labelB: `${pct(avgDivergence)} avg divergence`,
+    labelA: sharedCount === 0 ? "No data" : `${sharedCount} shared categories`,
+    labelB: sharedCount === 0 ? "" : `${pct(avgDivergence)} avg divergence`,
     valueA: 100 - avgDivergence, valueB: avgDivergence,
   };
 }

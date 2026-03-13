@@ -110,7 +110,9 @@ function VerdictBanner({ verdict, repA, repB }: {
     >
       <div className="flex items-center gap-3 mb-1">
         {verdict.winner === "tie" ? (
-          <span className="px-3 py-1 bg-black/10 font-mono text-xs font-bold uppercase">Tie</span>
+          <span className="px-3 py-1 bg-black/10 font-mono text-xs font-bold uppercase">
+            {verdict.winnerName === "No Data" ? "Insufficient Data" : "Tie"}
+          </span>
         ) : (
           <>
             <span
@@ -352,6 +354,16 @@ function VotingRecordSection({ a, b, verdict }: { a: Representative; b: Represen
 
   return (
     <Section title="Voting Record by Issue" icon="🗳️" id="sec-voting">
+      {allCats.length === 0 ? (
+        <div className="bg-black/5 px-5 py-10 text-center">
+          <div className="font-headline text-xl mb-2">No Issue Voting Data Available</div>
+          <p className="font-mono text-xs text-black/40">
+            Detailed issue-by-issue voting breakdowns are not yet available for these representatives.
+            This data will be populated when live Congress.gov vote data is connected.
+          </p>
+        </div>
+      ) : (
+      <>
       <VerdictBanner verdict={verdict} repA={a} repB={b} />
       <div className="space-y-4">
         <div className="flex justify-between font-mono text-xs font-bold text-black/40 uppercase px-2">
@@ -402,6 +414,8 @@ function VotingRecordSection({ a, b, verdict }: { a: Representative; b: Represen
           );
         })}
       </div>
+      </>
+      )}
     </Section>
   );
 }
