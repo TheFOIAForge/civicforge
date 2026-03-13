@@ -270,28 +270,47 @@ function formatMoney(n: number): string {
   return `$${n.toLocaleString()}`;
 }
 
+// Job titles / occupation categories from FEC data — these are individuals, not organizations.
+const INDIVIDUAL_CATEGORIES = new Set([
+  "retired", "homemaker", "housewife", "attorney", "physician",
+  "self-employed", "not employed", "student", "farmer", "teacher",
+  "engineer", "consultant", "real estate", "investor", "dentist",
+  "none", "n/a", "information requested", "unemployed",
+  "real estate agent", "sales", "manager", "professor", "nurse",
+  "owner", "ceo", "president", "lawyer", "doctor", "accountant",
+  "psychologist", "therapist", "contractor", "architect",
+]);
+
+function isIndividualCategory(name: string): boolean {
+  return INDIVIDUAL_CATEGORIES.has(name.toLowerCase().trim());
+}
+
+/** Separate donors into PACs/orgs and individual occupation categories, combining the latter. */
+function splitDonors(donors: { name: string; amount: string }[]) {
+  let individualTotal = 0;
+  const orgs: { name: string; amount: string }[] = [];
+
+  for (const d of donors) {
+    if (isIndividualCategory(d.name)) {
+      individualTotal += parseDollars(d.amount);
+    } else {
+      orgs.push(d);
+    }
+  }
+
+  return { orgs, individualTotal };
+}
+
 function FinanceSection({ a, b, verdict }: { a: Representative; b: Representative; verdict: CategoryVerdict }) {
   const totalA = parseDollars(a.totalFundraising);
   const totalB = parseDollars(b.totalFundraising);
 
-  // Generic occupation/employment categories that appear in FEC data —
-  // these are NOT real "shared donors" even if both reps list them.
-  const GENERIC_DONORS = new Set([
-    "retired", "homemaker", "housewife", "attorney", "physician",
-    "self-employed", "not employed", "student", "farmer", "teacher",
-    "engineer", "consultant", "real estate", "investor", "dentist",
-    "none", "n/a", "information requested", "unemployed",
-    "real estate agent", "sales", "manager", "professor",
-  ]);
+  const splitA = splitDonors(a.topDonors);
+  const splitB = splitDonors(b.topDonors);
 
-  const donorsA = new Set(
-    a.topDonors
-      .map(d => d.name.toLowerCase())
-      .filter(n => !GENERIC_DONORS.has(n))
-  );
-  const sharedDonors = b.topDonors.filter(
-    d => !GENERIC_DONORS.has(d.name.toLowerCase()) && donorsA.has(d.name.toLowerCase())
-  );
+  // Shared donor matching — only PACs/orgs, not individuals
+  const orgNamesA = new Set(splitA.orgs.map(d => d.name.toLowerCase()));
+  const sharedDonors = splitB.orgs.filter(d => orgNamesA.has(d.name.toLowerCase()));
 
   return (
     <Section title="Follow the Money" icon="💰" id="sec-finance">
@@ -332,12 +351,15 @@ function FinanceSection({ a, b, verdict }: { a: Representative; b: Representativ
         </div>
       </div>
 
-      {/* Top donors side-by-side */}
+      {/* Top donors side-by-side — PACs & Organizations only */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        {[a, b].map(rep => (
+        {[
+          { rep: a, split: splitA },
+          { rep: b, split: splitB },
+        ].map(({ rep, split }) => (
           <div key={rep.id}>
-            <div className="font-mono text-xs font-bold uppercase mb-2">{rep.lastName}&apos;s Top Donors</div>
-            {rep.topDonors.slice(0, 5).map((d, i) => {
+            <div className="font-mono text-xs font-bold uppercase mb-2">{rep.lastName}&apos;s Top PACs &amp; Organizations</div>
+            {split.orgs.slice(0, 5).map((d, i) => {
               const isShared = sharedDonors.some(s => s.name.toLowerCase() === d.name.toLowerCase());
               return (
                 <div key={i} className={`flex justify-between py-1.5 border-b border-black/10 ${isShared ? "bg-red/5" : ""}`}>
@@ -348,6 +370,13 @@ function FinanceSection({ a, b, verdict }: { a: Representative; b: Representativ
                 </div>
               );
             })}
+            {/* Rolled-up individual donors line */}
+            {split.individualTotal > 0 && (
+              <div className="flex justify-between py-1.5 border-b border-black/10 text-black/40">
+                <span className="font-mono text-xs italic">👤 Individual Donors (combined)</span>
+                <span className="font-mono text-xs font-bold">{formatMoney(split.individualTotal)}</span>
+              </div>
+            )}
           </div>
         ))}
       </div>

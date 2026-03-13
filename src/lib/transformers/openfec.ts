@@ -172,13 +172,33 @@ export function transformFinancials(
 
   const cycles = [allCycle, ...perCycle];
 
+  const topDonors = consolidate(employers, 10, isJunk);
+  const topIndustries = consolidate(occupations, 10, isOccupationJunk);
+
+  // Fallback: if totals endpoint returned $0 but we have donor/industry data,
+  // derive a rough total from the sum of employer contributions
+  let finalTotal = allCycle.totalFundraising;
+  let finalSmallPct = allCycle.smallDollarPct;
+  if (allTotalReceipts === 0 && employers.length > 0) {
+    const derivedTotal = employers.reduce((sum, e) => sum + e.total, 0);
+    if (derivedTotal > 0) {
+      finalTotal = formatMoney(derivedTotal);
+      const derivedUnitemized = occupations
+        .filter(o => !isOccupationJunk(o.name))
+        .reduce((sum, o) => sum + o.total, 0);
+      finalSmallPct = derivedTotal > 0
+        ? Math.round(((derivedTotal - derivedUnitemized) / derivedTotal) * 100)
+        : 0;
+    }
+  }
+
   return {
     cycles,
-    topDonors: consolidate(employers, 10, isJunk),
-    topIndustries: consolidate(occupations, 10, isOccupationJunk),
-    // Backward compat — use "all" aggregate
-    totalFundraising: allCycle.totalFundraising,
-    smallDollarPct: allCycle.smallDollarPct,
+    topDonors,
+    topIndustries,
+    // Backward compat — use "all" aggregate (or derived fallback)
+    totalFundraising: finalTotal,
+    smallDollarPct: finalSmallPct,
     outsideSpending: allCycle.outsideSpending,
   };
 }

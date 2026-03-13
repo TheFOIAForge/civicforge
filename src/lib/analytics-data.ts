@@ -347,21 +347,24 @@ export function generateVoteHeatmap(a: Representative, b: Representative): VoteH
   return cells;
 }
 
+// ─── Generic occupation filter (module-level) ───────────────────────────────
+// FEC filings list donor occupations/employers — these are individuals, not orgs.
+const GENERIC = new Set([
+  "retired", "homemaker", "housewife", "attorney", "physician",
+  "self-employed", "not employed", "student", "farmer", "teacher",
+  "engineer", "consultant", "real estate", "investor", "dentist",
+  "none", "n/a", "information requested", "unemployed",
+  "real estate agent", "sales", "manager", "professor", "nurse",
+  "owner", "ceo", "president", "lawyer", "doctor", "accountant",
+  "psychologist", "therapist", "contractor", "architect",
+]);
+
 // ─── Sankey (Money Flow) Data ────────────────────────────────────────────────
 
 export function generateSankeyData(a: Representative, b: Representative): {
   nodes: SankeyNode[];
   links: SankeyLink[];
 } {
-  // Generic occupation categories from FEC data — not real industry donors
-  const GENERIC = new Set([
-    "retired", "homemaker", "housewife", "attorney", "physician",
-    "self-employed", "not employed", "student", "farmer", "teacher",
-    "engineer", "consultant", "real estate", "investor", "dentist",
-    "none", "n/a", "information requested", "unemployed",
-    "real estate agent", "sales", "manager", "professor",
-  ]);
-
   // Nodes: [Industries...] → [PAC types...] → [Rep A, Rep B]
   const allIndustries = new Map<string, { amountA: number; amountB: number }>();
 
@@ -443,17 +446,32 @@ export function generateTreemapData(rep: Representative): FundingBlock[] {
 
   const blocks: FundingBlock[] = [];
 
-  // Use top industries
+  // Split industries vs individual occupation categories
   let accounted = 0;
+  let individualTotal = 0;
   for (const ind of rep.topIndustries) {
     const amt = parseDollars(ind.amount);
-    blocks.push({
-      name: ind.name,
-      amount: amt,
-      category: "Industry",
-      pct: (amt / total) * 100,
-    });
+    if (GENERIC.has(ind.name.toLowerCase())) {
+      individualTotal += amt;
+    } else {
+      blocks.push({
+        name: ind.name,
+        amount: amt,
+        category: "Industry",
+        pct: (amt / total) * 100,
+      });
+    }
     accounted += amt;
+  }
+
+  // Consolidate all individual/occupation categories into one block
+  if (individualTotal > 0) {
+    blocks.push({
+      name: "Individual Donors",
+      amount: individualTotal,
+      category: "Individuals",
+      pct: (individualTotal / total) * 100,
+    });
   }
 
   // Add small dollar block

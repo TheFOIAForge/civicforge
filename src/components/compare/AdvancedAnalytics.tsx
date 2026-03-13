@@ -577,6 +577,7 @@ function SankeyTab({ repA, repB }: { repA: Representative; repB: Representative 
 
 const TREEMAP_COLORS: Record<string, string> = {
   Industry: "#6b7280",
+  Individuals: "#8b5cf6",
   Grassroots: "#059669",
   Other: "#9ca3af",
 };
