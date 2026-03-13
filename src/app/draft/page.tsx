@@ -317,42 +317,49 @@ function DraftInner() {
                 </h2>
               </div>
               <div className="grid grid-cols-1 gap-3">
-                {(["letter", "call", "social"] as Mode[]).map((m) => (
-                  <button
-                    key={m}
-                    onClick={() => { setMode(m); setOutput(""); }}
-                    className="relative text-left p-4 border-2 cursor-pointer transition-all"
-                    style={{
-                      borderColor: mode === m ? "#C1272D" : "rgba(255,255,255,0.15)",
-                      backgroundColor: mode === m ? "rgba(193,39,45,0.15)" : "rgba(255,255,255,0.05)",
-                    }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{modeConfig[m].emoji}</span>
-                      <div className="flex-1">
-                        <span
-                          className="block font-headline text-base uppercase"
-                          style={{ color: mode === m ? "#FFFFFF" : "rgba(255,255,255,0.8)" }}
-                        >
-                          {modeConfig[m].label}
-                        </span>
-                        <span
-                          className="block font-mono text-xs mt-0.5"
-                          style={{ color: mode === m ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.4)" }}
-                        >
-                          {modeConfig[m].hint}
-                        </span>
-                      </div>
-                      {mode === m && (
-                        <div className="w-6 h-6 flex items-center justify-center" style={{ backgroundColor: "#C1272D" }}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
+                {(["letter", "call", "social"] as Mode[]).map((m) => {
+                  const actionImg = m === "letter" ? "/images/actions/write-letter.jpg" : m === "call" ? "/images/actions/call-script.jpg" : "/images/actions/social-post.jpg";
+                  return (
+                    <button
+                      key={m}
+                      onClick={() => { setMode(m); setOutput(""); }}
+                      className="relative text-left overflow-hidden border-2 cursor-pointer transition-all"
+                      style={{
+                        borderColor: mode === m ? "#C1272D" : "rgba(255,255,255,0.15)",
+                        backgroundColor: mode === m ? "rgba(193,39,45,0.15)" : "rgba(255,255,255,0.05)",
+                        height: "90px",
+                      }}
+                    >
+                      <div className="flex items-center h-full">
+                        <div className="flex-1 px-4 py-3 relative z-10">
+                          <span
+                            className="block font-headline text-lg uppercase"
+                            style={{ color: mode === m ? "#FFFFFF" : "rgba(255,255,255,0.8)", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
+                          >
+                            {modeConfig[m].label}
+                          </span>
+                          <span
+                            className="block font-mono text-xs mt-1"
+                            style={{ color: mode === m ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.4)" }}
+                          >
+                            {modeConfig[m].hint}
+                          </span>
                         </div>
-                      )}
-                    </div>
-                  </button>
-                ))}
+                        <div className="relative h-full w-[45%] shrink-0">
+                          <img src={actionImg} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                          <div className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(17,24,39,1) 0%, rgba(17,24,39,0.4) 30%, transparent 100%)" }} />
+                        </div>
+                        {mode === m && (
+                          <div className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center z-10" style={{ backgroundColor: "#C1272D" }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -472,37 +479,45 @@ function DraftInner() {
                       {/* Filters row — compact */}
                       <div className="flex flex-wrap items-center gap-2 mb-3">
                         <div className="flex border border-white/20 divide-x divide-white/20">
-                          {(["All", "Senate", "House"] as const).map((c) => (
-                            <button
-                              key={c}
-                              onClick={() => { setChamberFilter(c); setShowResults(true); setHighlightIdx(-1); }}
-                              className="px-3 py-1.5 font-mono text-[11px] font-bold uppercase cursor-pointer transition-colors"
-                              style={{
-                                backgroundColor: chamberFilter === c ? "rgba(255,255,255,0.15)" : "transparent",
-                                color: chamberFilter === c ? "#fff" : "rgba(255,255,255,0.4)",
-                              }}
-                            >
-                              {c}
-                            </button>
-                          ))}
+                          {(["All", "Senate", "House"] as const).map((c) => {
+                            const filterIcon = c === "Senate" ? "/images/icons/filters/senate.png" : c === "House" ? "/images/icons/filters/house.png" : "/images/icons/filters/all.png";
+                            return (
+                              <button
+                                key={c}
+                                onClick={() => { setChamberFilter(c); setShowResults(true); setHighlightIdx(-1); }}
+                                className="flex items-center gap-1.5 px-3 py-1.5 font-mono text-[11px] font-bold uppercase cursor-pointer transition-colors"
+                                style={{
+                                  backgroundColor: chamberFilter === c ? "rgba(255,255,255,0.15)" : "transparent",
+                                  color: chamberFilter === c ? "#fff" : "rgba(255,255,255,0.4)",
+                                }}
+                              >
+                                <img src={filterIcon} alt="" className="w-5 h-5 object-contain" style={{ filter: chamberFilter === c ? "brightness(1.2)" : "brightness(0.6)" }} />
+                                {c}
+                              </button>
+                            );
+                          })}
                         </div>
 
                         <div className="flex border border-white/20 divide-x divide-white/20">
-                          {(["All", "D", "R", "I"] as const).map((p) => (
-                            <button
-                              key={p}
-                              onClick={() => { setPartyFilter(p); setShowResults(true); setHighlightIdx(-1); }}
-                              className="px-3 py-1.5 font-mono text-[11px] font-bold uppercase cursor-pointer transition-colors"
-                              style={{
-                                backgroundColor: partyFilter === p
-                                  ? p === "D" ? "#1a3a6b" : p === "R" ? "#C1272D" : p === "I" ? "#6b5b3e" : "rgba(255,255,255,0.15)"
-                                  : "transparent",
-                                color: partyFilter === p ? "#fff" : "rgba(255,255,255,0.4)",
-                              }}
-                            >
-                              {p === "D" ? "DEM" : p === "R" ? "GOP" : p === "I" ? "IND" : "ALL"}
-                            </button>
-                          ))}
+                          {(["All", "D", "R", "I"] as const).map((p) => {
+                            const partyIcon = p === "D" ? "/images/icons/filters/dem.png" : p === "R" ? "/images/icons/filters/gop.png" : p === "I" ? "/images/icons/filters/ind.png" : "/images/icons/filters/all.png";
+                            return (
+                              <button
+                                key={p}
+                                onClick={() => { setPartyFilter(p); setShowResults(true); setHighlightIdx(-1); }}
+                                className="flex items-center gap-1.5 px-3 py-1.5 font-mono text-[11px] font-bold uppercase cursor-pointer transition-colors"
+                                style={{
+                                  backgroundColor: partyFilter === p
+                                    ? p === "D" ? "#1a3a6b" : p === "R" ? "#C1272D" : p === "I" ? "#6b5b3e" : "rgba(255,255,255,0.15)"
+                                    : "transparent",
+                                  color: partyFilter === p ? "#fff" : "rgba(255,255,255,0.4)",
+                                }}
+                              >
+                                <img src={partyIcon} alt="" className="w-5 h-5 object-contain" style={{ filter: partyFilter === p ? "brightness(1.2)" : "brightness(0.6)" }} />
+                                {p === "D" ? "DEM" : p === "R" ? "GOP" : p === "I" ? "IND" : "ALL"}
+                              </button>
+                            );
+                          })}
                         </div>
 
                         <select
@@ -626,31 +641,59 @@ function DraftInner() {
                 </h2>
               </div>
 
-              {/* Quick topic chips — 2-col grid for mobile */}
-              <div className="grid grid-cols-2 gap-2 mb-4">
-                {quickTopics.map((topic) => (
-                  <button
-                    key={topic.slug}
-                    onClick={() => {
-                      setSelectedIssueSlug(topic.slug);
-                      if (!concern.trim()) {
-                        const iss = getIssueBySlug(topic.slug);
-                        if (iss && iss.talkingPoints.length > 0) {
-                          setConcern(iss.talkingPoints[0]);
+              {/* Quick topic cards — full-width with illustration */}
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                {quickTopics.map((topic) => {
+                  const isSelected = selectedIssueSlug === topic.slug;
+                  return (
+                    <button
+                      key={topic.slug}
+                      onClick={() => {
+                        setSelectedIssueSlug(topic.slug);
+                        if (!concern.trim()) {
+                          const iss = getIssueBySlug(topic.slug);
+                          if (iss && iss.talkingPoints.length > 0) {
+                            setConcern(iss.talkingPoints[0]);
+                          }
                         }
-                      }
-                    }}
-                    className="flex items-center gap-2 px-3 py-3 font-mono text-xs font-bold cursor-pointer transition-all"
-                    style={{
-                      border: selectedIssueSlug === topic.slug ? "2px solid #C1272D" : "2px solid rgba(255,255,255,0.12)",
-                      backgroundColor: selectedIssueSlug === topic.slug ? "rgba(193,39,45,0.15)" : "rgba(255,255,255,0.04)",
-                      color: selectedIssueSlug === topic.slug ? "#fff" : "rgba(255,255,255,0.6)",
-                    }}
-                  >
-                    <span className="text-lg">{topic.icon}</span>
-                    {topic.label}
-                  </button>
-                ))}
+                      }}
+                      className="relative text-left overflow-hidden cursor-pointer transition-all"
+                      style={{
+                        border: isSelected ? "2px solid #C1272D" : "2px solid rgba(255,255,255,0.08)",
+                        backgroundColor: "#000",
+                        height: "100px",
+                      }}
+                    >
+                      {/* Icon illustration — centered background */}
+                      <img
+                        src={`/images/icons/topics/${topic.slug}.png`}
+                        alt=""
+                        className="absolute inset-0 m-auto h-[85%] object-contain"
+                        style={{ opacity: isSelected ? 0.35 : 0.25 }}
+                      />
+                      {/* Label — centered */}
+                      <div className="relative z-10 h-full flex items-center justify-center p-3">
+                        <span
+                          className="font-headline text-lg uppercase leading-tight text-center"
+                          style={{
+                            color: isSelected ? "#fff" : "rgba(255,255,255,0.9)",
+                            textShadow: "0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.7)",
+                          }}
+                        >
+                          {topic.label}
+                        </span>
+                      </div>
+                      {/* Selected check */}
+                      {isSelected && (
+                        <div className="absolute top-2 right-2 w-5 h-5 flex items-center justify-center z-10" style={{ backgroundColor: "#C1272D" }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Concern textarea */}

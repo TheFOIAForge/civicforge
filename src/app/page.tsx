@@ -640,10 +640,7 @@ export default function Home() {
                       >
                         {issue.name}
                       </h3>
-                      <div className="mt-2 flex items-center justify-between">
-                        <span className="font-mono text-sm font-bold uppercase" style={{ color: "#fff", textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>
-                          {issue.legislation.length} {issue.legislation.length === 1 ? "bill" : "bills"}
-                        </span>
+                      <div className="mt-2 flex items-center justify-end">
                         <span
                           className="font-headline text-base group-hover:translate-x-1 transition-all"
                           style={{ color: "#fff" }}
@@ -739,12 +736,12 @@ export default function Home() {
               }}
             />
             <div className="flex flex-col justify-center p-8 md:p-12">
-              <p className="font-mono text-base tracking-[0.4em] uppercase mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>
+              <p className="font-mono text-lg md:text-xl tracking-[0.4em] uppercase mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>
                 Make The Call
               </p>
               <h2
-                className="font-headline text-3xl md:text-4xl text-white leading-tight"
-                style={{ textShadow: "0 2px 15px rgba(193,39,45,0.3)" }}
+                className="font-headline text-4xl md:text-5xl leading-tight"
+                style={{ color: "#FF4444", textShadow: "0 2px 20px rgba(255,68,68,0.4), 0 4px 30px rgba(0,0,0,0.5)" }}
               >
                 Your Rep Is One Phone Call Away
               </h2>
