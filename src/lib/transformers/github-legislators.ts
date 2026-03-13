@@ -30,6 +30,7 @@ export interface RawLegislatorEntry {
     instagram?: string;
     youtube?: string;
   };
+  email?: string;
   committees: string[];
   externalIds: {
     govtrack?: number;
@@ -87,7 +88,7 @@ export function transformLegislator(raw: RawLegislatorEntry): Representative {
     photoUrl: `https://www.congress.gov/img/member/${bioId.toLowerCase()}_200.jpg`,
 
     offices: raw.offices,
-    email: undefined,
+    email: raw.email || undefined,
     contactForm: raw.contactForm || undefined,
     website: raw.website,
     social: raw.social,
