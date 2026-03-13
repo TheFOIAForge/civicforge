@@ -1,6 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { loadStripe } from "@stripe/stripe-js";
+import {
+  EmbeddedCheckoutProvider,
+  EmbeddedCheckout,
+} from "@stripe/react-stripe-js";
 import type { Representative, MailingAddress } from "@/data/types";
 
 type Step = "preview" | "addresses" | "pay";
@@ -13,6 +18,10 @@ interface MailLetterModalProps {
   contactLogId: string;
   issue: string;
 }
+
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+  : null;
 
 function parseStoredAddress(): Partial<MailingAddress> {
   // Try structured address first
@@ -49,7 +58,6 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, c
   const [senderZip, setSenderZip] = useState("");
   const [verifyStatus, setVerifyStatus] = useState<"idle" | "loading" | "deliverable" | "warning" | "error">("idle");
   const [verifyMsg, setVerifyMsg] = useState("");
-  const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState("");
 
   // Pre-fill sender address
@@ -125,53 +133,6 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, c
     } catch {
       setVerifyStatus("error");
       setVerifyMsg("Could not verify address");
-    }
-  }
-
-  async function handlePay() {
-    setPaying(true);
-    setPayError("");
-
-    // Save structured sender address for future use
-    try {
-      localStorage.setItem("checkmyrep_sender_address", JSON.stringify(senderAddress));
-    } catch { /* ignore */ }
-
-    // Save draft state so we can restore after Stripe redirect
-    try {
-      sessionStorage.setItem("checkmyrep_pending_mail", JSON.stringify({
-        contactLogId,
-        repId: rep.id,
-        repName: rep.fullName,
-        issue,
-      }));
-    } catch { /* ignore */ }
-
-    try {
-      const res = await fetch("/api/mail/create-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contactLogId,
-          repName: rep.fullName,
-          repOfficeAddress: recipientAddress,
-          senderAddress,
-          letterContent,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        setPayError(data.error || "Failed to create checkout session");
-        setPaying(false);
-        return;
-      }
-
-      // Redirect to Stripe Checkout
-      window.location.href = data.url;
-    } catch {
-      setPayError("Something went wrong. Please try again.");
-      setPaying(false);
     }
   }
 
@@ -499,70 +460,178 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, c
           </div>
         )}
 
-        {/* Step: Pay */}
+        {/* Step: Pay — Embedded Checkout with letter preview */}
         {step === "pay" && (
-          <div className="p-5">
-            <p className="font-mono text-xs font-bold mb-4" style={{ color: "rgba(0,0,0,0.5)" }}>
-              CONFIRM AND PAY
-            </p>
-
-            {/* Summary */}
-            <div className="grid grid-cols-2 gap-4 mb-5">
-              <div className="p-3 border-2" style={{ borderColor: "rgba(0,0,0,0.1)" }}>
-                <p className="font-mono text-[10px] font-bold mb-1" style={{ color: "rgba(0,0,0,0.4)" }}>TO</p>
-                <p className="font-body text-sm font-bold">{recipientAddress.name}</p>
-                <p className="font-body text-xs" style={{ color: "rgba(0,0,0,0.6)" }}>{recipientAddress.address_line1}</p>
-                <p className="font-body text-xs" style={{ color: "rgba(0,0,0,0.6)" }}>{recipientAddress.address_city}, {recipientAddress.address_state} {recipientAddress.address_zip}</p>
-              </div>
-              <div className="p-3 border-2" style={{ borderColor: "rgba(0,0,0,0.1)" }}>
-                <p className="font-mono text-[10px] font-bold mb-1" style={{ color: "rgba(0,0,0,0.4)" }}>FROM</p>
-                <p className="font-body text-sm font-bold">{senderAddress.name}</p>
-                <p className="font-body text-xs" style={{ color: "rgba(0,0,0,0.6)" }}>{senderAddress.address_line1}</p>
-                <p className="font-body text-xs" style={{ color: "rgba(0,0,0,0.6)" }}>{senderAddress.address_city}, {senderAddress.address_state} {senderAddress.address_zip}</p>
-              </div>
-            </div>
-
-            {/* Cost breakdown */}
-            <div className="p-4 mb-5" style={{ backgroundColor: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)" }}>
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-mono text-sm">USPS First Class Letter</span>
-                <span className="font-mono text-sm font-bold">$1.50</span>
-              </div>
-              <div className="flex justify-between items-center text-xs" style={{ color: "rgba(0,0,0,0.5)" }}>
-                <span className="font-mono">Includes printing, envelope, and postage</span>
-              </div>
-              <div className="flex justify-between items-center mt-2 pt-2 border-t" style={{ borderColor: "rgba(0,0,0,0.1)" }}>
-                <span className="font-mono text-sm font-bold">Estimated delivery</span>
-                <span className="font-mono text-sm">3-5 business days</span>
-              </div>
-            </div>
-
-            {payError && (
-              <div className="mb-4 p-3" style={{ backgroundColor: "rgba(193,39,45,0.1)", border: "2px solid #C1272D" }}>
-                <p className="font-mono text-xs font-bold" style={{ color: "#C1272D" }}>
-                  {payError}
-                </p>
-              </div>
-            )}
-
-            <button
-              onClick={handlePay}
-              disabled={paying}
-              className="w-full py-5 font-headline text-xl uppercase cursor-pointer border-none"
-              style={{
-                backgroundColor: paying ? "rgba(0,0,0,0.2)" : "#C1272D",
-                color: "#fff",
-              }}
-            >
-              {paying ? "Redirecting to payment..." : "Pay & Mail — $1.50"}
-            </button>
-
-            <p className="mt-3 text-center font-mono text-[10px]" style={{ color: "rgba(0,0,0,0.4)" }}>
-              Secure payment via Stripe. Your card details never touch our servers.
-            </p>
-          </div>
+          <PayStep
+            rep={rep}
+            office={office}
+            recipientAddress={recipientAddress}
+            senderAddress={senderAddress}
+            letterContent={letterContent}
+            contactLogId={contactLogId}
+            issue={issue}
+            senderName={senderName}
+            payError={payError}
+            setPayError={setPayError}
+          />
         )}
       </div>
+    </div>
+  );
+}
+
+/* ── Pay Step (separated to manage its own checkout state) ── */
+function PayStep({
+  rep,
+  office,
+  recipientAddress,
+  senderAddress,
+  letterContent,
+  contactLogId,
+  issue,
+  senderName,
+  payError,
+  setPayError,
+}: {
+  rep: Representative;
+  office: Representative["offices"][0];
+  recipientAddress: MailingAddress;
+  senderAddress: MailingAddress;
+  letterContent: string;
+  contactLogId: string;
+  issue: string;
+  senderName: string;
+  payError: string;
+  setPayError: (s: string) => void;
+}) {
+  // Save structured sender address
+  useEffect(() => {
+    try {
+      localStorage.setItem("checkmyrep_sender_address", JSON.stringify(senderAddress));
+    } catch { /* ignore */ }
+    try {
+      sessionStorage.setItem("checkmyrep_pending_mail", JSON.stringify({
+        contactLogId,
+        repId: rep.id,
+        repName: rep.fullName,
+        issue,
+      }));
+    } catch { /* ignore */ }
+  }, [senderAddress, contactLogId, rep.id, rep.fullName, issue]);
+
+  const fetchClientSecret = useCallback(async () => {
+    const res = await fetch("/api/mail/create-checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contactLogId,
+        repName: rep.fullName,
+        repOfficeAddress: recipientAddress,
+        senderAddress,
+        letterContent,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setPayError(data.error || "Failed to create checkout session");
+      throw new Error(data.error);
+    }
+    return data.clientSecret;
+  }, [contactLogId, rep.fullName, recipientAddress, senderAddress, letterContent, setPayError]);
+
+  return (
+    <div className="p-5">
+      {/* Compact letter preview */}
+      <p className="font-mono text-xs font-bold mb-3" style={{ color: "rgba(0,0,0,0.5)" }}>
+        LETTER PREVIEW
+      </p>
+
+      {/* Mini envelope */}
+      <div
+        className="relative mb-4 overflow-hidden"
+        style={{
+          backgroundColor: "#f5f0e8",
+          border: "1px solid rgba(0,0,0,0.1)",
+          padding: "12px 16px",
+          fontSize: "9px",
+          fontFamily: "monospace",
+        }}
+      >
+        <div className="flex justify-between">
+          <div style={{ color: "rgba(0,0,0,0.5)", lineHeight: "1.4" }}>
+            <div style={{ fontWeight: "bold" }}>{senderName || "Your Name"}</div>
+            <div>{senderAddress.address_line1}</div>
+            <div>{senderAddress.address_city}, {senderAddress.address_state} {senderAddress.address_zip}</div>
+          </div>
+          <div style={{ color: "#111", lineHeight: "1.4", textAlign: "right" }}>
+            <div style={{ fontWeight: "bold" }}>{rep.title} {rep.fullName}</div>
+            <div>{office?.street}</div>
+            <div>{office?.city}, {office?.state} {office?.zip}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Compact letter body */}
+      <div
+        className="mb-4 overflow-hidden"
+        style={{
+          backgroundColor: "#fff",
+          border: "1px solid rgba(0,0,0,0.1)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+          padding: "16px 20px",
+          maxHeight: "200px",
+          overflowY: "auto",
+        }}
+      >
+        <div style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: "10pt", color: "rgba(0,0,0,0.7)", marginBottom: "8px" }}>
+          Dear {rep.title} {rep.lastName},
+        </div>
+        <div className="whitespace-pre-wrap" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: "10pt", lineHeight: "1.5", color: "#111" }}>
+          {letterContent.length > 500 ? letterContent.slice(0, 500) + "..." : letterContent}
+        </div>
+        <div style={{ marginTop: "12px", fontFamily: "'Times New Roman', Times, serif", fontSize: "10pt", color: "#111" }}>
+          Respectfully,<br />{senderName || "Your Name"}
+        </div>
+      </div>
+
+      {/* Cost info */}
+      <div className="mb-4 p-3 flex items-center justify-between" style={{ backgroundColor: "rgba(193,39,45,0.06)", border: "1px solid rgba(193,39,45,0.15)" }}>
+        <div>
+          <p className="font-mono text-xs font-bold" style={{ color: "#C1272D" }}>USPS FIRST CLASS — $1.50</p>
+          <p className="font-mono text-[10px]" style={{ color: "rgba(0,0,0,0.5)" }}>Includes printing, envelope, and postage</p>
+        </div>
+        <p className="font-mono text-[10px]" style={{ color: "rgba(0,0,0,0.4)" }}>3-5 business days</p>
+      </div>
+
+      {payError && (
+        <div className="mb-4 p-3" style={{ backgroundColor: "rgba(193,39,45,0.1)", border: "2px solid #C1272D" }}>
+          <p className="font-mono text-xs font-bold" style={{ color: "#C1272D" }}>
+            {payError}
+          </p>
+        </div>
+      )}
+
+      {/* Embedded Stripe Checkout */}
+      {stripePromise ? (
+        <div className="rounded overflow-hidden border" style={{ borderColor: "rgba(0,0,0,0.1)" }}>
+          <EmbeddedCheckoutProvider stripe={stripePromise} options={{ fetchClientSecret }}>
+            <EmbeddedCheckout />
+          </EmbeddedCheckoutProvider>
+        </div>
+      ) : (
+        <div className="p-4 text-center" style={{ backgroundColor: "rgba(193,39,45,0.05)" }}>
+          <p className="font-mono text-xs font-bold" style={{ color: "#C1272D" }}>
+            Payment service not configured
+          </p>
+          <p className="font-mono text-[10px] mt-1" style={{ color: "rgba(0,0,0,0.5)" }}>
+            NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set
+          </p>
+        </div>
+      )}
+
+      <p className="mt-3 text-center font-mono text-[10px]" style={{ color: "rgba(0,0,0,0.4)" }}>
+        Secure payment via Stripe. Your card details never touch our servers.
+      </p>
     </div>
   );
 }

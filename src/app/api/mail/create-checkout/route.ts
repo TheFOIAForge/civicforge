@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
     const origin = request.headers.get("origin") || "http://localhost:3000";
 
     const session = await stripe.checkout.sessions.create({
+      ui_mode: "embedded",
       mode: "payment",
       line_items: [
         {
@@ -54,11 +55,10 @@ export async function POST(request: NextRequest) {
         },
       ],
       metadata,
-      success_url: `${origin}/draft?mail_success={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/draft?mail_cancelled=1`,
+      return_url: `${origin}/draft?mail_success={CHECKOUT_SESSION_ID}`,
     });
 
-    return NextResponse.json({ url: session.url });
+    return NextResponse.json({ clientSecret: session.client_secret });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });
