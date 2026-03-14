@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { getIssueBySlug } from "@/data/issues";
 import { useScorecard } from "@/lib/scorecard-context";
+import { callClaude } from "@/lib/claude-client";
 import type { Representative, Legislation } from "@/data/types";
 
 const issueEmoji: Record<string, string> = {
@@ -229,29 +230,12 @@ RULES:
 - Write like an investigative journalist, not an activist.`;
 
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1500,
-          system: systemPrompt,
-          messages: [
-            {
-              role: "user",
-              content: `Analyze ${bill.billNumber} ("${bill.title}") in the context of ${member.fullName}'s record, donors, and lobbying connections.`,
-            },
-          ],
-        }),
+      const text = await callClaude({
+        apiKey,
+        system: systemPrompt,
+        userMessage: `Analyze ${bill.billNumber} ("${bill.title}") in the context of ${member.fullName}'s record, donors, and lobbying connections.`,
+        maxTokens: 1500,
       });
-
-      const data = await res.json();
-      const text = data.content?.[0]?.text || "Unable to generate analysis.";
       setBillAI((prev) =>
         prev ? { ...prev, phase: "done", analysis: text } : null
       );

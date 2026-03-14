@@ -42,10 +42,10 @@ const securityHeaders = [
     value: [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' https://js.stripe.com https://*.stripe.com https://maps.googleapis.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com",
+      "style-src 'self' 'unsafe-inline'",
+      "font-src 'self'",
       "img-src 'self' data: blob: https://raw.githubusercontent.com https://www.congress.gov https://*.supabase.co https://*.lob.com",
-      "connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.stripe.com https://api.lob.com https://api.congress.gov https://www.googleapis.com https://api.open.fec.gov https://v3.openstates.org https://api.regulations.gov https://api.usaspending.gov https://api.govinfo.gov https://api.anthropic.com",
+      "connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.stripe.com https://api.lob.com https://api.congress.gov https://www.googleapis.com https://api.open.fec.gov https://v3.openstates.org https://api.regulations.gov https://api.usaspending.gov https://api.govinfo.gov",
       "frame-src 'self' https://js.stripe.com https://checkout.stripe.com https://*.stripe.com https://*.supabase.co",
       "object-src 'none'",
       "base-uri 'self'",
@@ -73,6 +73,12 @@ const nextConfig: NextConfig = {
     {
       source: "/(.*)",
       headers: securityHeaders,
+    },
+    {
+      source: "/((?!api/).*)",
+      headers: [
+        { key: "Access-Control-Allow-Origin", value: "https://www.checkmyrep.us" },
+      ],
     },
     {
       source: "/api/members",
