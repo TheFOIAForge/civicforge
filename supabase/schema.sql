@@ -18,9 +18,9 @@ create table if not exists public.profiles (
 );
 
 alter table public.profiles enable row level security;
-create policy "Users can view own profile" on public.profiles for select using (auth.uid() = id);
-create policy "Users can update own profile" on public.profiles for update using (auth.uid() = id);
-create policy "Users can insert own profile" on public.profiles for insert with check (auth.uid() = id);
+create policy "Users can view own profile" on public.profiles for select to authenticated using (auth.uid() = id);
+create policy "Users can update own profile" on public.profiles for update to authenticated using (auth.uid() = id) with check (auth.uid() = id);
+create policy "Service role full access on profiles" on public.profiles for all to service_role using (true) with check (true);
 
 -- Auto-create profile on signup
 create or replace function public.handle_new_user()
@@ -55,7 +55,10 @@ create table if not exists public.saved_reps (
 );
 
 alter table public.saved_reps enable row level security;
-create policy "Users can manage own saved reps" on public.saved_reps for all using (auth.uid() = user_id);
+create policy "Users can read own saved reps" on public.saved_reps for select to authenticated using (auth.uid() = user_id);
+create policy "Users can insert own saved reps" on public.saved_reps for insert to authenticated with check (auth.uid() = user_id);
+create policy "Users can update own saved reps" on public.saved_reps for update to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "Users can delete own saved reps" on public.saved_reps for delete to authenticated using (auth.uid() = user_id);
 
 -- ══════════════════════════════════════════════
 -- ACTIONS (letters, calls, emails)
@@ -80,7 +83,7 @@ create table if not exists public.actions (
   stripe_session_id text,
   lob_letter_id text,
   lob_tracking_url text,
-  expected_delivery_date text,
+  expected_delivery_date date,
 
   -- Points
   points_awarded integer default 0,
@@ -89,7 +92,11 @@ create table if not exists public.actions (
 );
 
 alter table public.actions enable row level security;
-create policy "Users can manage own actions" on public.actions for all using (auth.uid() = user_id);
+create policy "Users can read own actions" on public.actions for select to authenticated using (auth.uid() = user_id);
+create policy "Users can insert own actions" on public.actions for insert to authenticated with check (auth.uid() = user_id);
+create policy "Users can update own actions" on public.actions for update to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "Service role full access on actions" on public.actions for all to service_role using (true) with check (true);
+-- No DELETE policy — actions are permanent audit records
 
 create index idx_actions_user_id on public.actions(user_id);
 create index idx_actions_created_at on public.actions(created_at desc);
@@ -100,7 +107,7 @@ create index idx_actions_created_at on public.actions(created_at desc);
 create table if not exists public.engagement (
   user_id uuid references public.profiles on delete cascade primary key,
   total_points integer default 0,
-  level text default 'Citizen',
+  level text default 'Citizen' check (level in ('Citizen', 'Activist', 'Organizer', 'Leader', 'Champion')),
   letters_sent integer default 0,
   calls_made integer default 0,
   emails_sent integer default 0,
@@ -114,9 +121,9 @@ create table if not exists public.engagement (
 );
 
 alter table public.engagement enable row level security;
-create policy "Users can view own engagement" on public.engagement for select using (auth.uid() = user_id);
-create policy "Users can update own engagement" on public.engagement for update using (auth.uid() = user_id);
-create policy "Users can insert own engagement" on public.engagement for insert with check (auth.uid() = user_id);
+create policy "Users can view own engagement" on public.engagement for select to authenticated using (auth.uid() = user_id);
+create policy "Service role full access on engagement" on public.engagement for all to service_role using (true) with check (true);
+-- No user UPDATE/INSERT — engagement is managed server-side only
 
 -- Auto-create engagement row on profile creation
 create or replace function public.handle_new_profile()
@@ -145,12 +152,16 @@ create table if not exists public.point_events (
 );
 
 alter table public.point_events enable row level security;
-create policy "Users can view own point events" on public.point_events for all using (auth.uid() = user_id);
+create policy "Users can read own point events" on public.point_events for select to authenticated using (auth.uid() = user_id);
+create policy "Service role can insert point events" on public.point_events for insert to service_role with check (true);
+create policy "Service role can update point events" on public.point_events for update to service_role using (true);
+-- No user INSERT/UPDATE/DELETE — points are managed server-side only
 
 create index idx_point_events_user_id on public.point_events(user_id);
+create index idx_point_events_created_at on public.point_events(created_at desc);
 
 -- ══════════════════════════════════════════════
--- LEADERBOARD VIEW (optional — top activists)
+-- LEADERBOARD VIEW (top activists — read-only)
 -- ══════════════════════════════════════════════
 create or replace view public.leaderboard as
 select
@@ -165,3 +176,8 @@ join public.profiles p on p.id = e.user_id
 where e.total_points > 0
 order by e.total_points desc
 limit 100;
+
+-- Leaderboard: authenticated users can read only
+revoke all on public.leaderboard from anon;
+revoke all on public.leaderboard from public;
+grant select on public.leaderboard to authenticated;

@@ -5,12 +5,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useMyReps } from "@/lib/my-reps-context";
 import type { Representative } from "@/data/types";
-
-function partyBg(party: string) {
-  if (party === "D") return "bg-dem";
-  if (party === "R") return "bg-rep";
-  return "bg-ind";
-}
+import { RepScorecard } from "@/components/scorecard";
 
 export default function MyRepsPage() {
   const { myReps, removeRep, saveRep, hasSavedReps, clearMyReps } = useMyReps();
@@ -121,87 +116,13 @@ export default function MyRepsPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             {myReps.map((rep) => (
-              <div
+              <RepScorecard
                 key={rep.id}
-                className="border-3 border-border bg-surface p-5 relative group"
-              >
-                {/* Remove button */}
-                <button
-                  onClick={() => removeRep(rep.id)}
-                  className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center bg-surface border-3 border-border text-gray-mid hover:bg-red hover:text-cream hover:border-red transition-colors cursor-pointer font-mono text-xs font-bold opacity-0 group-hover:opacity-100 focus:opacity-100"
-                  aria-label={`Remove ${rep.fullName}`}
-                  title="Remove from My Reps"
-                >
-                  ✕
-                </button>
-
-                <div className="flex items-start gap-4 mb-4">
-                  <div className={`w-14 h-14 ${partyBg(rep.party)} flex items-center justify-center shrink-0 overflow-hidden relative`} style={{ border: "1px solid #E5E5E5" }}>
-                    <span className="font-sans font-bold text-xl text-cream">{rep.firstName[0]}{rep.lastName[0]}</span>
-                    {rep.photoUrl && (
-                      <img src={rep.photoUrl} alt={rep.fullName} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`px-2 py-0.5 text-xs font-mono font-bold ${partyBg(rep.party)} text-cream`}>
-                        {rep.party === "D" ? "DEM" : rep.party === "R" ? "GOP" : "IND"}
-                      </span>
-                      <span className="font-mono text-xs text-gray-mid font-bold">{rep.chamber}</span>
-                    </div>
-                    <Link href={`/directory/${rep.slug}`} className="no-underline text-black hover:text-red transition-colors">
-                      <h3 className="font-sans font-bold text-lg normal-case">{rep.fullName}</h3>
-                    </Link>
-                    <p className="font-mono text-xs text-gray-mid">
-                      {rep.title} — {rep.state}{rep.district ? `, ${rep.district}` : ""}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Quick stats */}
-                <div className="flex gap-3 mb-4 text-center">
-                  {rep.partyLoyalty > 0 && (
-                    <div className="flex-1 bg-cream-dark p-2 border-3 border-border-light">
-                      <span className="block font-sans font-bold text-lg">{rep.partyLoyalty}%</span>
-                      <span className="font-mono text-[9px] text-gray-mid font-bold">PARTY LOYAL</span>
-                    </div>
-                  )}
-                  <div className="flex-1 bg-cream-dark p-2 border-3 border-border-light">
-                    <span className="block font-sans font-bold text-lg">{rep.billsIntroduced}</span>
-                    <span className="font-mono text-[9px] text-gray-mid font-bold">BILLS</span>
-                  </div>
-                  <div className="flex-1 bg-cream-dark p-2 border-3 border-border-light">
-                    <span className="block font-sans font-bold text-lg">{rep.committees.length}</span>
-                    <span className="font-mono text-[9px] text-gray-mid font-bold">COMMITTEES</span>
-                  </div>
-                </div>
-
-                {/* Quick action buttons */}
-                <div className="flex gap-2">
-                  <Link
-                    href={`/draft?rep=${rep.slug}`}
-                    className="flex-1 px-3 py-2.5 font-mono text-xs font-bold no-underline text-center hover:bg-black transition-colors"
-                    style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
-                  >
-                    WRITE
-                  </Link>
-                  <Link
-                    href={`/draft?rep=${rep.slug}&mode=call`}
-                    className="flex-1 px-3 py-2.5 font-mono text-xs font-bold no-underline text-center hover:bg-red transition-colors"
-                    style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
-                  >
-                    CALL SCRIPT
-                  </Link>
-                  <Link
-                    href={`/directory/${rep.slug}`}
-                    className="flex-1 px-3 py-2.5 bg-surface text-black font-mono text-xs font-bold no-underline text-center border-3 border-border hover:border-red transition-colors"
-                  >
-                    PROFILE
-                  </Link>
-                </div>
-              </div>
+                rep={rep}
+                onRemove={() => removeRep(rep.id)}
+              />
             ))}
           </div>
 
@@ -275,33 +196,14 @@ export default function MyRepsPage() {
                 SAVE ALL AS MY REPS
               </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               {lookupResults.map((rep) => (
-                <div
+                <RepScorecard
                   key={rep.id}
-                  className="border-3 border-border bg-cream-dark p-4"
-                >
-                  <div className={`w-12 h-12 ${partyBg(rep.party)} flex items-center justify-center mb-2 overflow-hidden relative`} style={{ border: "1px solid #E5E5E5" }}>
-                    <span className="font-sans font-bold text-lg text-cream">{rep.firstName[0]}{rep.lastName[0]}</span>
-                    {rep.photoUrl && (
-                      <img src={rep.photoUrl} alt={rep.fullName} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                    )}
-                  </div>
-                  <span className={`inline-block px-2 py-0.5 text-xs font-mono font-bold ${partyBg(rep.party)} text-cream`}>
-                    {rep.party === "D" ? "DEM" : rep.party === "R" ? "GOP" : "IND"}
-                  </span>
-                  <h4 className="font-sans font-bold text-lg mt-1 normal-case">{rep.fullName}</h4>
-                  <p className="font-mono text-xs text-gray-mid">
-                    {rep.title} — {rep.state}{rep.district ? `, ${rep.district}` : ""}
-                  </p>
-                  <button
-                    onClick={() => saveRep(rep)}
-                    className="mt-3 w-full px-3 py-2 font-mono text-xs font-bold cursor-pointer hover:bg-black transition-colors"
-                    style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
-                  >
-                    SAVE THIS REP
-                  </button>
-                </div>
+                  rep={rep}
+                  showSaveButton
+                  onSave={() => saveRep(rep)}
+                />
               ))}
             </div>
           </div>

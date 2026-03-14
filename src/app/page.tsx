@@ -16,12 +16,9 @@ import {
   Users,
   ArrowRight,
   ChevronRight,
-  Shield,
   Star,
   TrendingUp,
-  Landmark,
   Heart,
-  Briefcase,
   GraduationCap,
   Globe,
   Home as HomeIcon,
@@ -31,6 +28,7 @@ import {
 } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import { RepScorecard } from "@/components/scorecard";
 
 const issueIcons: Record<string, React.ReactNode> = {
   healthcare: <Heart className="w-5 h-5" />,
@@ -274,9 +272,9 @@ export default function Home() {
                 Save as My Reps
               </Button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               {results.map((rep) => (
-                <RepCard key={rep.id} rep={rep} />
+                <RepScorecard key={rep.id} rep={rep} />
               ))}
             </div>
           </div>
@@ -298,9 +296,9 @@ export default function Home() {
                 </Button>
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               {myReps.map((rep) => (
-                <RepCard key={rep.id} rep={rep} />
+                <RepScorecard key={rep.id} rep={rep} />
               ))}
             </div>
           </div>
@@ -566,49 +564,3 @@ export default function Home() {
   );
 }
 
-/* ═══ Rep Card Component ═══ */
-function RepCard({ rep }: { rep: Representative }) {
-  const partyConfig = {
-    D: { label: "Democrat", bg: "bg-blue", text: "text-blue", light: "bg-blue-light" },
-    R: { label: "Republican", bg: "bg-red", text: "text-red", light: "bg-red-light" },
-  } as Record<string, { label: string; bg: string; text: string; light: string }>;
-
-  const party = partyConfig[rep.party] || { label: "Independent", bg: "bg-purple-600", text: "text-purple-600", light: "bg-purple-50" };
-
-  return (
-    <Link
-      href={`/directory/${rep.slug}`}
-      className="group no-underline"
-    >
-      <Card hover padding="none" className="overflow-hidden">
-        <div className="p-5 flex items-center gap-4">
-          <div
-            className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 overflow-hidden relative ${party.bg}`}
-          >
-            <span className="text-white font-semibold text-lg">{rep.firstName[0]}{rep.lastName[0]}</span>
-            {rep.photoUrl && (
-              <img
-                src={rep.photoUrl}
-                alt={rep.fullName}
-                className="absolute inset-0 w-full h-full object-cover rounded-xl"
-                onError={(e) => { e.currentTarget.style.display = "none"; }}
-              />
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full text-white ${party.bg}`}>
-                {party.label}
-              </span>
-            </div>
-            <h3 className="text-base font-semibold text-navy truncate">{rep.fullName}</h3>
-            <p className="text-sm text-gray-500 mt-0.5">
-              {rep.title} — {rep.state}{rep.district ? `, District ${rep.district}` : ""}
-            </p>
-          </div>
-          <ChevronRight className="w-5 h-5 text-gray-300 shrink-0 group-hover:text-gold-dark transition-colors" />
-        </div>
-      </Card>
-    </Link>
-  );
-}
