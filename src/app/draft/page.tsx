@@ -966,11 +966,11 @@ function DraftInner() {
                                   tabIndex={0}
                                   className={`w-full flex items-center gap-3 px-4 py-2 text-left cursor-pointer transition-colors border-b border-white/5`}
                                   style={{
-                                    backgroundColor: isRepSelected ? `${partyColor}20` : `${partyColor}08`,
+                                    backgroundColor: isRepSelected ? `${partyColor}40` : `${partyColor}25`,
                                     boxShadow: isRepSelected ? `inset 3px 0 0 ${partyColor}` : "none",
                                   }}
-                                  onMouseEnter={(e) => { if (!isRepSelected) e.currentTarget.style.backgroundColor = `${partyColor}15`; }}
-                                  onMouseLeave={(e) => { if (!isRepSelected) e.currentTarget.style.backgroundColor = `${partyColor}08`; }}
+                                  onMouseEnter={(e) => { if (!isRepSelected) e.currentTarget.style.backgroundColor = `${partyColor}35`; }}
+                                  onMouseLeave={(e) => { if (!isRepSelected) e.currentTarget.style.backgroundColor = `${partyColor}25`; }}
                                 >
                                   <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 overflow-hidden relative border-2"
                                     style={{ borderColor: `${partyColor}60`, background: `linear-gradient(135deg, ${partyColor}30, ${partyColor}10)` }}
