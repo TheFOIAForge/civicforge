@@ -497,27 +497,16 @@ function DraftInner() {
 
   return (
     <div className="min-h-screen pb-24 bg-black" data-print-content>
-      {/* Header */}
-      <div className="bg-gradient-hero px-4 sm:px-6 pt-8 pb-8 relative overflow-hidden">
-        <div className="absolute inset-0 pattern-dots opacity-[0.04]" />
-        <img
-          src="/images/civic/illustrations/sign-envelope.png"
-          alt=""
-          className="absolute right-4 bottom-0 w-28 sm:w-36 opacity-[0.15]"
-          aria-hidden="true"
+      {/* Hero Banner */}
+      <div className="relative w-full overflow-hidden">
+        <Image
+          src="/images/checkmyrep-hero.png"
+          alt="CheckMyRep — Write Congress"
+          width={1344}
+          height={768}
+          priority
+          className="w-full h-auto object-cover"
         />
-        <div className="relative z-10 max-w-6xl mx-auto">
-          <div className="flex items-center gap-3 mb-2">
-            <img src="/images/civic/icons/capitol.png" alt="" className="w-7 h-7 opacity-80" aria-hidden="true" />
-            <span className="text-sm text-white/60 font-medium">CheckMyRep</span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-            Write Congress
-          </h1>
-          <p className="mt-2 text-white/70">
-            Pick a rep, write or paste your message, and send it.
-          </p>
-        </div>
       </div>
 
       {/* Main content */}
