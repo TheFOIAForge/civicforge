@@ -37,7 +37,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https://raw.githubusercontent.com https://www.congress.gov https://*.supabase.co https://*.lob.com",
-      "connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.stripe.com https://api.lob.com https://api.congress.gov https://www.googleapis.com https://api.open.fec.gov https://v3.openstates.org https://api.regulations.gov https://api.usaspending.gov https://api.govinfo.gov",
+      "connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.stripe.com https://api.lob.com https://api.congress.gov https://www.googleapis.com https://api.open.fec.gov https://v3.openstates.org https://api.regulations.gov https://api.usaspending.gov https://api.govinfo.gov https://api.anthropic.com",
       "frame-src 'self' https://js.stripe.com https://checkout.stripe.com https://*.stripe.com https://*.supabase.co",
       "object-src 'none'",
       "base-uri 'self'",
@@ -67,7 +67,19 @@ const nextConfig: NextConfig = {
       headers: securityHeaders,
     },
     {
-      source: "/api/:path*",
+      source: "/api/members",
+      headers: [
+        { key: "Cache-Control", value: "public, s-maxage=3600, stale-while-revalidate=86400" },
+      ],
+    },
+    {
+      source: "/api/zip-district",
+      headers: [
+        { key: "Cache-Control", value: "public, s-maxage=86400, stale-while-revalidate=604800" },
+      ],
+    },
+    {
+      source: "/api/:path((?!members|zip-district).*)",
       headers: [
         { key: "Cache-Control", value: "no-store, no-cache, must-revalidate" },
         { key: "Pragma", value: "no-cache" },

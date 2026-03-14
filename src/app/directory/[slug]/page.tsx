@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import type { Representative, ContactLogEntry, EmailServiceConfig } from "@/data/types";
 import MailLetterModal from "@/components/MailLetterModal";
+import { callClaude } from "@/lib/claude-client";
 
 function partyColor(party: string) {
   if (party === "D") return "bg-blue text-white";
@@ -572,18 +573,13 @@ export default function RepProfilePage() {
                     const filingsSummary = rep.lobbyingFilings.map((f) =>
                       `Client: ${f.client}${f.clientDescription ? ` (${f.clientDescription})` : ""} | Firm: ${f.registrant} | $${f.amount.toLocaleString()} (${f.filingYear}) | Issues: ${f.issueLabels?.join(", ") || f.issueCodes.join(", ") || "N/A"} | Lobbying on: ${f.specificIssues[0]?.slice(0, 300) || "N/A"} | Bills: ${f.billsLobbied?.join(", ") || "None"} | Donor match: ${f.matchesDonor ? "YES" : "no"}`
                     ).join("\n\n");
-                    fetch("https://api.anthropic.com/v1/messages", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-                      body: JSON.stringify({
-                        model: "claude-sonnet-4-20250514",
-                        max_tokens: 1200,
-                        system: `You are an investigative journalist analyzing lobbying filings for ${rep.fullName} (${rep.party === "D" ? "Democrat" : rep.party === "R" ? "Republican" : "Independent"}-${rep.stateAbbr}, ${rep.title}). Committees: ${rep.committees.join(", ")}.\n\nRules:\n- Identify the key industries and interests lobbying this member\n- Flag any donor-lobbyist overlaps (marked "Donor match: YES")\n- Explain what the lobbying activity tells us about who wants this member's attention and why\n- Note any patterns (same lobbying firm representing multiple clients, concentration in one sector)\n- Be factual, cite specific dollar amounts and client names\n- Keep it under 250 words\n- No partisan framing — present facts\n- Do not use phrases like "let that sink in" or "make no mistake"`,
-                        messages: [{ role: "user", content: `Analyze these ${rep.lobbyingFilings.length} lobbying filings:\n\n${filingsSummary}` }],
-                      }),
+                    callClaude({
+                      apiKey,
+                      system: `You are an investigative journalist analyzing lobbying filings for ${rep.fullName} (${rep.party === "D" ? "Democrat" : rep.party === "R" ? "Republican" : "Independent"}-${rep.stateAbbr}, ${rep.title}). Committees: ${rep.committees.join(", ")}.\n\nRules:\n- Identify the key industries and interests lobbying this member\n- Flag any donor-lobbyist overlaps (marked "Donor match: YES")\n- Explain what the lobbying activity tells us about who wants this member's attention and why\n- Note any patterns (same lobbying firm representing multiple clients, concentration in one sector)\n- Be factual, cite specific dollar amounts and client names\n- Keep it under 250 words\n- No partisan framing — present facts\n- Do not use phrases like "let that sink in" or "make no mistake"`,
+                      userMessage: `Analyze these ${rep.lobbyingFilings.length} lobbying filings:\n\n${filingsSummary}`,
+                      maxTokens: 1200,
                     })
-                      .then((r) => r.json())
-                      .then((data) => { setLobbyAnalysis(data.content?.[0]?.text || "Unable to analyze."); setLobbyAnalysisLoading(false); })
+                      .then((text) => { setLobbyAnalysis(text); setLobbyAnalysisLoading(false); })
                       .catch(() => { setLobbyAnalysis("Failed to generate analysis. Check your API key."); setLobbyAnalysisLoading(false); });
                   }}
                   className="w-full mb-4 px-4 py-3 bg-black text-white font-mono text-sm text-center cursor-pointer hover:bg-red transition-colors font-bold flex items-center justify-center gap-2"
@@ -1141,24 +1137,13 @@ RULES:
 - Do not use phrases like "let that sink in", "make no mistake", or "imagine"
 - Write clearly and directly like a journalist`;
 
-                      fetch("https://api.anthropic.com/v1/messages", {
-                        method: "POST",
-                        headers: {
-                          "Content-Type": "application/json",
-                          "x-api-key": apiKey,
-                          "anthropic-version": "2023-06-01",
-                          "anthropic-dangerous-direct-browser-access": "true",
-                        },
-                        body: JSON.stringify({
-                          model: "claude-sonnet-4-20250514",
-                          max_tokens: 1000,
-                          system: systemPrompt,
-                          messages: [{ role: "user", content: "Analyze this campaign finance data and give me the key takeaways." }],
-                        }),
+                      callClaude({
+                        apiKey,
+                        system: systemPrompt,
+                        userMessage: "Analyze this campaign finance data and give me the key takeaways.",
+                        maxTokens: 1000,
                       })
-                        .then((r) => r.json())
-                        .then((data) => {
-                          const text = data.content?.[0]?.text || "Unable to generate summary.";
+                        .then((text) => {
                           setAiMessages([
                             { role: "user", content: "Analyze this campaign finance data and give me the key takeaways." },
                             { role: "assistant", content: text },
@@ -1221,24 +1206,13 @@ RULES:
                       const outsideDetail = (rep.outsideSpending || []).map((s) => `${s.support ? "FOR" : "AGAINST"}: ${s.name} (${s.amount})`).join("\n");
                       const systemPrompt = `You are a nonpartisan campaign finance analyst discussing FEC data for ${rep.fullName} (${rep.party === "D" ? "Democrat" : rep.party === "R" ? "Republican" : "Independent"}-${rep.stateAbbr}). Cycle data:\n${cycleBreakdown}\nOutside spending:\n${outsideDetail || "None"}\nTop employers: ${rep.topDonors.map((d) => `${d.name}: ${d.amount}`).join(", ") || "None"}\nOccupations: ${rep.topIndustries.map((d) => `${d.name}: ${d.amount}`).join(", ") || "None"}\n\nRules: Be factual, cite numbers, no partisan framing, write clearly like a journalist. Keep answers concise.`;
 
-                      fetch("https://api.anthropic.com/v1/messages", {
-                        method: "POST",
-                        headers: {
-                          "Content-Type": "application/json",
-                          "x-api-key": apiKey,
-                          "anthropic-version": "2023-06-01",
-                          "anthropic-dangerous-direct-browser-access": "true",
-                        },
-                        body: JSON.stringify({
-                          model: "claude-sonnet-4-20250514",
-                          max_tokens: 1000,
-                          system: systemPrompt,
-                          messages: newMessages.map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
-                        }),
+                      callClaude({
+                        apiKey,
+                        system: systemPrompt,
+                        userMessage: newMessages[newMessages.length - 1].content,
+                        maxTokens: 1000,
                       })
-                        .then((r) => r.json())
-                        .then((data) => {
-                          const text = data.content?.[0]?.text || "Unable to respond.";
+                        .then((text) => {
                           setAiMessages([...newMessages, { role: "assistant", content: text }]);
                           setAiLoading(false);
                         })

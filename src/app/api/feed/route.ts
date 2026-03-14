@@ -1,5 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { cache } from "@/lib/cache";
+import { rateLimit } from "@/lib/rate-limit";
+
+const limiter = rateLimit({ windowMs: 60_000, max: 30 });
 
 interface FeedItem {
   id: string;
@@ -13,7 +16,10 @@ interface FeedItem {
   actionUrl?: string;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const limited = limiter.check(request);
+  if (limited) return limited;
+
   const cacheKey = "feed:homepage";
   const cached = cache.get<FeedItem[]>(cacheKey);
   if (cached && cached.length > 0) return NextResponse.json(cached);

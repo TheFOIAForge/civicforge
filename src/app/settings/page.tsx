@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { callClaude } from "@/lib/claude-client";
 
 interface ApiStatus {
   name: string;
@@ -76,29 +77,13 @@ export default function SettingsPage() {
     setTestResult(null);
 
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey.trim(),
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 10,
-          messages: [{ role: "user", content: "Say OK" }],
-        }),
+      await callClaude({
+        apiKey: apiKey.trim(),
+        userMessage: "Say OK",
+        maxTokens: 10,
       });
-
-      if (response.ok) {
-        setTestResult("success");
-        setTestMessage("Connection successful. Your API key works.");
-      } else {
-        const data = await response.json().catch(() => ({}));
-        setTestResult("error");
-        setTestMessage(data.error?.message || `Error: ${response.status} ${response.statusText}`);
-      }
+      setTestResult("success");
+      setTestMessage("Connection successful. Your API key works.");
     } catch (err) {
       setTestResult("error");
       setTestMessage(err instanceof Error ? err.message : "Connection failed.");

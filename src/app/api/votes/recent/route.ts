@@ -1,8 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { cache } from "@/lib/cache";
+import { rateLimit } from "@/lib/rate-limit";
 import type { RecentRollCallVote } from "@/data/types";
 
-export async function GET() {
+const limiter = rateLimit({ windowMs: 60_000, max: 30 });
+
+export async function GET(request: NextRequest) {
+  const limited = limiter.check(request);
+  if (limited) return limited;
+
   const cacheKey = "votes:recent";
   const cached = cache.get<RecentRollCallVote[]>(cacheKey);
   if (cached && cached.length > 0) return NextResponse.json(cached);

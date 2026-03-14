@@ -100,26 +100,50 @@ export default function AuthModal() {
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-teal-50 flex items-center justify-center">
               <MailIcon className="w-8 h-8 text-teal" />
             </div>
+            <h3 className="text-lg font-bold text-navy mb-2">Confirmation Email Sent!</h3>
             <div className="mx-auto mb-4 px-4 py-2 bg-gray-50 rounded-xl border border-gray-200">
               <p className="text-sm font-medium text-navy">{email}</p>
             </div>
-            <p className="text-sm text-gray-500 leading-relaxed mb-6">
-              We sent a confirmation link. Click the link to activate your account, then come back and log in.
-            </p>
+
+            {/* Step-by-step instructions */}
+            <div className="text-left bg-gray-50 rounded-xl p-4 mb-5 border border-gray-100">
+              <p className="text-xs font-bold text-navy uppercase tracking-wider mb-3">Follow these steps:</p>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-navy text-white flex items-center justify-center text-xs font-bold shrink-0">1</div>
+                  <p className="text-sm text-gray-600">Open your email inbox (check spam/junk too)</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-navy text-white flex items-center justify-center text-xs font-bold shrink-0">2</div>
+                  <p className="text-sm text-gray-600">Click the <strong>&quot;Confirm your email&quot;</strong> link from CheckMyRep</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-navy text-white flex items-center justify-center text-xs font-bold shrink-0">3</div>
+                  <p className="text-sm text-gray-600">You&apos;ll be redirected back here and automatically logged in</p>
+                </div>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Button
                 onClick={() => { setEmailSent(false); setTab("login"); setPassword(""); }}
                 variant="primary"
                 className="w-full"
               >
-                I Confirmed — Log In
+                Already Confirmed? Log In Here
               </Button>
               <button onClick={close} className="w-full py-2 text-xs text-gray-400 cursor-pointer bg-transparent border-none">
-                I&apos;ll do it later
+                I&apos;ll confirm later
               </button>
             </div>
             <p className="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-400">
-              Didn&apos;t get it? Check spam or try a different email.
+              Didn&apos;t get it? Check spam, or{" "}
+              <button
+                onClick={() => { setEmailSent(false); setError(""); }}
+                className="text-navy font-medium underline cursor-pointer bg-transparent border-none p-0"
+              >
+                try a different email
+              </button>.
             </p>
           </div>
         ) : (

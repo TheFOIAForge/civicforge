@@ -1,5 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { HARDCODED_MEMBER_STATS, type MemberStatsPayload } from "@/data/member-stats";
+import { rateLimit } from "@/lib/rate-limit";
+
+const limiter = rateLimit({ windowMs: 60_000, max: 30 });
 
 /**
  * GET /api/member-stats
@@ -22,7 +25,10 @@ export function getCachedStats(): MemberStatsPayload {
   return cachedLiveData ?? HARDCODED_MEMBER_STATS;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const limited = limiter.check(request);
+  if (limited) return limited;
+
   const data = getCachedStats();
 
   return NextResponse.json(data, {

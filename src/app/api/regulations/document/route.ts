@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit } from "@/lib/rate-limit";
 
+const limiter = rateLimit({ windowMs: 60_000, max: 20 });
 const REGULATIONS_API = "https://api.regulations.gov/v4/documents";
 
 export async function GET(request: NextRequest) {
+  const limited = limiter.check(request);
+  if (limited) return limited;
+
   const apiKey = process.env.REGULATIONS_GOV_API_KEY;
   if (!apiKey) {
     return NextResponse.json(

@@ -1,11 +1,12 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 
-import { useState, useEffect, Suspense, useRef, useCallback } from "react";
+import { useState, useEffect, Suspense, useRef, useCallback, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { issues, getIssueBySlug } from "@/data/issues";
 import { buildSystemPrompt } from "@/lib/prompts";
+import { callClaude } from "@/lib/claude-client";
 import type { Representative } from "@/data/types";
 import { useMyReps } from "@/lib/my-reps-context";
 import { useAuth } from "@/lib/auth-context";
@@ -43,9 +44,9 @@ import {
 type Mode = "letter" | "call" | "social";
 
 const modeConfig: Record<Mode, { label: string; desc: string; action: string; hint: string; Icon: typeof Mail; civicIcon: string }> = {
-  letter: { label: "Mail a Letter", desc: "Physical letter via USPS", action: "GENERATE LETTER", hint: "Strongest impact — lands on their desk", Icon: Mail, civicIcon: "/images/civic/icons/mail.png" },
-  call: { label: "Make a Call", desc: "Talking points for a phone call", action: "GENERATE SCRIPT", hint: "Fastest way to get attention", Icon: Phone, civicIcon: "/images/civic/icons/contact.png" },
-  social: { label: "Send an Email", desc: "Email their office directly", action: "GENERATE EMAIL", hint: "Quick and convenient", Icon: PenLine, civicIcon: "/images/civic/icons/email.png" },
+  letter: { label: "Mail a Letter", desc: "Physical letter via USPS", action: "GENERATE LETTER", hint: "Strongest impact — lands on their desk", Icon: Mail, civicIcon: "/images/civic/icons/mail-animation.mp4" },
+  call: { label: "Make a Call", desc: "Talking points for a phone call", action: "GENERATE SCRIPT", hint: "Fastest way to get attention", Icon: Phone, civicIcon: "/images/civic/icons/email-animation.mp4" },
+  social: { label: "Send an Email", desc: "Email their office directly", action: "GENERATE EMAIL", hint: "Quick and convenient", Icon: PenLine, civicIcon: "/images/civic/icons/call-animation.mp4" },
 };
 
 const quickTopics = [
@@ -73,13 +74,14 @@ const US_STATES = [
 
 function DraftInner() {
   const searchParams = useSearchParams();
-  const { myReps, hasSavedReps } = useMyReps();
+  const { myReps, hasSavedReps, removeRep, saveRep, isMyRep } = useMyReps();
   const { user, setShowAuthModal, setAuthModalMessage } = useAuth();
   const outputRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const [allReps, setAllReps] = useState<Representative[]>([]);
+  const [repsLoading, setRepsLoading] = useState(true);
   const [selectedModes, setSelectedModes] = useState<Set<Mode>>(
     new Set([(searchParams.get("mode") as Mode) || "letter"])
   );
@@ -99,8 +101,9 @@ function DraftInner() {
   const [chamberFilter, setChamberFilter] = useState<"All" | "Senate" | "House">("All");
   const [partyFilter, setPartyFilter] = useState<"All" | "D" | "R" | "I">("All");
   const [stateFilter, setStateFilter] = useState<string>("All");
-  const [showResults, setShowResults] = useState(false);
   const [highlightIdx, setHighlightIdx] = useState(-1);
+  const [zipResult, setZipResult] = useState<{ state: string | null; districts: string[] } | null>(null);
+  const [zipLoading, setZipLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [mailModalOpen, setMailModalOpen] = useState(false);
   const [mailSuccess, setMailSuccess] = useState(false);
@@ -116,29 +119,20 @@ function DraftInner() {
 
   // Load all reps
   useEffect(() => {
-    fetch("/api/members")
+    setRepsLoading(true);
+    fetch("/api/members?fields=light")
       .then((r) => r.json())
       .then((data: Representative[]) => {
         setAllReps(data);
+        setRepsLoading(false);
         const repParam = searchParams.get("rep");
         if (repParam) {
           const match = data.find((r: Representative) => r.slug === repParam);
           if (match) { setSelectedReps([match]); setStep(3); }
         }
       })
-      .catch(() => {});
+      .catch(() => { setRepsLoading(false); });
   }, [searchParams]);
-
-  // Close search results on outside click
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (resultsRef.current && !resultsRef.current.contains(e.target as Node)) {
-        setShowResults(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
 
   // Handle Stripe redirect back
   useEffect(() => {
@@ -214,19 +208,87 @@ function DraftInner() {
   const selectedIssue = selectedIssueSlug ? getIssueBySlug(selectedIssueSlug) : undefined;
   const hasFilters = chamberFilter !== "All" || partyFilter !== "All" || stateFilter !== "All" || repSearch.length >= 2;
 
-  const filteredReps = allReps.filter((r) => {
-    if (chamberFilter !== "All" && r.chamber !== chamberFilter) return false;
-    if (partyFilter !== "All" && r.party !== partyFilter) return false;
-    if (stateFilter !== "All" && r.stateAbbr !== stateFilter) return false;
-    if (repSearch.length >= 2) {
-      const q = repSearch.toLowerCase();
-      return r.fullName.toLowerCase().includes(q) || r.state.toLowerCase().includes(q) || r.stateAbbr.toLowerCase() === q;
-    }
-    return true;
-  });
+  // Address / zip search — auto-triggers on zip patterns, debounced for addresses
+  const [addressQuery, setAddressQuery] = useState("");
+  const lookupTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastLookupRef = useRef("");
 
-  const otherReps = filteredReps.filter((r) => !myReps.some((mr) => mr.id === r.id));
-  const dropdownReps = (hasSavedReps ? otherReps : filteredReps).slice(0, 30);
+  function doAddressLookup(q: string) {
+    if (!q || q === lastLookupRef.current) return;
+    lastLookupRef.current = q;
+    setZipLoading(true);
+    setZipResult(null);
+    fetch(`/api/zip-district?q=${encodeURIComponent(q)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.state) {
+          setZipResult({ state: data.state, districts: data.districts || [] });
+        } else {
+          setZipResult({ state: null, districts: [] });
+        }
+      })
+      .catch(() => { setZipResult({ state: null, districts: [] }); })
+      .finally(() => setZipLoading(false));
+  }
+
+  // Auto-detect zip/address patterns and trigger lookup
+  useEffect(() => {
+    if (lookupTimerRef.current) clearTimeout(lookupTimerRef.current);
+    const q = addressQuery.trim();
+
+    // 5-digit zip → immediate lookup
+    if (/^\d{5}$/.test(q)) {
+      lookupTimerRef.current = setTimeout(() => doAddressLookup(q), 300);
+      return;
+    }
+    // Zip+4 → immediate lookup
+    if (/^\d{5}[- ]?\d{4}$/.test(q)) {
+      lookupTimerRef.current = setTimeout(() => doAddressLookup(q), 300);
+      return;
+    }
+    // Looks like an address (has digits + letters + comma or space, min 10 chars) → debounced
+    if (q.length >= 10 && /\d/.test(q) && /[a-zA-Z]/.test(q)) {
+      lookupTimerRef.current = setTimeout(() => doAddressLookup(q), 800);
+      return;
+    }
+    // Not a zip/address — clear any previous lookup
+    if (zipResult && !q) {
+      setZipResult(null);
+      lastLookupRef.current = "";
+    }
+    return () => { if (lookupTimerRef.current) clearTimeout(lookupTimerRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addressQuery]);
+
+  function clearAddressFilter() {
+    setAddressQuery("");
+    setRepSearch("");
+    setZipResult(null);
+    lastLookupRef.current = "";
+  }
+
+  const dropdownReps = useMemo(() => {
+    return allReps.filter((r) => {
+      if (chamberFilter !== "All" && r.chamber !== chamberFilter) return false;
+      if (partyFilter !== "All" && r.party !== partyFilter) return false;
+      if (stateFilter !== "All" && r.stateAbbr !== stateFilter) return false;
+      // District-level filtering from address/zip lookup
+      if (zipResult?.state) {
+        if (r.stateAbbr !== zipResult.state) return false;
+        if (r.chamber === "Senate") return true;
+        if (zipResult.districts.length > 0 && r.district) {
+          return zipResult.districts.includes(r.district);
+        }
+        return true;
+      }
+      if (repSearch.length >= 2) {
+        const q = repSearch.toLowerCase();
+        return r.fullName.toLowerCase().includes(q) || r.state.toLowerCase().includes(q) || r.stateAbbr.toLowerCase() === q;
+      }
+      return true;
+    });
+  }, [allReps, chamberFilter, partyFilter, stateFilter, zipResult, repSearch]);
+
 
   function handleSearchKeyDown(e: React.KeyboardEvent) {
     if (e.key === "ArrowDown") {
@@ -239,13 +301,11 @@ function DraftInner() {
       e.preventDefault();
       const rep = dropdownReps[highlightIdx];
       setSelectedReps((prev) => prev.some((r) => r.id === rep.id) ? prev.filter((r) => r.id !== rep.id) : [...prev, rep]);
-      setShowResults(false);
       setRepSearch("");
+      setAddressQuery("");
       setShowAllReps(false);
       setStep(3);
       setTimeout(() => document.getElementById("step-3-topics")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
-    } else if (e.key === "Escape") {
-      setShowResults(false);
     }
   }
 
@@ -278,34 +338,11 @@ function DraftInner() {
     const systemPrompt = buildSystemPrompt(mode, selectedRep, selectedIssue);
 
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1500,
-          system: systemPrompt,
-          messages: [
-            {
-              role: "user",
-              content: `My concern: ${concern}\n\nMy location: [CITY, STATE] (the user will fill this in)\n\nPlease draft the ${mode === "letter" ? "letter" : mode === "call" ? "call script" : "social media posts"}.`,
-            },
-          ],
-        }),
+      const text = await callClaude({
+        apiKey,
+        system: systemPrompt,
+        userMessage: `My concern: ${concern}\n\nMy location: [CITY, STATE] (the user will fill this in)\n\nPlease draft the ${mode === "letter" ? "letter" : mode === "call" ? "call script" : "social media posts"}.`,
       });
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error?.message || `API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const text = data.content?.[0]?.text || "No response generated. Please try again.";
       setOutput(text);
 
       setTimeout(() => {
@@ -445,7 +482,7 @@ function DraftInner() {
   const canGenerate = selectedRep && concern.trim().length > 0;
 
   return (
-    <div className="min-h-screen pb-24" data-print-content>
+    <div className="min-h-screen pb-24 bg-black" data-print-content>
       {/* Header */}
       <div className="bg-gradient-hero px-4 sm:px-6 pt-8 pb-8 relative overflow-hidden">
         <div className="absolute inset-0 pattern-dots opacity-[0.04]" />
@@ -455,7 +492,7 @@ function DraftInner() {
           className="absolute right-4 bottom-0 w-28 sm:w-36 opacity-[0.15]"
           aria-hidden="true"
         />
-        <div className="relative z-10 max-w-3xl mx-auto">
+        <div className="relative z-10 max-w-6xl mx-auto">
           <div className="flex items-center gap-3 mb-2">
             <img src="/images/civic/icons/capitol.png" alt="" className="w-7 h-7 opacity-80" aria-hidden="true" />
             <span className="text-sm text-white/60 font-medium">CheckMyRep</span>
@@ -470,7 +507,7 @@ function DraftInner() {
       </div>
 
       {/* Main content */}
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 -mt-4 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 -mt-4 relative z-10">
         {/* Mail Success Screen */}
         {mailSuccess ? (
           <div className="space-y-6 pb-24">
@@ -636,24 +673,374 @@ function DraftInner() {
         ) : !output ? (
           <div className="space-y-6" data-print-hide>
 
-            {/* Step 1: Choose how to reach them */}
-            <Card padding="md">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 rounded-xl bg-navy text-white flex items-center justify-center text-sm font-semibold shrink-0">
-                  1
-                </div>
-                <h2 className="text-lg font-semibold text-navy">
-                  How do you want to reach them?
+            {/* Step 1: Pick your rep */}
+            <Card padding="none" className="!bg-gradient-to-br !from-gray-950 !via-gray-900 !to-black !border-gray-800 !overflow-hidden relative z-40 mt-8">
+              {/* Distressed noise overlay */}
+              <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E\")" }} />
+              <div className="relative px-6 pt-6 pb-2">
+                <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-white/15 to-transparent pointer-events-none" />
+                <h2 className="text-5xl lg:text-6xl tracking-wider text-center relative z-10 w-full" style={{ fontFamily: "'Bebas Neue', sans-serif", color: "#ffffff" }}>
+                  Who Are You Writing To?
                 </h2>
+                <p className="text-xl text-white/60 mb-0 mt-1 text-center tracking-wide" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>
+                  Tap to select your representatives.
+                </p>
               </div>
-              <p className="text-xs text-gray-500 mb-3">
-                Select one or more — we&apos;ll handle the rest
-              </p>
+
+              <div className="px-6 pb-6 pt-4">
+              {/* Saved reps */}
+              {hasSavedReps && (
+                <div className="mb-5">
+                  <p className="text-xs text-white/40 mb-3 uppercase tracking-widest font-semibold">
+                    Your saved representatives
+                  </p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {myReps.map((rep) => {
+                      const isRepSelected = selectedReps.some((r) => r.id === rep.id);
+                      const party = partyConfig(rep.party);
+                      const partyColor = rep.party === "R" ? "#dc2626" : rep.party === "D" ? "#2563eb" : "#9333ea";
+                      return (
+                        <button
+                          key={rep.id}
+                          onClick={() => {
+                            setSelectedReps((prev) => {
+                              const exists = prev.some((r) => r.id === rep.id);
+                              const next = exists ? prev.filter((r) => r.id !== rep.id) : [...prev, rep];
+                              if (next.length > 0) setStep(3);
+                              return next;
+                            });
+                            setTimeout(() => document.getElementById("step-3-topics")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+                          }}
+                          className={`flex items-center gap-3 p-3 rounded-xl text-left cursor-pointer transition-all border-2
+                            ${isRepSelected
+                              ? "bg-white/10 backdrop-blur-sm"
+                              : "bg-white/5 border-white/10 hover:border-white/30 hover:bg-white/10"}`}
+                          style={isRepSelected ? { borderColor: partyColor, boxShadow: `0 0 20px ${partyColor}40, inset 0 0 20px ${partyColor}10` } : {}}
+                        >
+                          {/* Activist checkmark */}
+                          <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 border-2 transition-all
+                            ${isRepSelected ? "border-white" : "border-white/30"}`}
+                            style={isRepSelected ? { backgroundColor: partyColor, borderColor: partyColor } : {}}
+                          >
+                            {isRepSelected && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
+                          </div>
+                          {/* Distressed party badge with portrait */}
+                          <div className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden relative border-2"
+                            style={{ borderColor: partyColor, boxShadow: `0 0 8px ${partyColor}30`, background: `linear-gradient(135deg, ${partyColor}40, ${partyColor}20)` }}
+                          >
+                            <span className="text-white font-bold text-sm" style={{ textShadow: "1px 1px 2px rgba(0,0,0,0.5)" }}>{rep.firstName[0]}{rep.lastName[0]}</span>
+                            {rep.photoUrl && (
+                              <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                            )}
+                            {/* Distressed grain overlay on badge */}
+                            <div className="absolute inset-0 opacity-20 mix-blend-overlay" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className="block text-sm font-bold text-white">{rep.fullName}</span>
+                            <span className="block text-xs text-white/50">
+                              {party.label} — {rep.chamber}{rep.stateAbbr ? ` · ${rep.stateAbbr}` : ""}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            {isRepSelected && (
+                              <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full mr-1" style={{ color: partyColor, backgroundColor: `${partyColor}20`, border: `1px solid ${partyColor}40` }}>Selected</span>
+                            )}
+                            <Link
+                              href={`/members/${rep.slug}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+                              title="View profile"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5 text-white/40 hover:text-white/80" />
+                            </Link>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); removeRep(rep.id); }}
+                              className="p-1.5 rounded-lg hover:bg-red-500/20 transition-colors cursor-pointer bg-transparent border-none"
+                              title="Remove from saved"
+                            >
+                              <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
+                            </button>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {selectedReps.length > 1 && (
+                    <p className="text-xs font-bold mt-2" style={{ color: "#dc2626" }}>
+                      {selectedReps.length} representatives selected
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Search for other reps */}
+              <div ref={resultsRef}>
+                {hasSavedReps && !showAllReps ? (
+                  <button
+                    onClick={() => setShowAllReps(true)}
+                    className="w-full p-4 text-sm font-bold text-center cursor-pointer transition-all
+                      border-2 border-dashed border-red-500/40 rounded-xl bg-red-500/5 hover:border-red-500 hover:bg-red-500/10 hover:shadow-[0_0_20px_rgba(220,38,38,0.15)]"
+                    style={{ color: "#dc2626", fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.1rem", letterSpacing: "0.1em" }}
+                  >
+                    Search All Members of Congress
+                  </button>
+                ) : (
+                  <>
+                    {/* Unified search bar — live name filter + address/zip lookup on Enter */}
+                    <div className="relative mb-4">
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+                      <input
+                        ref={searchInputRef}
+                        type="text"
+                        value={addressQuery}
+                        onChange={(e) => {
+                          setAddressQuery(e.target.value);
+                          // Live name/state filtering (clears zip result when typing non-address)
+                          setRepSearch(e.target.value);
+                          if (zipResult) { setZipResult(null); }
+                          setHighlightIdx(-1);
+                        }}
+                        onKeyDown={handleSearchKeyDown}
+                        placeholder="Search by name, state, address, or zip code..."
+                        className="w-full pl-12 pr-36 py-4 bg-white/5 border-2 border-white/15 rounded-xl text-sm text-white
+                          placeholder:text-white/30 focus:bg-white/10 focus:border-red-500/50 focus:outline-none transition-all"
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                        {zipLoading ? (
+                          <span className="text-xs font-bold text-red-400 flex items-center gap-1.5">
+                            <span className="w-3 h-3 border-2 border-red-400 border-t-transparent rounded-full animate-spin" /> Looking up...
+                          </span>
+                        ) : zipResult?.state ? (
+                          <>
+                            <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                              <Check className="w-3.5 h-3.5" />
+                              {zipResult.state}{zipResult.districts.length > 0 ? ` District ${zipResult.districts.join(", ")}` : ""}
+                            </span>
+                            <button
+                              onClick={clearAddressFilter}
+                              className="p-1 rounded-md hover:bg-white/10 text-white/40 hover:text-white/80 cursor-pointer bg-transparent border-none transition-colors"
+                              aria-label="Clear address filter"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        ) : zipResult && !zipResult.state ? (
+                          <>
+                            <span className="text-xs font-bold text-red-400">Not found</span>
+                            <button
+                              onClick={clearAddressFilter}
+                              className="p-1 rounded-md hover:bg-white/10 text-white/40 hover:text-white/80 cursor-pointer bg-transparent border-none transition-colors"
+                              aria-label="Clear"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        ) : repsLoading ? (
+                          <span className="text-xs font-bold text-red-400 flex items-center gap-1.5">
+                            <span className="w-3 h-3 border-2 border-red-400 border-t-transparent rounded-full animate-spin" /> Loading...
+                          </span>
+                        ) : (
+                          <span className="text-xs font-bold text-red-400 flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" /> {dropdownReps.length} found
+                          </span>
+                        )}
+                      </span>
+                    </div>
+
+                    {/* Filter chips — distressed activist style */}
+                    <div className="flex flex-wrap items-center gap-2 mb-4">
+                      {(["All", "Senate", "House"] as const).map((c) => {
+                        const isActive = chamberFilter === c;
+                        return (
+                          <button
+                            key={c}
+                            onClick={() => { setChamberFilter(c); setHighlightIdx(-1); }}
+                            className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg cursor-pointer transition-all border-2
+                              ${isActive
+                                ? "bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.2)]"
+                                : "bg-transparent text-white/70 border-white/20 hover:border-white/50 hover:text-white"}`}
+                          >
+                            {c}
+                          </button>
+                        );
+                      })}
+                      <div className="w-px h-6 mx-1 bg-white/20" />
+                      {(["D", "R", "I"] as const).map((p) => {
+                        const isActive = partyFilter === p;
+                        const labels = { D: "Dem", R: "GOP", I: "Ind" };
+                        const chipColors = {
+                          D: { active: "#2563eb", glow: "rgba(37,99,235,0.3)" },
+                          R: { active: "#dc2626", glow: "rgba(220,38,38,0.3)" },
+                          I: { active: "#9333ea", glow: "rgba(147,51,234,0.3)" },
+                        };
+                        const cc = chipColors[p];
+                        return (
+                          <button
+                            key={p}
+                            onClick={() => { setPartyFilter(partyFilter === p ? "All" : p); setHighlightIdx(-1); }}
+                            className="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg cursor-pointer transition-all border-2"
+                            style={isActive
+                              ? { backgroundColor: cc.active, color: "#fff", borderColor: cc.active, boxShadow: `0 0 15px ${cc.glow}` }
+                              : { backgroundColor: "transparent", color: cc.active, borderColor: `${cc.active}50`, }}
+                          >
+                            {labels[p]}
+                          </button>
+                        );
+                      })}
+                      <div className="w-px h-6 mx-1 bg-white/20" />
+                      <select
+                        value={stateFilter}
+                        onChange={(e) => { setStateFilter(e.target.value); setZipResult(null); setHighlightIdx(-1); }}
+                        className="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg cursor-pointer border-2 transition-all"
+                        style={stateFilter === "All"
+                          ? { backgroundColor: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
+                          : { backgroundColor: "#fff", color: "#000", borderColor: "#fff" }}
+                      >
+                        <option value="All">State</option>
+                        {US_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                      {(activeFilterCount > 0 || addressQuery || zipResult) && (
+                        <button
+                          onClick={() => { setChamberFilter("All"); setPartyFilter("All"); setStateFilter("All"); clearAddressFilter(); }}
+                          className="px-3 py-2 text-xs font-bold uppercase tracking-wider cursor-pointer bg-transparent border-2 border-red-500/40 rounded-lg text-red-400 hover:bg-red-500/10 hover:border-red-500 transition-all"
+                        >
+                          Clear All
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Inline scrollable results list */}
+                    <div className="max-h-80 overflow-y-auto rounded-xl border-2 border-white/10 bg-black/30">
+                      {repsLoading || zipLoading ? (
+                        <div className="flex flex-col items-center justify-center py-12 gap-3">
+                          <div className="w-8 h-8 border-3 border-red-500 border-t-transparent rounded-full animate-spin" />
+                          <p className="text-sm font-bold text-white/60" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: "0.1em" }}>
+                            {zipLoading ? "Looking Up Your District..." : "Loading Members of Congress..."}
+                          </p>
+                          {!zipLoading && <p className="text-xs text-white/30">535 representatives</p>}
+                        </div>
+                      ) : dropdownReps.length > 0 ? (
+                        dropdownReps.map((rep, idx) => {
+                          const party = partyConfig(rep.party);
+                          const partyColor = rep.party === "R" ? "#dc2626" : rep.party === "D" ? "#2563eb" : "#9333ea";
+                          const isRepSelected = selectedReps.some((r) => r.id === rep.id);
+                          return (
+                            <div
+                              key={rep.id}
+                              onClick={() => {
+                                setSelectedReps((prev) => {
+                                  const exists = prev.some((r) => r.id === rep.id);
+                                  return exists ? prev.filter((r) => r.id !== rep.id) : [...prev, rep];
+                                });
+                                setStep(3);
+                                setTimeout(() => document.getElementById("step-3-topics")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+                              }}
+                              role="button"
+                              tabIndex={0}
+                              className={`w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer transition-colors border-b border-white/5
+                                ${isRepSelected ? "bg-white/10" : "bg-transparent hover:bg-white/5"}`}
+                              style={isRepSelected ? { boxShadow: `inset 3px 0 0 ${partyColor}` } : {}}
+                            >
+                              <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 overflow-hidden relative border-2"
+                                style={{ borderColor: `${partyColor}60`, background: `linear-gradient(135deg, ${partyColor}30, ${partyColor}10)` }}
+                              >
+                                <span className="text-white text-xs font-bold">{rep.firstName[0]}{rep.lastName[0]}</span>
+                                {rep.photoUrl && (
+                                  <img src={rep.photoUrl} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                                )}
+                              </div>
+                              <span className="text-sm font-bold text-white flex-1">{rep.fullName}</span>
+                              <span className="text-xs text-white/40 font-medium">
+                                {party.label.slice(0, 3)} · {rep.stateAbbr}{rep.district ? `-${rep.district}` : ""} · {rep.chamber}
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (isMyRep(rep.id)) { removeRep(rep.id); } else { saveRep(rep); }
+                                }}
+                                className="p-1.5 rounded-lg hover:bg-white/10 cursor-pointer bg-transparent border-none transition-colors shrink-0"
+                                aria-label={isMyRep(rep.id) ? "Remove from My Reps" : "Save to My Reps"}
+                                title={isMyRep(rep.id) ? "Remove from My Reps" : "Save to My Reps"}
+                              >
+                                <Star className={`w-4 h-4 ${isMyRep(rep.id) ? "text-yellow-400 fill-yellow-400" : "text-white/20 hover:text-yellow-400"}`} />
+                              </button>
+                              {isRepSelected && <Check className="w-4 h-4 text-red-400 shrink-0" />}
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="p-6 text-center">
+                          <p className="text-sm text-white/50">
+                            {zipResult && !zipResult.state
+                              ? "Couldn\u2019t find a district for that address. Try a full address or zip+4."
+                              : "No representatives found. Try different filters."}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Selected reps pills */}
+              {selectedReps.length > 0 && (
+                <div className="mt-5">
+                  <p className="text-xs text-white/40 font-bold mb-2 uppercase tracking-widest">
+                    {selectedReps.length === 1 ? "Selected representative" : `${selectedReps.length} representatives selected`}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedReps.map((rep) => {
+                      const partyColor = rep.party === "R" ? "#dc2626" : rep.party === "D" ? "#2563eb" : "#9333ea";
+                      return (
+                        <div
+                          key={rep.id}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg border-2"
+                          style={{ backgroundColor: `${partyColor}15`, borderColor: `${partyColor}40` }}
+                        >
+                          <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 overflow-hidden relative border"
+                            style={{ borderColor: `${partyColor}60`, background: `${partyColor}30` }}
+                          >
+                            <span className="text-white text-[10px] font-bold">{rep.firstName[0]}{rep.lastName[0]}</span>
+                            {rep.photoUrl && (
+                              <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                            )}
+                          </div>
+                          <span className="text-sm font-bold text-white">{rep.fullName}</span>
+                          <button
+                            onClick={() => setSelectedReps((prev) => prev.filter((r) => r.id !== rep.id))}
+                            className="text-white/40 hover:text-red-400 cursor-pointer bg-transparent border-none p-0 transition-colors"
+                            aria-label={`Remove ${rep.fullName}`}
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              </div>
+            </Card>
+
+            {/* Step 2: Choose how to reach them */}
+            <div style={{ fontFamily: "'Bebas Neue', sans-serif" }}><Card padding="none" className="!bg-gradient-to-br !from-gray-950 !via-gray-900 !to-black !border-gray-800 !overflow-hidden relative">
+              <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E\")" }} />
+              <div className="relative px-6 pt-6 pb-2">
+                <h2 className="text-5xl lg:text-6xl tracking-wider text-center relative z-10 w-full" style={{ fontFamily: "'Bebas Neue', sans-serif", color: "#ffffff" }}>
+                  How Do You Want To Reach Them?
+                </h2>
+                <p className="text-xl text-white/60 mb-0 mt-1 text-center tracking-wide" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>
+                  Select one or more.
+                </p>
+              </div>
+              <div className="relative px-6 pb-6 pt-2">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {(["letter", "call", "social"] as Mode[]).map((m) => {
                   const isSelected = selectedModes.has(m);
+                  const videoLabel = m === "letter" ? "MAIL ($1.50)" : m === "call" ? "CALL (Free)" : "EMAIL (Free)";
+                  const strokeColor = m === "letter" ? "#dc2626" : m === "call" ? "#2563eb" : "#eab308";
+                  const selectedBorder = m === "letter" ? "border-red-500" : m === "call" ? "border-blue-500" : "border-yellow-500";
                   const cfg = modeConfig[m];
-                  const colors = m === "letter" ? "border-navy bg-navy-50" : m === "call" ? "border-teal bg-teal-50" : "border-gold-dark bg-gold-50";
                   return (
                     <button
                       key={m}
@@ -669,284 +1056,29 @@ function DraftInner() {
                         });
                         setOutput("");
                       }}
-                      className={`relative text-left p-4 rounded-xl cursor-pointer transition-all border-2
-                        ${isSelected ? colors : "border-gray-200 bg-white hover:border-gray-300"}`}
+                      className={`group relative text-left rounded-xl cursor-pointer border-2 overflow-hidden p-0
+                        transition-all duration-300 ease-out
+                        hover:scale-105 hover:shadow-xl hover:shadow-black/40 hover:-translate-y-1
+                        active:scale-95 active:shadow-md
+                        ${isSelected ? `${selectedBorder} ring-2 ring-white/30 scale-[1.02] shadow-lg` : "border-white/20 hover:border-white/40"}`}
                     >
-                      <div className="flex items-start gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 overflow-hidden
-                          ${isSelected ? (m === "letter" ? "bg-navy text-white" : m === "call" ? "bg-teal text-white" : "bg-gold-dark text-white") : "bg-gray-100 text-gray-500"}`}>
-                          <img src={cfg.civicIcon} alt="" className="w-6 h-6" style={{ filter: isSelected ? "brightness(10)" : "grayscale(0.5) opacity(0.6)" }} aria-hidden="true" />
+                      <div>
+                        <div className="py-2 text-center bg-black/80 transition-colors duration-300 group-hover:bg-black/90">
+                          <span className="text-2xl tracking-[0.15em] uppercase transition-all duration-300 group-hover:tracking-[0.25em]" style={{ fontFamily: "'Bebas Neue', sans-serif", color: strokeColor, textShadow: `0 0 12px ${strokeColor}50` }}>{videoLabel}</span>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <span className={`block text-sm font-semibold ${isSelected ? "text-navy" : "text-gray-700"}`}>
-                            {cfg.label}
-                          </span>
-                          <span className="block text-xs text-gray-500 mt-0.5">{cfg.hint}</span>
-                        </div>
+                        <video src={cfg.civicIcon} autoPlay loop muted playsInline className="w-full object-cover min-h-[100px] transition-all duration-300 group-hover:brightness-110 group-hover:contrast-110" aria-hidden="true" />
                       </div>
                       {isSelected && (
-                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-navy flex items-center justify-center">
-                          <Check className="w-3 h-3 text-white" />
+                        <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-md animate-[bounce_0.4s_ease-out]">
+                          <Check className="w-3.5 h-3.5" style={{ color: strokeColor }} />
                         </div>
                       )}
                     </button>
                   );
                 })}
               </div>
-              {selectedModes.size > 1 && (
-                <p className="text-xs text-teal font-medium mt-2">
-                  {selectedModes.size} methods selected — write once, send {selectedModes.size} ways
-                </p>
-              )}
-            </Card>
-
-            {/* Step 2: Pick your rep */}
-            <Card padding="md" className="relative z-40">
-              <div className="flex items-center gap-3 mb-4">
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm font-semibold shrink-0
-                  ${step >= 1 ? "bg-navy text-white" : "bg-gray-200 text-gray-500"}`}>
-                  2
-                </div>
-                <h2 className="text-lg font-semibold text-navy">
-                  Who are you writing to?
-                </h2>
               </div>
-
-              {/* Saved reps */}
-              {hasSavedReps && (
-                <div className="mb-4">
-                  <p className="text-xs text-gray-500 mb-3">
-                    Your saved representatives — tap to select
-                  </p>
-                  <div className="grid grid-cols-1 gap-2">
-                    {myReps.map((rep) => {
-                      const isRepSelected = selectedReps.some((r) => r.id === rep.id);
-                      const party = partyConfig(rep.party);
-                      return (
-                        <button
-                          key={rep.id}
-                          onClick={() => {
-                            setSelectedReps((prev) => {
-                              const exists = prev.some((r) => r.id === rep.id);
-                              const next = exists ? prev.filter((r) => r.id !== rep.id) : [...prev, rep];
-                              if (next.length > 0) setStep(3);
-                              return next;
-                            });
-                            setTimeout(() => document.getElementById("step-3-topics")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
-                          }}
-                          className={`flex items-center gap-3 p-3 rounded-xl text-left cursor-pointer transition-all border-2
-                            ${isRepSelected ? "border-navy bg-navy-50" : "border-gray-200 bg-white hover:border-gray-300"}`}
-                        >
-                          {/* Checkbox */}
-                          <div className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 border-2
-                            ${isRepSelected ? "bg-navy border-navy" : "border-gray-300"}`}>
-                            {isRepSelected && <Check className="w-3 h-3 text-white" />}
-                          </div>
-                          <div className={`w-10 h-10 ${party.bg} rounded-xl flex items-center justify-center shrink-0 overflow-hidden relative`}>
-                            <span className="text-white font-semibold text-sm">{rep.firstName[0]}{rep.lastName[0]}</span>
-                            {rep.photoUrl && (
-                              <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover rounded-xl" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <span className="block text-sm font-semibold text-navy">{rep.fullName}</span>
-                            <span className="block text-xs text-gray-500">
-                              {party.label} — {rep.chamber}
-                            </span>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {selectedReps.length > 1 && (
-                    <p className="text-xs text-navy font-medium mt-2">
-                      {selectedReps.length} representatives selected
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {/* Search for other reps */}
-              <div ref={resultsRef}>
-                {hasSavedReps && !showAllReps ? (
-                  <button
-                    onClick={() => setShowAllReps(true)}
-                    className="w-full p-3 text-sm text-gray-500 font-medium text-center cursor-pointer transition-colors
-                      border-2 border-dashed border-gray-300 rounded-xl bg-transparent hover:border-navy hover:text-navy"
-                  >
-                    Search All Members of Congress
-                  </button>
-                ) : (
-                  <>
-                    {!hasSavedReps && (
-                      <p className="text-xs text-gray-500 mb-3">
-                        Search for your representative, or{" "}
-                        <Link href="/my-reps" className="font-semibold text-navy">
-                          save your reps
-                        </Link>{" "}
-                        for one-tap access next time.
-                      </p>
-                    )}
-
-                    {/* Filter chips */}
-                    <div className="flex flex-wrap items-center gap-1.5 mb-3">
-                      {(["All", "Senate", "House"] as const).map((c) => (
-                        <button
-                          key={c}
-                          onClick={() => { setChamberFilter(c); setShowResults(true); setHighlightIdx(-1); }}
-                          className={`px-3 py-1.5 text-xs font-medium rounded-full cursor-pointer transition-all border
-                            ${chamberFilter === c ? "bg-navy text-white border-navy" : "bg-white text-gray-600 border-gray-200 hover:border-navy"}`}
-                        >
-                          {c}
-                        </button>
-                      ))}
-                      <div className="w-px h-4 mx-1 bg-gray-200" />
-                      {(["D", "R", "I"] as const).map((p) => {
-                        const isActive = partyFilter === p;
-                        const labels = { D: "Dem", R: "GOP", I: "Ind" };
-                        const colors = {
-                          D: isActive ? "bg-blue text-white border-blue" : "text-blue border-gray-200 hover:border-blue",
-                          R: isActive ? "bg-red text-white border-red" : "text-red border-gray-200 hover:border-red",
-                          I: isActive ? "bg-purple-600 text-white border-purple-600" : "text-purple-600 border-gray-200 hover:border-purple-600",
-                        };
-                        return (
-                          <button
-                            key={p}
-                            onClick={() => { setPartyFilter(partyFilter === p ? "All" : p); setShowResults(true); setHighlightIdx(-1); }}
-                            className={`px-3 py-1.5 text-xs font-medium rounded-full cursor-pointer transition-all border bg-white ${colors[p]}`}
-                          >
-                            {labels[p]}
-                          </button>
-                        );
-                      })}
-                      <div className="w-px h-4 mx-1 bg-gray-200" />
-                      <select
-                        value={stateFilter}
-                        onChange={(e) => { setStateFilter(e.target.value); setShowResults(true); setHighlightIdx(-1); }}
-                        className={`px-3 py-1.5 text-xs font-medium rounded-full cursor-pointer border transition-all
-                          ${stateFilter === "All" ? "bg-white text-gray-600 border-gray-200" : "bg-navy text-white border-navy"}`}
-                      >
-                        <option value="All">State</option>
-                        {US_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-                      </select>
-                      {activeFilterCount > 0 && (
-                        <button
-                          onClick={() => { setChamberFilter("All"); setPartyFilter("All"); setStateFilter("All"); }}
-                          className="px-2 py-1.5 text-xs font-medium text-red cursor-pointer bg-transparent border-none"
-                        >
-                          Clear
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Search input */}
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input
-                        ref={searchInputRef}
-                        type="text"
-                        value={repSearch}
-                        onChange={(e) => { setRepSearch(e.target.value); setShowResults(true); setHighlightIdx(-1); }}
-                        onFocus={() => setShowResults(true)}
-                        onKeyDown={handleSearchKeyDown}
-                        placeholder="Search by name or state..."
-                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm
-                          placeholder:text-gray-400 focus:bg-white focus:border-navy focus:outline-none transition-all"
-                      />
-                      {hasFilters && (
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
-                          {filteredReps.length} found
-                        </span>
-                      )}
-                      {showResults && hasFilters && dropdownReps.length > 0 && (
-                        <div className="absolute z-40 left-0 right-0 top-full mt-1 max-h-72 overflow-y-auto
-                          bg-white border border-gray-200 rounded-xl shadow-lg">
-                          {dropdownReps.map((rep, idx) => {
-                            const party = partyConfig(rep.party);
-                            return (
-                              <button
-                                key={rep.id}
-                                onClick={() => {
-                                  setSelectedReps((prev) => {
-                                    const exists = prev.some((r) => r.id === rep.id);
-                                    return exists ? prev.filter((r) => r.id !== rep.id) : [...prev, rep];
-                                  });
-                                  setShowResults(false);
-                                  setRepSearch("");
-                                  setStep(3);
-                                  setTimeout(() => document.getElementById("step-3-topics")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
-                                }}
-                                onMouseEnter={() => setHighlightIdx(idx)}
-                                className={`w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer transition-colors border-b border-gray-100
-                                  ${idx === highlightIdx ? "bg-gray-50" : "bg-white hover:bg-gray-50"}`}
-                              >
-                                <div className={`w-8 h-8 ${party.bg} rounded-lg flex items-center justify-center shrink-0 overflow-hidden relative`}>
-                                  <span className="text-white text-xs font-semibold">{rep.firstName[0]}{rep.lastName[0]}</span>
-                                  {rep.photoUrl && (
-                                    <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover rounded-lg" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                                  )}
-                                </div>
-                                <span className="text-sm font-medium text-navy flex-1">{rep.fullName}</span>
-                                <span className="text-xs text-gray-400">
-                                  {party.label.slice(0, 3)} · {rep.stateAbbr} · {rep.chamber}
-                                </span>
-                              </button>
-                            );
-                          })}
-                          {filteredReps.length > 30 && (
-                            <div className="px-4 py-2 text-xs text-center text-gray-400">
-                              Showing 30 of {filteredReps.length} — type to narrow
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      {showResults && hasFilters && dropdownReps.length === 0 && (
-                        <div className="absolute z-40 left-0 right-0 top-full mt-1 p-4 bg-white border border-gray-200 rounded-xl shadow-lg">
-                          <p className="text-sm text-center text-gray-500">
-                            No representatives found. Try different filters.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Selected reps pills */}
-              {selectedReps.length > 0 && (
-                <div className="mt-4">
-                  <p className="text-xs text-navy font-medium mb-2">
-                    {selectedReps.length === 1 ? "Selected representative" : `${selectedReps.length} representatives selected`}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedReps.map((rep) => {
-                      const party = partyConfig(rep.party);
-                      return (
-                        <div
-                          key={rep.id}
-                          className="flex items-center gap-2 px-3 py-1.5 bg-navy-50 border border-navy/20 rounded-full"
-                        >
-                          <div className={`w-6 h-6 ${party.bg} rounded-full flex items-center justify-center shrink-0 overflow-hidden relative`}>
-                            <span className="text-white text-[10px] font-semibold">{rep.firstName[0]}{rep.lastName[0]}</span>
-                            {rep.photoUrl && (
-                              <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover rounded-full" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                            )}
-                          </div>
-                          <span className="text-sm font-medium text-navy">{rep.fullName}</span>
-                          <button
-                            onClick={() => setSelectedReps((prev) => prev.filter((r) => r.id !== rep.id))}
-                            className="text-gray-400 hover:text-red cursor-pointer bg-transparent border-none p-0"
-                            aria-label={`Remove ${rep.fullName}`}
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </Card>
+            </Card></div>
 
             {/* Step 3: What's on your mind? */}
             <Card padding="md" id="step-3-topics">
