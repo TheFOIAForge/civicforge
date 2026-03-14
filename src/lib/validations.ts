@@ -22,14 +22,26 @@ const usState = z.string().min(2).max(2).transform((s) => s.toUpperCase());
 
 const zipCode = z.string().regex(/^\d{5}(-\d{4})?$/, "Invalid ZIP code format");
 
+// Lenient address state: accepts 2+ char strings, just trims and uppercases
+const lenientState = z.preprocess(
+  (val) => (typeof val === "string" ? val.trim().toUpperCase() : val),
+  z.string().min(1).max(50)
+);
+
+// Lenient ZIP: accepts any non-empty string (for rep office addresses from our DB)
+const lenientZip = z.preprocess(
+  (val) => (typeof val === "string" ? val.trim() : val),
+  z.string().min(1).max(20)
+);
+
 // ── Address ──────────────────────────────────────────────────
 
 export const addressSchema = z.object({
   name: safeString(200).optional(),
   address_line1: safeString(200),
   address_line2: z.preprocess(
-    (val) => (val == null || val === "" ? "" : val),
-    safeString(200).default("")
+    (val) => (val == null || val === "" || val === undefined ? "" : val),
+    safeString(200).optional().default("")
   ),
   address_city: safeString(100),
   address_state: usState,
@@ -39,6 +51,19 @@ export const addressSchema = z.object({
 // Address with required name field (matches MailingAddress type)
 const mailingAddressSchema = addressSchema.extend({
   name: safeString(200),
+});
+
+// Lenient address schema for rep office addresses (from our DB, not user input)
+const lenientAddressSchema = z.object({
+  name: safeString(200).optional(),
+  address_line1: safeString(200),
+  address_line2: z.preprocess(
+    (val) => (val == null || val === "" || val === undefined ? "" : val),
+    safeString(200).optional().default("")
+  ),
+  address_city: safeString(100),
+  address_state: lenientState,
+  address_zip: lenientZip,
 });
 
 export type ValidatedAddress = z.infer<typeof addressSchema>;
@@ -57,7 +82,7 @@ export const verifyAddressSchema = z.object({
 
 const recipientSchema = z.object({
   repName: safeString(200),
-  repOfficeAddress: addressSchema,
+  repOfficeAddress: lenientAddressSchema,
 });
 
 export const createCheckoutSchema = z.object({
@@ -69,7 +94,7 @@ export const createCheckoutSchema = z.object({
   recipients: z.array(recipientSchema).min(1).max(10).optional(),
   // Legacy single-rep format
   repName: safeString(200).optional(),
-  repOfficeAddress: addressSchema.optional(),
+  repOfficeAddress: lenientAddressSchema.optional(),
 });
 
 // ── Mail: Send (direct Lob send) ─────────────────────────────
