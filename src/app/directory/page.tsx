@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-/* eslint-disable @next/next/no-img-element */
+import Image from "next/image";
 import { useState, useMemo, useEffect } from "react";
 import { US_STATES } from "@/data/states";
 import type { Representative } from "@/data/types";
@@ -174,7 +174,7 @@ export default function DirectoryPage() {
               <div className={`w-12 h-12 ${partyBg(rep.party)} flex items-center justify-center shrink-0 overflow-hidden relative`}>
                 <span className="font-sans font-bold text-lg" style={{ color: "#F8F7F4" }}>{rep.firstName[0]}{rep.lastName[0]}</span>
                 {rep.photoUrl && (
-                  <img src={rep.photoUrl} alt={rep.fullName} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                  <Image src={rep.photoUrl} alt={rep.fullName} fill sizes="48px" className="object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                 )}
               </div>
               <div>

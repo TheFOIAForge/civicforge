@@ -1,7 +1,7 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
 import { forwardRef } from "react";
+import Image from "next/image";
 import type { Representative } from "@/data/types";
 import type { ComparisonVerdicts } from "@/lib/compare-verdicts";
 
@@ -56,9 +56,10 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
             <div style={{ textAlign: "center" }}>
               <div style={{ position: "relative", display: "inline-block", marginBottom: 12 }}>
                 {repA.photoUrl ? (
-                  <img
+                  <Image
                     src={repA.photoUrl} alt=""
-                    style={{ width: 120, height: 120, objectFit: "cover", border: `4px solid ${PC[repA.party]}` }}
+                    width={120} height={120}
+                    style={{ objectFit: "cover", border: `4px solid ${PC[repA.party]}` }}
                   />
                 ) : (
                   <div
@@ -97,9 +98,10 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
             <div style={{ textAlign: "center" }}>
               <div style={{ position: "relative", display: "inline-block", marginBottom: 12 }}>
                 {repB.photoUrl ? (
-                  <img
+                  <Image
                     src={repB.photoUrl} alt=""
-                    style={{ width: 120, height: 120, objectFit: "cover", border: `4px solid ${PC[repB.party]}` }}
+                    width={120} height={120}
+                    style={{ objectFit: "cover", border: `4px solid ${PC[repB.party]}` }}
                   />
                 ) : (
                   <div

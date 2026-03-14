@@ -1,8 +1,8 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { Representative } from "@/data/types";
 import PoliticalSpectrumBar from "./PoliticalSpectrumBar";
 import RepScorecardMetrics from "./RepScorecardMetrics";
@@ -77,10 +77,12 @@ export default function RepScorecard({ rep, onRemove, showSaveButton, onSave }: 
                 {rep.firstName[0]}{rep.lastName[0]}
               </span>
               {rep.photoUrl && !imgError && (
-                <img
+                <Image
                   src={rep.photoUrl}
                   alt={rep.fullName}
-                  className="absolute inset-0 w-full h-full object-cover rounded-2xl"
+                  fill
+                  sizes="96px"
+                  className="object-cover rounded-2xl"
                   onError={() => setImgError(true)}
                 />
               )}

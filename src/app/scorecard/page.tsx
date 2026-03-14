@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useScorecard } from "@/lib/scorecard-context";
 import { useMyReps } from "@/lib/my-reps-context";
 /* eslint-disable @next/next/no-img-element */
@@ -111,7 +112,7 @@ export default function ScorecardPage() {
                 <div className={`w-12 h-12 ${rep.party === "D" ? "bg-dem" : rep.party === "R" ? "bg-rep" : "bg-ind"} flex items-center justify-center shrink-0 overflow-hidden relative`}>
                   <span className="font-sans font-bold text-base text-white">{rep.firstName[0]}{rep.lastName[0]}</span>
                   {rep.photoUrl && (
-                    <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+                    <Image src={rep.photoUrl} alt="" fill sizes="48px" className="object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                   )}
                 </div>
                 <div>

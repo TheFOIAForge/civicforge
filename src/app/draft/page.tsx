@@ -1,9 +1,8 @@
 "use client";
-/* eslint-disable @next/next/no-img-element */
-
 import { useState, useEffect, Suspense, useRef, useCallback, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { issues, getIssueBySlug } from "@/data/issues";
 import { buildSystemPrompt } from "@/lib/prompts";
 import { callClaude } from "@/lib/claude-client";
@@ -730,7 +729,7 @@ function DraftInner() {
                           >
                             <span className="text-white font-bold text-sm" style={{ textShadow: "1px 1px 2px rgba(0,0,0,0.5)" }}>{rep.firstName[0]}{rep.lastName[0]}</span>
                             {rep.photoUrl && (
-                              <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                              <Image src={rep.photoUrl} alt="" fill sizes="48px" className="object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                             )}
                             {/* Distressed grain overlay on badge */}
                             <div className="absolute inset-0 opacity-20 mix-blend-overlay" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
@@ -946,7 +945,7 @@ function DraftInner() {
                               >
                                 <span className="text-white text-xs font-bold">{rep.firstName[0]}{rep.lastName[0]}</span>
                                 {rep.photoUrl && (
-                                  <img src={rep.photoUrl} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                                  <Image src={rep.photoUrl} alt="" fill sizes="48px" className="object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                                 )}
                               </div>
                               <span className="text-sm font-bold text-white flex-1">{rep.fullName}</span>
@@ -1002,7 +1001,7 @@ function DraftInner() {
                           >
                             <span className="text-white text-[10px] font-bold">{rep.firstName[0]}{rep.lastName[0]}</span>
                             {rep.photoUrl && (
-                              <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                              <Image src={rep.photoUrl} alt="" fill sizes="48px" className="object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                             )}
                           </div>
                           <span className="text-sm font-bold text-white">{rep.fullName}</span>

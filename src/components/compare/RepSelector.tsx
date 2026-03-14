@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { Representative } from "@/data/types";
 import { useMyReps } from "@/lib/my-reps-context";
 
@@ -95,10 +96,11 @@ export default function RepSelector({ slot, members, selected, otherSelected, on
         </div>
         <div className="flex items-center gap-4">
           {selected.photoUrl ? (
-            <img
+            <Image
               src={selected.photoUrl}
               alt=""
-              className="w-16 h-16 object-cover border-2 border-black"
+              width={64} height={64}
+              className="object-cover border-2 border-black"
             />
           ) : (
             <div className={`w-16 h-16 flex items-center justify-center border-2 border-black font-sans font-bold text-2xl text-white ${selected.party === "R" ? "bg-red" : selected.party === "D" ? "bg-[#1a3a6b]" : "bg-[#6b5b3e]"}`}>
