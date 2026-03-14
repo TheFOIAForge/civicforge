@@ -45,8 +45,8 @@ type Mode = "letter" | "call" | "social";
 
 const modeConfig: Record<Mode, { label: string; desc: string; action: string; hint: string; Icon: typeof Mail; civicIcon: string }> = {
   letter: { label: "Mail a Letter", desc: "Physical letter via USPS", action: "GENERATE LETTER", hint: "Strongest impact — lands on their desk", Icon: Mail, civicIcon: "/images/civic/icons/mail-animation.mp4" },
-  call: { label: "Make a Call", desc: "Talking points for a phone call", action: "GENERATE SCRIPT", hint: "Fastest way to get attention", Icon: Phone, civicIcon: "/images/civic/icons/phone-blue.mp4" },
-  social: { label: "Send an Email", desc: "Email their office directly", action: "GENERATE EMAIL", hint: "Quick and convenient", Icon: PenLine, civicIcon: "/images/civic/icons/at-yellow.mp4" },
+  call: { label: "Make a Call", desc: "Talking points for a phone call", action: "GENERATE SCRIPT", hint: "Fastest way to get attention", Icon: Phone, civicIcon: "/images/civic/icons/at-yellow.mp4" },
+  social: { label: "Send an Email", desc: "Email their office directly", action: "GENERATE EMAIL", hint: "Quick and convenient", Icon: PenLine, civicIcon: "/images/civic/icons/phone-blue.mp4" },
 };
 
 const quickTopics = [
