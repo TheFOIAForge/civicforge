@@ -471,7 +471,169 @@ function DraftInner() {
 
       {/* Main content */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 -mt-4 relative z-10">
-        {!output ? (
+        {/* Mail Success Screen */}
+        {mailSuccess ? (
+          <div className="space-y-6 pb-24">
+            {/* Success header */}
+            <Card padding="lg" className="text-center">
+              <div className="w-16 h-16 rounded-full bg-green/10 flex items-center justify-center mx-auto mb-4">
+                <Check className="w-8 h-8 text-green" strokeWidth={3} />
+              </div>
+              <h2 className="text-2xl font-bold text-navy">
+                {mailLetters.length > 1 ? `${mailLetters.length} Letters` : "Letter"} on the Way!
+              </h2>
+              <p className="text-gray-500 mt-2">
+                Your {mailLetters.length > 1 ? "letters are" : "letter is"} being printed and will arrive via USPS First Class in 3-5 business days.
+              </p>
+            </Card>
+
+            {/* Letter tracking cards */}
+            {mailStatusLoading && mailLetters.length === 0 && (
+              <Card padding="md" className="text-center">
+                <div className="flex items-center justify-center gap-3">
+                  <div className="w-5 h-5 border-2 border-navy border-t-transparent rounded-full animate-spin" />
+                  <p className="text-sm text-gray-500">Processing your {selectedReps.length > 1 ? "letters" : "letter"}...</p>
+                </div>
+              </Card>
+            )}
+
+            {mailLetters.length > 0 && (
+              <div className="space-y-3">
+                {mailLetters.map((letter, i) => (
+                  <Card key={i} padding="md">
+                    <div className="flex items-start gap-4">
+                      {letter.thumbnailUrl && (
+                        <a href={letter.trackingUrl || "#"} target="_blank" rel="noopener noreferrer" className="shrink-0">
+                          <img
+                            src={letter.thumbnailUrl}
+                            alt={`Letter to ${letter.repName}`}
+                            className="w-20 h-auto rounded-lg border border-gray-200 shadow-sm"
+                          />
+                        </a>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-base font-semibold text-navy">{letter.repName}</p>
+                        {letter.deliveryStatus && (
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <div className="w-2 h-2 rounded-full bg-green animate-pulse" />
+                            <p className="text-sm text-green font-medium">{letter.deliveryStatus}</p>
+                          </div>
+                        )}
+                        {letter.expectedDeliveryDate && (
+                          <p className="text-sm text-gray-500 mt-1">
+                            Expected delivery: {new Date(letter.expectedDeliveryDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                          </p>
+                        )}
+                        {letter.letterId && (
+                          <p className="text-xs text-gray-400 mt-1 font-mono">ID: {letter.letterId}</p>
+                        )}
+                        {letter.trackingUrl && (
+                          <a href={letter.trackingUrl} target="_blank" rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 mt-2 text-sm font-medium text-teal hover:underline">
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            View Letter &amp; Track Delivery
+                          </a>
+                        )}
+                        {letter.error && (
+                          <p className="text-sm text-red mt-1">Issue sending — we&apos;ll retry automatically.</p>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {!mailStatusLoading && mailLetters.length === 0 && (
+              <Card padding="md" className="text-center">
+                <Mail className="w-8 h-8 text-navy mx-auto mb-2" />
+                <p className="text-sm text-gray-500">
+                  Your letter is being processed. You&apos;ll receive an email confirmation with tracking details shortly.
+                </p>
+              </Card>
+            )}
+
+            {/* Info section */}
+            <Card padding="md" className="bg-navy/5 border-navy/10">
+              <h3 className="text-sm font-semibold text-navy mb-3">What happens next?</h3>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-navy text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</div>
+                  <div>
+                    <p className="text-sm font-medium text-navy">Printing &amp; Processing</p>
+                    <p className="text-xs text-gray-500">Your letter is printed on quality paper and sealed in an envelope.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-navy text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</div>
+                  <div>
+                    <p className="text-sm font-medium text-navy">USPS First Class Mail</p>
+                    <p className="text-xs text-gray-500">Picked up and delivered by USPS. Typical delivery takes 3-5 business days.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-navy text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</div>
+                  <div>
+                    <p className="text-sm font-medium text-navy">Delivered to Their Office</p>
+                    <p className="text-xs text-gray-500">Your letter arrives at your representative&apos;s office and gets logged by staff.</p>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Actions */}
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                onClick={() => { setMailSuccess(false); setOutput(""); setSelectedReps([]); }}
+                variant="primary"
+                size="lg"
+                icon={<PenLine className="w-4 h-4" />}
+                className="w-full"
+              >
+                Write Another
+              </Button>
+              <Link href="/profile" className="no-underline">
+                <Button variant="outline" size="lg" className="w-full">
+                  My Letters
+                </Button>
+              </Link>
+            </div>
+
+            {/* Receipt info */}
+            <p className="text-center text-xs text-gray-400">
+              A payment receipt was sent by Stripe. Check your email for delivery updates.
+            </p>
+
+            {/* Sign up prompt for non-logged-in users */}
+            {!user && (
+              <Card padding="md" className="border-gold/30 bg-gold-50/50">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gold-50 flex items-center justify-center shrink-0">
+                    <UserPlus className="w-5 h-5 text-gold-dark" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-navy">Track Your Letters</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Create a free account to track delivery status, see your civic history, and earn impact points.
+                    </p>
+                    <Button
+                      onClick={() => {
+                        setAuthModalMessage("Create an account to track your mailed letters and civic activity!");
+                        setShowAuthModal(true);
+                      }}
+                      variant="primary"
+                      size="sm"
+                      className="mt-3"
+                      icon={<UserPlus className="w-3.5 h-3.5" />}
+                    >
+                      Sign Up Free
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            )}
+          </div>
+        ) : !output ? (
           <div className="space-y-6" data-print-hide>
 
             {/* Step 1: Choose how to reach them */}
@@ -1034,65 +1196,6 @@ function DraftInner() {
               </p>
             </Card>
 
-            {/* Mail success banner */}
-            {mailSuccess && (
-              <Card padding="md" className="mt-4 border-green/30 bg-green-light" data-print-hide>
-                <p className="text-lg font-semibold text-green">
-                  Letter{mailLetters.length > 1 ? "s" : ""} Mailed!
-                </p>
-
-                {mailStatusLoading && mailLetters.length === 0 && (
-                  <p className="text-xs text-gray-500 mt-1">Processing your letter{selectedReps.length > 1 ? "s" : ""}...</p>
-                )}
-
-                {mailLetters.length > 0 ? (
-                  <div className="mt-3 space-y-3">
-                    {mailLetters.map((letter, i) => (
-                      <div key={i} className="p-3 bg-white rounded-xl border border-green/20">
-                        <div className="flex items-start gap-3">
-                          {letter.thumbnailUrl && (
-                            <a href={letter.trackingUrl || "#"} target="_blank" rel="noopener noreferrer" className="shrink-0">
-                              <img
-                                src={letter.thumbnailUrl}
-                                alt={`Letter to ${letter.repName}`}
-                                className="w-16 h-auto rounded-lg border border-gray-200"
-                              />
-                            </a>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-navy">{letter.repName}</p>
-                            {letter.deliveryStatus && (
-                              <p className="text-xs text-green mt-0.5">Status: {letter.deliveryStatus}</p>
-                            )}
-                            {letter.expectedDeliveryDate && (
-                              <p className="text-xs text-gray-500 mt-0.5">
-                                Expected: {new Date(letter.expectedDeliveryDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
-                              </p>
-                            )}
-                            {letter.trackingUrl && (
-                              <a href={letter.trackingUrl} target="_blank" rel="noopener noreferrer"
-                                className="inline-block mt-1 text-xs font-medium text-teal">
-                                View Letter &amp; Tracking
-                              </a>
-                            )}
-                            {letter.error && (
-                              <p className="text-xs text-red mt-0.5">Issue sending — we&apos;ll retry automatically.</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    <p className="text-xs text-gray-500">
-                      Receipt sent to your email. Letters arrive in 3-5 business days via USPS First Class.
-                    </p>
-                  </div>
-                ) : !mailStatusLoading ? (
-                  <p className="text-xs text-gray-500 mt-1">
-                    Your letter{selectedReps.length > 1 ? "s are" : " is"} being printed and will arrive in 3-5 business days.
-                  </p>
-                ) : null}
-              </Card>
-            )}
           </div>
         )}
 

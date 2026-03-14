@@ -179,6 +179,109 @@ export async function POST(request: NextRequest) {
     } catch (metaErr) {
       console.error("Failed to update PaymentIntent with Lob results:", metaErr);
     }
+
+    // Send confirmation email to the customer
+    const customerEmail = session.customer_details?.email;
+    if (customerEmail && lobResults.length > 0) {
+      try {
+        const successfulLetters = lobResults.filter((r) => r.letterId);
+        const failedLetters = lobResults.filter((r) => r.error);
+
+        const letterLines = successfulLetters.map((r) => {
+          let line = `  - ${r.repName}`;
+          if (r.expectedDeliveryDate) {
+            line += ` (expected delivery: ${new Date(r.expectedDeliveryDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })})`;
+          }
+          if (r.trackingUrl) {
+            line += `\n    Track: ${r.trackingUrl}`;
+          }
+          if (r.letterId) {
+            line += `\n    Letter ID: ${r.letterId}`;
+          }
+          return line;
+        }).join("\n\n");
+
+        const subject = successfulLetters.length === 1
+          ? `Your letter to ${successfulLetters[0].repName} is on its way`
+          : `Your ${successfulLetters.length} letters to Congress are on their way`;
+
+        const body = [
+          `Hi ${senderAddress.name || "there"},`,
+          "",
+          successfulLetters.length === 1
+            ? "Your letter has been printed and is on its way via USPS First Class Mail."
+            : `Your ${successfulLetters.length} letters have been printed and are on their way via USPS First Class Mail.`,
+          "",
+          "LETTER DETAILS",
+          "─────────────",
+          letterLines,
+          "",
+          "DELIVERY TIMELINE",
+          "─────────────────",
+          "  - Printed and sealed: Today",
+          "  - Picked up by USPS: Within 1 business day",
+          "  - Delivered to office: 3-5 business days",
+          "",
+          ...(failedLetters.length > 0 ? [
+            "NOTE: We had trouble sending the following. We'll retry automatically:",
+            ...failedLetters.map((r) => `  - ${r.repName}`),
+            "",
+          ] : []),
+          "YOUR SENDER ADDRESS",
+          "───────────────────",
+          `  ${senderAddress.name || ""}`,
+          `  ${senderAddress.address_line1 || ""}`,
+          ...(senderAddress.address_line2 ? [`  ${senderAddress.address_line2}`] : []),
+          `  ${senderAddress.address_city || ""}, ${senderAddress.address_state || ""} ${senderAddress.address_zip || ""}`,
+          "",
+          "Thank you for making your voice heard. Physical letters are one of the most impactful ways to reach your representatives.",
+          "",
+          "— CheckMyRep",
+          "https://checkmyrep.us",
+        ].join("\n");
+
+        // Send via internal email API
+        const emailFrom = process.env.EMAIL_FROM || "noreply@checkmyrep.us";
+        const resendKey = process.env.RESEND_API_KEY;
+        const sendgridKey = process.env.SENDGRID_API_KEY;
+
+        if (resendKey) {
+          await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${resendKey}`,
+            },
+            body: JSON.stringify({
+              from: emailFrom,
+              to: [customerEmail],
+              subject,
+              text: body,
+            }),
+          });
+          console.log(`Confirmation email sent to ${customerEmail} via Resend`);
+        } else if (sendgridKey) {
+          await fetch("https://api.sendgrid.com/v3/mail/send", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${sendgridKey}`,
+            },
+            body: JSON.stringify({
+              personalizations: [{ to: [{ email: customerEmail }] }],
+              from: { email: emailFrom },
+              subject,
+              content: [{ type: "text/plain", value: body }],
+            }),
+          });
+          console.log(`Confirmation email sent to ${customerEmail} via SendGrid`);
+        } else {
+          console.warn("No email service configured — skipping confirmation email");
+        }
+      } catch (emailErr) {
+        console.error("Failed to send confirmation email:", emailErr);
+      }
+    }
   }
 
   return NextResponse.json({ received: true });
