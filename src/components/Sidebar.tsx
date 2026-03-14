@@ -105,8 +105,8 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             <img src="/images/civic/icons/capitol.png" alt="" className="w-5 h-5" aria-hidden="true" />
           </div>
           {showExpanded && (
-            <span className="text-lg font-bold tracking-tight text-white whitespace-nowrap">
-              Check<span className="text-red-500">My</span><span className="text-blue-400">Rep</span>
+            <span className="text-lg font-bold tracking-tight whitespace-nowrap">
+              <span className="text-red-500">Check</span><span className="text-white">My</span><span className="text-blue-400">Rep</span>
             </span>
           )}
         </Link>

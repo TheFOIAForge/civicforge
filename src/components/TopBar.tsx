@@ -30,8 +30,8 @@ export default function TopBar({ onMenuToggle }: TopBarProps) {
               <div className="w-8 h-8 bg-navy rounded-lg flex items-center justify-center overflow-hidden">
                 <img src="/images/civic/icons/capitol.png" alt="" className="w-5 h-5" aria-hidden="true" />
               </div>
-              <span className="text-xl font-bold tracking-tight text-navy">
-                Check<span className="text-gold">My</span>Rep
+              <span className="text-xl font-bold tracking-tight">
+                <span className="text-red-600">Check</span><span className="text-navy">My</span><span className="text-blue-600">Rep</span>
               </span>
             </Link>
           </div>
