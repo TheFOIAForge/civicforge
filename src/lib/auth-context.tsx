@@ -35,7 +35,7 @@ interface AuthContextType {
   profile: Profile | null;
   engagement: Engagement | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
+  signInWithOAuth: (provider: "google" | "apple" | "facebook" | "twitter" | "discord") => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<{ error: string | null }>;
   signUpWithEmail: (email: string, password: string, name: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
@@ -52,7 +52,7 @@ const AuthContext = createContext<AuthContextType>({
   profile: null,
   engagement: null,
   loading: true,
-  signInWithGoogle: async () => {},
+  signInWithOAuth: async () => {},
   signInWithEmail: async () => ({ error: null }),
   signUpWithEmail: async () => ({ error: null }),
   signOut: async () => {},
@@ -190,9 +190,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (user) refreshEngagement();
   }, [user, refreshEngagement]);
 
-  async function signInWithGoogle() {
+  async function signInWithOAuth(provider: "google" | "apple" | "facebook" | "twitter" | "discord") {
     await supabase.auth.signInWithOAuth({
-      provider: "google",
+      provider,
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
       },
@@ -231,7 +231,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         profile,
         engagement,
         loading,
-        signInWithGoogle,
+        signInWithOAuth,
         signInWithEmail,
         signUpWithEmail,
         signOut,
