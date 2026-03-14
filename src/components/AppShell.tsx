@@ -1,13 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import TopBar from "@/components/TopBar";
 import BottomNav from "@/components/BottomNav";
 import Sidebar from "@/components/Sidebar";
 import OnboardingModal from "@/components/OnboardingModal";
 
+const HIDE_TOPBAR_ROUTES = ["/draft"];
+
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
+  const hideTopBar = HIDE_TOPBAR_ROUTES.includes(pathname);
 
   return (
     <>
@@ -22,18 +27,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <div className="lg:pl-64 min-h-screen flex flex-col">
-        <TopBar onMenuToggle={() => setSidebarOpen(true)} />
+      <div className={`${hideTopBar ? "" : "lg:pl-64"} min-h-screen flex flex-col`}>
+        {!hideTopBar && <TopBar onMenuToggle={() => setSidebarOpen(true)} />}
         <main
           id="main-content"
           className="flex-1 pb-20 lg:pb-0"
-          style={{ backgroundColor: "var(--color-offwhite)" }}
+          style={{ backgroundColor: hideTopBar ? "#000" : "var(--color-offwhite)" }}
         >
           {children}
         </main>
       </div>
 
-      <BottomNav />
+      {!hideTopBar && <BottomNav />}
     </>
   );
 }

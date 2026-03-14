@@ -509,6 +509,22 @@ function DraftInner() {
         />
       </div>
 
+      {/* Sign Up / Login Button */}
+      {!user && (
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
+          <button
+            onClick={() => setShowAuthModal(true)}
+            className="w-full py-4 rounded-xl text-2xl tracking-[0.15em] uppercase cursor-pointer
+              border-2 border-white/30 bg-white/10 text-white backdrop-blur-sm
+              hover:bg-white/20 hover:border-white/50 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)]
+              transition-all duration-300"
+            style={{ fontFamily: "'Bebas Neue', sans-serif" }}
+          >
+            Sign Up / Log In
+          </button>
+        </div>
+      )}
+
       {/* Main content */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 -mt-4 relative z-10">
         {/* Mail Success Screen */}
