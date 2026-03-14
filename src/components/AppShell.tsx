@@ -1,18 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import TopBar from "@/components/TopBar";
 import BottomNav from "@/components/BottomNav";
 import Sidebar from "@/components/Sidebar";
 import OnboardingModal from "@/components/OnboardingModal";
 
-const HIDE_TOPBAR_ROUTES = ["/draft"];
+const HIDE_CHROME_ROUTES = ["/draft"];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
-  const hideTopBar = HIDE_TOPBAR_ROUTES.includes(pathname);
+  const hideChrome = HIDE_CHROME_ROUTES.includes(pathname);
+
+  // Track sidebar collapsed/pinned state for content offset
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  useEffect(() => {
+    const checkSidebar = () => {
+      const pinned = localStorage.getItem("sidebar-pinned") !== "false";
+      const collapsed = localStorage.getItem("sidebar-collapsed") === "true";
+      setSidebarCollapsed(!pinned || collapsed);
+    };
+    checkSidebar();
+    window.addEventListener("storage", checkSidebar);
+    // Poll for changes from sidebar interactions
+    const interval = setInterval(checkSidebar, 300);
+    return () => { window.removeEventListener("storage", checkSidebar); clearInterval(interval); };
+  }, []);
+
+  const contentPadding = hideChrome ? "" : sidebarCollapsed ? "lg:pl-16" : "lg:pl-64";
 
   return (
     <>
@@ -27,18 +45,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <div className={`${hideTopBar ? "" : "lg:pl-64"} min-h-screen flex flex-col`}>
-        {!hideTopBar && <TopBar onMenuToggle={() => setSidebarOpen(true)} />}
+      <div className={`${contentPadding} min-h-screen flex flex-col transition-all duration-300`}>
+        {!hideChrome && <TopBar onMenuToggle={() => setSidebarOpen(true)} />}
         <main
           id="main-content"
           className="flex-1 pb-20 lg:pb-0"
-          style={{ backgroundColor: hideTopBar ? "#000" : "var(--color-offwhite)" }}
+          style={{ backgroundColor: hideChrome ? "#000" : "var(--color-offwhite)" }}
         >
           {children}
         </main>
       </div>
 
-      {!hideTopBar && <BottomNav />}
+      {!hideChrome && <BottomNav />}
     </>
   );
 }

@@ -511,14 +511,17 @@ function DraftInner() {
 
       {/* Sign Up / Login Button */}
       {!user && (
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
+        <div className="flex justify-center py-4">
           <button
             onClick={() => setShowAuthModal(true)}
-            className="w-full py-4 rounded-xl text-2xl tracking-[0.15em] uppercase cursor-pointer
-              border-2 border-white/30 bg-white/10 text-white backdrop-blur-sm
-              hover:bg-white/20 hover:border-white/50 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)]
+            className="px-12 py-3 rounded-xl text-2xl tracking-[0.15em] uppercase cursor-pointer
+              border-2 border-white/20 text-white
+              hover:scale-105 hover:shadow-[0_0_30px_rgba(220,38,38,0.3)]
               transition-all duration-300"
-            style={{ fontFamily: "'Bebas Neue', sans-serif" }}
+            style={{
+              fontFamily: "'Bebas Neue', sans-serif",
+              background: "linear-gradient(to right, #dc2626 0%, #dc2626 40%, #2563eb 60%, #2563eb 100%)",
+            }}
           >
             Sign Up / Log In
           </button>
