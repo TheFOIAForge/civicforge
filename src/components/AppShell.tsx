@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import TopBar from "@/components/TopBar";
 import BottomNav from "@/components/BottomNav";
@@ -14,23 +14,22 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const hideChrome = HIDE_CHROME_ROUTES.includes(pathname);
 
-  // Track sidebar collapsed/pinned state for content offset
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
-  useEffect(() => {
-    const checkSidebar = () => {
-      const pinned = localStorage.getItem("sidebar-pinned") !== "false";
-      const collapsed = localStorage.getItem("sidebar-collapsed") === "true";
-      setSidebarCollapsed(!pinned || collapsed);
-    };
-    checkSidebar();
-    window.addEventListener("storage", checkSidebar);
-    // Poll for changes from sidebar interactions
-    const interval = setInterval(checkSidebar, 300);
-    return () => { window.removeEventListener("storage", checkSidebar); clearInterval(interval); };
+  const syncSidebar = useCallback(() => {
+    const pinned = localStorage.getItem("sidebar-pinned") !== "false";
+    const collapsed = localStorage.getItem("sidebar-collapsed") === "true";
+    setSidebarExpanded(pinned && !collapsed);
   }, []);
 
-  const contentPadding = hideChrome ? "" : sidebarCollapsed ? "lg:pl-16" : "lg:pl-64";
+  useEffect(() => {
+    syncSidebar();
+    const handler = () => syncSidebar();
+    window.addEventListener("sidebar-state", handler);
+    return () => window.removeEventListener("sidebar-state", handler);
+  }, [syncSidebar]);
+
+  const contentPadding = hideChrome ? "" : sidebarExpanded ? "lg:pl-64" : "lg:pl-16";
 
   return (
     <>

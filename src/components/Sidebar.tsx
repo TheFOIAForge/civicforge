@@ -62,10 +62,12 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
   useEffect(() => {
     localStorage.setItem("sidebar-pinned", String(pinned));
-  }, [pinned]);
+    window.dispatchEvent(new CustomEvent("sidebar-state", { detail: { pinned, collapsed } }));
+  }, [pinned, collapsed]);
 
   useEffect(() => {
     localStorage.setItem("sidebar-collapsed", String(collapsed));
+    window.dispatchEvent(new CustomEvent("sidebar-state", { detail: { pinned, collapsed } }));
   }, [collapsed]);
 
   // When unpinned, collapse when not hovered
