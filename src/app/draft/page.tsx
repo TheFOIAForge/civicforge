@@ -705,7 +705,7 @@ function DraftInner() {
               {/* Saved reps */}
               {hasSavedReps && (
                 <div className="mb-5">
-                  <p className="text-xs text-white/40 mb-3 uppercase tracking-widest font-semibold">
+                  <p className="text-sm text-white/40 mb-3 uppercase tracking-widest" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>
                     Your saved representatives
                   </p>
                   <div className="grid grid-cols-1 gap-2">
@@ -749,8 +749,8 @@ function DraftInner() {
                             <div className="absolute inset-0 opacity-20 mix-blend-overlay" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="block text-sm font-bold text-white">{rep.fullName}</span>
-                            <span className="block text-xs text-white/50">
+                            <span className="block text-lg text-white tracking-wide" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>{rep.fullName}</span>
+                            <span className="block text-sm text-white/50 tracking-wider" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>
                               {party.label} — {rep.chamber}{rep.stateAbbr ? ` · ${rep.stateAbbr}` : ""}
                             </span>
                           </div>
@@ -868,10 +868,11 @@ function DraftInner() {
                           <button
                             key={c}
                             onClick={() => { setChamberFilter(c); setHighlightIdx(-1); }}
-                            className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg cursor-pointer transition-all border-2
+                            className={`px-4 py-1.5 text-sm uppercase tracking-wider rounded-lg cursor-pointer transition-all border-2
                               ${isActive
                                 ? "bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.2)]"
                                 : "bg-transparent text-white/70 border-white/20 hover:border-white/50 hover:text-white"}`}
+                            style={{ fontFamily: "'Bebas Neue', sans-serif" }}
                           >
                             {c}
                           </button>
@@ -891,10 +892,13 @@ function DraftInner() {
                           <button
                             key={p}
                             onClick={() => { setPartyFilter(partyFilter === p ? "All" : p); setHighlightIdx(-1); }}
-                            className="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg cursor-pointer transition-all border-2"
-                            style={isActive
-                              ? { backgroundColor: cc.active, color: "#fff", borderColor: cc.active, boxShadow: `0 0 15px ${cc.glow}` }
-                              : { backgroundColor: "transparent", color: cc.active, borderColor: `${cc.active}50`, }}
+                            className="px-4 py-1.5 text-sm uppercase tracking-wider rounded-lg cursor-pointer transition-all border-2"
+                            style={{
+                              fontFamily: "'Bebas Neue', sans-serif",
+                              ...(isActive
+                                ? { backgroundColor: cc.active, color: "#fff", borderColor: cc.active, boxShadow: `0 0 15px ${cc.glow}` }
+                                : { backgroundColor: "transparent", color: cc.active, borderColor: `${cc.active}50` }),
+                            }}
                           >
                             {labels[p]}
                           </button>
@@ -904,10 +908,13 @@ function DraftInner() {
                       <select
                         value={stateFilter}
                         onChange={(e) => { setStateFilter(e.target.value); setZipResult(null); setHighlightIdx(-1); }}
-                        className="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg cursor-pointer border-2 transition-all"
-                        style={stateFilter === "All"
-                          ? { backgroundColor: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
-                          : { backgroundColor: "#fff", color: "#000", borderColor: "#fff" }}
+                        className="px-4 py-1.5 text-sm uppercase tracking-wider rounded-lg cursor-pointer border-2 transition-all"
+                        style={{
+                          fontFamily: "'Bebas Neue', sans-serif",
+                          ...(stateFilter === "All"
+                            ? { backgroundColor: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
+                            : { backgroundColor: "#fff", color: "#000", borderColor: "#fff" }),
+                        }}
                       >
                         <option value="All">State</option>
                         {US_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -915,7 +922,8 @@ function DraftInner() {
                       {(activeFilterCount > 0 || addressQuery || zipResult) && (
                         <button
                           onClick={() => { setChamberFilter("All"); setPartyFilter("All"); setStateFilter("All"); clearAddressFilter(); }}
-                          className="px-3 py-2 text-xs font-bold uppercase tracking-wider cursor-pointer bg-transparent border-2 border-red-500/40 rounded-lg text-red-400 hover:bg-red-500/10 hover:border-red-500 transition-all"
+                          className="px-3 py-1.5 text-sm uppercase tracking-wider cursor-pointer bg-transparent border-2 border-red-500/40 rounded-lg text-red-400 hover:bg-red-500/10 hover:border-red-500 transition-all"
+                          style={{ fontFamily: "'Bebas Neue', sans-serif" }}
                         >
                           Clear All
                         </button>
@@ -956,9 +964,13 @@ function DraftInner() {
                                   }}
                                   role="button"
                                   tabIndex={0}
-                                  className={`w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer transition-colors border-b border-white/5
-                                    ${isRepSelected ? "bg-white/10" : "bg-transparent hover:bg-white/5"}`}
-                                  style={isRepSelected ? { boxShadow: `inset 3px 0 0 ${partyColor}` } : {}}
+                                  className={`w-full flex items-center gap-3 px-4 py-2 text-left cursor-pointer transition-colors border-b border-white/5`}
+                                  style={{
+                                    backgroundColor: isRepSelected ? `${partyColor}20` : `${partyColor}08`,
+                                    boxShadow: isRepSelected ? `inset 3px 0 0 ${partyColor}` : "none",
+                                  }}
+                                  onMouseEnter={(e) => { if (!isRepSelected) e.currentTarget.style.backgroundColor = `${partyColor}15`; }}
+                                  onMouseLeave={(e) => { if (!isRepSelected) e.currentTarget.style.backgroundColor = `${partyColor}08`; }}
                                 >
                                   <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 overflow-hidden relative border-2"
                                     style={{ borderColor: `${partyColor}60`, background: `linear-gradient(135deg, ${partyColor}30, ${partyColor}10)` }}
@@ -968,8 +980,8 @@ function DraftInner() {
                                       <Image src={rep.photoUrl} alt="" fill sizes="48px" className="object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                                     )}
                                   </div>
-                                  <span className="text-sm font-bold text-white flex-1">{rep.fullName}</span>
-                                  <span className="text-xs text-white/40 font-medium">
+                                  <span className="text-lg text-white flex-1 tracking-wide" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>{rep.fullName}</span>
+                                  <span className="text-sm text-white/50 tracking-wider" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>
                                     {party.label.slice(0, 3)} · {rep.stateAbbr}{rep.district ? `-${rep.district}` : ""} · {rep.chamber}
                                   </span>
                                   <button
@@ -1006,7 +1018,7 @@ function DraftInner() {
               {/* Selected reps pills */}
               {selectedReps.length > 0 && (
                 <div className="mt-5">
-                  <p className="text-xs text-white/40 font-bold mb-2 uppercase tracking-widest">
+                  <p className="text-sm text-white/40 mb-2 uppercase tracking-widest" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>
                     {selectedReps.length === 1 ? "Selected representative" : `${selectedReps.length} representatives selected`}
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -1026,7 +1038,7 @@ function DraftInner() {
                               <Image src={rep.photoUrl} alt="" fill sizes="48px" className="object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                             )}
                           </div>
-                          <span className="text-sm font-bold text-white">{rep.fullName}</span>
+                          <span className="text-base text-white tracking-wide" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>{rep.fullName}</span>
                           <button
                             onClick={() => setSelectedReps((prev) => prev.filter((r) => r.id !== rep.id))}
                             className="text-white/40 hover:text-red-400 cursor-pointer bg-transparent border-none p-0 transition-colors"
