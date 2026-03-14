@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-/* eslint-disable @next/next/no-img-element */
+import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { issues } from "@/data/issues";
 import type { Representative } from "@/data/types";
@@ -428,9 +428,10 @@ export default function Home() {
       {/* ═══ Stats ═══ */}
       <section className="px-4 sm:px-6 py-16 bg-gradient-navy relative overflow-hidden">
         <div className="absolute inset-0 pattern-grid opacity-[0.04]" />
-        <img
+        <Image
           src="/images/civic/illustrations/voter-witness.png"
           alt=""
+          width={160} height={160}
           className="absolute right-[-30px] bottom-[-20px] w-40 opacity-[0.06]"
           aria-hidden="true"
         />
@@ -462,15 +463,17 @@ export default function Home() {
               <div className="bg-gradient-hero p-8 md:p-12 flex flex-col justify-center relative overflow-hidden">
                 <div className="absolute inset-0 pattern-dots opacity-[0.06]" />
                 {/* Forclaude illustration overlays */}
-                <img
+                <Image
                   src="/images/civic/illustrations/vote-by-mail.png"
                   alt=""
+                  width={128} height={128}
                   className="absolute bottom-4 right-4 w-32 h-32 opacity-10"
                   aria-hidden="true"
                 />
-                <img
+                <Image
                   src="/images/civic/illustrations/signature-sign.png"
                   alt=""
+                  width={96} height={96}
                   className="absolute top-4 left-4 w-24 h-24 opacity-[0.07]"
                   aria-hidden="true"
                 />
@@ -515,15 +518,17 @@ export default function Home() {
       {/* ═══ Final CTA ═══ */}
       <section className="px-4 sm:px-6 py-20 text-center bg-gradient-hero relative overflow-hidden">
         <div className="absolute inset-0 pattern-dots opacity-[0.04]" />
-        <img
+        <Image
           src="/images/civic/illustrations/receive-ballot.png"
           alt=""
+          width={144} height={144}
           className="absolute left-4 bottom-4 w-36 opacity-[0.08]"
           aria-hidden="true"
         />
-        <img
+        <Image
           src="/images/civic/illustrations/vote-by-dropbox.png"
           alt=""
+          width={144} height={144}
           className="absolute right-4 top-4 w-36 opacity-[0.08]"
           aria-hidden="true"
         />
