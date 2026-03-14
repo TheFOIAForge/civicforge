@@ -587,36 +587,49 @@ function PayStep({
   }, [senderAddress, senderEmail, contactLogId, allReps, issue]);
 
   const fetchClientSecret = useCallback(async () => {
-    const res = await fetch("/api/mail/create-checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contactLogId,
-        recipients: allReps.map((r) => {
-          const o = getRepOffice(r, officePerRep[r.id] || 0);
-          return {
-            repName: r.fullName,
-            repOfficeAddress: {
-              name: `${r.title} ${r.fullName}`,
-              address_line1: o?.street || "",
-              address_city: o?.city || "",
-              address_state: o?.state || "",
-              address_zip: o?.zip || "",
-            },
-          };
+    try {
+      setPayError("");
+      const res = await fetch("/api/mail/create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contactLogId,
+          recipients: allReps.map((r) => {
+            const o = getRepOffice(r, officePerRep[r.id] || 0);
+            return {
+              repName: r.fullName,
+              repOfficeAddress: {
+                name: `${r.title} ${r.fullName}`,
+                address_line1: o?.street || "",
+                address_city: o?.city || "",
+                address_state: o?.state || "",
+                address_zip: o?.zip || "",
+              },
+            };
+          }),
+          senderAddress,
+          senderEmail: senderEmail || undefined,
+          letterContent,
         }),
-        senderAddress,
-        senderEmail,
-        letterContent,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setPayError(data.error || "Failed to create checkout session");
-      throw new Error(data.error);
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setPayError(data.error || "Failed to create checkout session");
+        throw new Error(data.error);
+      }
+      if (!data.clientSecret) {
+        setPayError("No client secret returned from checkout session");
+        throw new Error("No client secret");
+      }
+      return data.clientSecret;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Checkout failed";
+      if (!msg.includes("client secret")) {
+        setPayError(msg);
+      }
+      throw err;
     }
-    return data.clientSecret;
-  }, [contactLogId, allReps, officePerRep, senderAddress, letterContent, setPayError]);
+  }, [contactLogId, allReps, officePerRep, senderAddress, senderEmail, letterContent, setPayError]);
 
   const totalCost = (allReps.length * 1.5).toFixed(2);
 
@@ -726,7 +739,7 @@ function PayStep({
       )}
 
       {stripePromise ? (
-        <div className="rounded overflow-hidden border" style={{ borderColor: "rgba(0,0,0,0.1)" }}>
+        <div className="rounded border" style={{ borderColor: "rgba(0,0,0,0.1)", minHeight: "300px" }}>
           <EmbeddedCheckoutProvider stripe={stripePromise} options={{ fetchClientSecret }}>
             <EmbeddedCheckout />
           </EmbeddedCheckoutProvider>
