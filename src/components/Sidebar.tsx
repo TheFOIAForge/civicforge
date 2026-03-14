@@ -121,7 +121,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
               aria-label={pinned ? "Unpin sidebar" : "Pin sidebar"}
               title={pinned ? "Unpin sidebar" : "Pin sidebar"}
             >
-              <Pin className={`w-4 h-4 ${pinned ? "text-blue-400" : ""}`} style={pinned ? { transform: "rotate(45deg)" } : undefined} />
+              <Pin className={`w-4 h-4 ${pinned ? "text-white" : ""}`} style={pinned ? { transform: "rotate(45deg)" } : undefined} />
             </button>
           )}
           {/* Collapse button — desktop only, when pinned */}
