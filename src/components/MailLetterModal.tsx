@@ -65,6 +65,7 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
   const [senderCity, setSenderCity] = useState("");
   const [senderState, setSenderState] = useState("");
   const [senderZip, setSenderZip] = useState("");
+  const [senderEmail, setSenderEmail] = useState("");
   const [verifyStatus, setVerifyStatus] = useState<"idle" | "loading" | "deliverable" | "warning" | "error">("idle");
   const [verifyMsg, setVerifyMsg] = useState("");
   const [payError, setPayError] = useState("");
@@ -78,6 +79,10 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
     if (saved.address_city) setSenderCity(saved.address_city);
     if (saved.address_state) setSenderState(saved.address_state);
     if (saved.address_zip) setSenderZip(saved.address_zip);
+    try {
+      const email = localStorage.getItem("checkmyrep_sender_email");
+      if (email) setSenderEmail(email);
+    } catch { /* ignore */ }
   }, []);
 
   if (!isOpen) return null;
@@ -488,6 +493,24 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
               )}
             </div>
 
+            {/* Email for receipt */}
+            <div className="mb-4">
+              <p className="font-mono text-xs font-bold mb-2" style={{ color: "rgba(0,0,0,0.5)" }}>
+                EMAIL FOR RECEIPT
+              </p>
+              <input
+                type="email"
+                placeholder="your@email.com"
+                value={senderEmail}
+                onChange={(e) => setSenderEmail(e.target.value)}
+                className="w-full px-3 py-2.5 font-mono text-sm border-2"
+                style={{ borderColor: "rgba(0,0,0,0.12)", backgroundColor: "rgba(0,0,0,0.02)" }}
+              />
+              <p className="mt-1 font-mono text-[10px]" style={{ color: "rgba(0,0,0,0.4)" }}>
+                We&apos;ll send a payment receipt and delivery confirmation to this email.
+              </p>
+            </div>
+
             <button
               onClick={() => setStep("pay")}
               disabled={!senderValid}
@@ -508,6 +531,7 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
             allReps={allReps}
             officePerRep={officePerRep}
             senderAddress={senderAddress}
+            senderEmail={senderEmail}
             letterContent={letterContent}
             contactLogId={contactLogId}
             issue={issue}
@@ -526,6 +550,7 @@ function PayStep({
   allReps,
   officePerRep,
   senderAddress,
+  senderEmail,
   letterContent,
   contactLogId,
   issue,
@@ -536,6 +561,7 @@ function PayStep({
   allReps: Representative[];
   officePerRep: Record<string, number>;
   senderAddress: MailingAddress;
+  senderEmail: string;
   letterContent: string;
   contactLogId: string;
   issue: string;
@@ -548,6 +574,9 @@ function PayStep({
       localStorage.setItem("checkmyrep_sender_address", JSON.stringify(senderAddress));
     } catch { /* ignore */ }
     try {
+      if (senderEmail) localStorage.setItem("checkmyrep_sender_email", senderEmail);
+    } catch { /* ignore */ }
+    try {
       sessionStorage.setItem("checkmyrep_pending_mail", JSON.stringify({
         contactLogId,
         repIds: allReps.map((r) => r.id),
@@ -555,7 +584,7 @@ function PayStep({
         issue,
       }));
     } catch { /* ignore */ }
-  }, [senderAddress, contactLogId, allReps, issue]);
+  }, [senderAddress, senderEmail, contactLogId, allReps, issue]);
 
   const fetchClientSecret = useCallback(async () => {
     const res = await fetch("/api/mail/create-checkout", {
@@ -577,6 +606,7 @@ function PayStep({
           };
         }),
         senderAddress,
+        senderEmail,
         letterContent,
       }),
     });

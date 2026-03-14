@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     const stripe = new Stripe(secretKey);
 
     const body = await request.json();
-    const { contactLogId, senderAddress, letterContent } = body;
+    const { contactLogId, senderAddress, senderEmail, letterContent } = body;
 
     // Support both single rep (legacy) and multiple reps
     const recipients: Array<{ repName: string; repOfficeAddress: Record<string, string> }> = [];
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       ? "Physical letter printed and mailed via USPS First Class"
       : `Letters to: ${repNames.join(", ")}`;
 
-    const session = await stripe.checkout.sessions.create({
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
       ui_mode: "embedded",
       mode: "payment",
       line_items: [
@@ -84,7 +84,16 @@ export async function POST(request: NextRequest) {
       ],
       metadata,
       return_url: `${origin}/draft?mail_success={CHECKOUT_SESSION_ID}`,
-    });
+    };
+
+    // Set receipt email if provided
+    if (senderEmail) {
+      sessionParams.payment_intent_data = {
+        receipt_email: senderEmail,
+      };
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
 
     return NextResponse.json({ clientSecret: session.client_secret });
   } catch (err) {

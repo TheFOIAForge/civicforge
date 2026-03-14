@@ -82,6 +82,7 @@ export async function POST(request: NextRequest) {
     const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
     // Send a separate letter for each recipient
+    const lobResults: Array<{ repName: string; letterId?: string; expectedDeliveryDate?: string; trackingUrl?: string; thumbnails?: string[]; error?: boolean }> = [];
     for (const recipient of recipients) {
       try {
         const lastName = recipient.repName.split(" ").pop() || "";
@@ -134,13 +135,49 @@ export async function POST(request: NextRequest) {
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
           console.error(`Lob send failed for ${recipient.repName}:`, err);
+          lobResults.push({ repName: recipient.repName, error: true });
         } else {
           const letter = await res.json();
           console.log(`Letter to ${recipient.repName} sent:`, letter.id, "ETA:", letter.expected_delivery_date);
+          lobResults.push({
+            repName: recipient.repName,
+            letterId: letter.id,
+            expectedDeliveryDate: letter.expected_delivery_date || "",
+            trackingUrl: letter.url || "",
+            thumbnails: (letter.thumbnails || []).map((t: { large: string }) => t.large),
+          });
         }
       } catch (err) {
         console.error(`Failed to send letter to ${recipient.repName} via Lob:`, err);
+        lobResults.push({ repName: recipient.repName, error: true });
       }
+    }
+
+    // Store Lob results in the PaymentIntent metadata so the client can retrieve them
+    try {
+      const paymentIntentId = session.payment_intent as string;
+      if (paymentIntentId && lobResults.length > 0) {
+        const lobMeta: Record<string, string> = {
+          lob_count: String(lobResults.length),
+        };
+        for (let i = 0; i < lobResults.length; i++) {
+          const r = lobResults[i];
+          lobMeta[`lob_${i}_repName`] = r.repName;
+          if (r.letterId) {
+            lobMeta[`lob_${i}_id`] = r.letterId;
+            lobMeta[`lob_${i}_eta`] = r.expectedDeliveryDate || "";
+            lobMeta[`lob_${i}_url`] = r.trackingUrl || "";
+            // Store first thumbnail only (metadata value limit)
+            if (r.thumbnails && r.thumbnails[0]) {
+              lobMeta[`lob_${i}_thumb`] = r.thumbnails[0];
+            }
+          }
+          if (r.error) lobMeta[`lob_${i}_error`] = "true";
+        }
+        await stripe.paymentIntents.update(paymentIntentId, { metadata: lobMeta });
+      }
+    } catch (metaErr) {
+      console.error("Failed to update PaymentIntent with Lob results:", metaErr);
     }
   }
 

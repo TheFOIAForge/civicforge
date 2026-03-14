@@ -1,13 +1,15 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 
-import { useState, useEffect, Suspense, useRef } from "react";
+import { useState, useEffect, Suspense, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { issues, getIssueBySlug } from "@/data/issues";
 import { buildSystemPrompt } from "@/lib/prompts";
 import type { Representative } from "@/data/types";
 import { useMyReps } from "@/lib/my-reps-context";
+import { useAuth } from "@/lib/auth-context";
+import { recordAction } from "@/lib/points";
 import MailLetterModal from "@/components/MailLetterModal";
 
 type Mode = "letter" | "call" | "social";
@@ -44,6 +46,7 @@ const US_STATES = [
 function DraftInner() {
   const searchParams = useSearchParams();
   const { myReps, hasSavedReps } = useMyReps();
+  const { user, setShowAuthModal, setAuthModalMessage } = useAuth();
   const outputRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -74,6 +77,14 @@ function DraftInner() {
   const [step, setStep] = useState(1);
   const [mailModalOpen, setMailModalOpen] = useState(false);
   const [mailSuccess, setMailSuccess] = useState(false);
+  const [mailSessionId, setMailSessionId] = useState("");
+  const [mailLetters, setMailLetters] = useState<Array<{
+    repName: string; letterId: string | null; expectedDeliveryDate: string | null;
+    trackingUrl: string | null; thumbnailUrl: string | null; error: boolean;
+    deliveryStatus: string | null;
+  }>>([]);
+  const [mailStatusLoading, setMailStatusLoading] = useState(false);
+  const [showAccountPrompt, setShowAccountPrompt] = useState(false);
   const [lastLogId, setLastLogId] = useState("");
 
   // Load all reps
@@ -107,6 +118,7 @@ function DraftInner() {
     const mailSuccessParam = searchParams.get("mail_success");
     if (mailSuccessParam) {
       setMailSuccess(true);
+      setMailSessionId(mailSuccessParam);
       // Update contact log entry
       try {
         const pending = sessionStorage.getItem("checkmyrep_pending_mail");
@@ -127,6 +139,51 @@ function DraftInner() {
       window.history.replaceState({}, "", "/draft");
     }
   }, [searchParams]);
+
+  // Poll for mail status after successful payment
+  const pollMailStatus = useCallback(async (sessionId: string) => {
+    setMailStatusLoading(true);
+    let attempts = 0;
+    const maxAttempts = 20; // ~60 seconds max
+    const poll = async () => {
+      try {
+        const res = await fetch(`/api/mail/status?session_id=${sessionId}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.letters && data.letters.length > 0) {
+          setMailLetters(data.letters);
+          // Update localStorage contact log with Lob details
+          try {
+            const logs = JSON.parse(localStorage.getItem("checkmyrep_contacts") || "[]");
+            const idx = logs.findIndex((l: Record<string, string>) => l.stripeSessionId === sessionId);
+            if (idx !== -1 && data.letters[0]?.letterId) {
+              logs[idx].lobLetterId = data.letters.map((l: { letterId: string }) => l.letterId).join(",");
+              logs[idx].expectedDeliveryDate = data.letters[0].expectedDeliveryDate || "";
+              logs[idx].lobTrackingUrl = data.letters[0].trackingUrl || "";
+              localStorage.setItem("checkmyrep_contacts", JSON.stringify(logs));
+            }
+          } catch { /* ignore */ }
+        }
+        if (data.status === "sent" || data.status === "error") {
+          setMailStatusLoading(false);
+          return;
+        }
+      } catch { /* ignore */ }
+      attempts++;
+      if (attempts < maxAttempts) {
+        setTimeout(poll, 3000);
+      } else {
+        setMailStatusLoading(false);
+      }
+    };
+    poll();
+  }, []);
+
+  useEffect(() => {
+    if (mailSessionId) {
+      pollMailStatus(mailSessionId);
+    }
+  }, [mailSessionId, pollMailStatus]);
 
   // Auto-advance step when rep is selected
   useEffect(() => {
@@ -259,6 +316,20 @@ function DraftInner() {
       } catch {
         // Silently fail on storage errors
       }
+
+      // Save to Supabase if logged in, or prompt to create account
+      if (user) {
+        recordAction(user.id, {
+          repId: selectedRep.id,
+          repName: selectedRep.fullName,
+          method: mode,
+          issue: selectedIssue?.name || "General",
+          content: text,
+          concern: concern.slice(0, 500),
+        }).catch(() => {});
+      } else {
+        setShowAccountPrompt(true);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -330,6 +401,23 @@ function DraftInner() {
       }
       localStorage.setItem("checkmyrep_contacts", JSON.stringify(logs));
     } catch { /* ignore */ }
+
+    // Save to Supabase if logged in, or prompt to create account
+    if (user) {
+      for (const rep of selectedReps) {
+        recordAction(user.id, {
+          repId: rep.id,
+          repName: rep.fullName,
+          method: mode,
+          issue: selectedIssue?.name || "General",
+          content: concern,
+          concern: concern.slice(0, 500),
+        }).catch(() => {});
+      }
+    } else {
+      setShowAccountPrompt(true);
+    }
+
     setTimeout(() => {
       outputRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 100);
@@ -1145,13 +1233,126 @@ function DraftInner() {
             {mailSuccess && (
               <div className="p-4" style={{ backgroundColor: "rgba(22,163,74,0.1)", borderTop: "3px solid #16a34a" }} data-print-hide>
                 <p className="font-headline text-lg" style={{ color: "#16a34a" }}>
-                  Letter Mailed!
+                  Letter{mailLetters.length > 1 ? "s" : ""} Mailed!
                 </p>
-                <p className="font-mono text-xs mt-1" style={{ color: "rgba(0,0,0,0.6)" }}>
-                  Your letter to {selectedRep?.fullName} is being printed and will arrive in 3-5 business days via USPS First Class.
-                </p>
+
+                {mailStatusLoading && mailLetters.length === 0 && (
+                  <p className="font-mono text-xs mt-1" style={{ color: "rgba(0,0,0,0.5)" }}>
+                    Processing your letter{selectedReps.length > 1 ? "s" : ""}...
+                  </p>
+                )}
+
+                {mailLetters.length > 0 ? (
+                  <div className="mt-2 space-y-3">
+                    {mailLetters.map((letter, i) => (
+                      <div key={i} className="p-3" style={{ backgroundColor: "rgba(255,255,255,0.7)", border: "1px solid rgba(22,163,74,0.2)" }}>
+                        <div className="flex items-start gap-3">
+                          {/* PDF thumbnail proof */}
+                          {letter.thumbnailUrl && (
+                            <a href={letter.trackingUrl || "#"} target="_blank" rel="noopener noreferrer" className="shrink-0">
+                              <img
+                                src={letter.thumbnailUrl}
+                                alt={`Letter to ${letter.repName}`}
+                                className="border"
+                                style={{ width: "64px", height: "auto", borderColor: "rgba(0,0,0,0.1)" }}
+                              />
+                            </a>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-mono text-xs font-bold" style={{ color: "#111" }}>
+                              {letter.repName}
+                            </p>
+                            {letter.deliveryStatus && (
+                              <p className="font-mono text-[10px] mt-0.5" style={{ color: "#16a34a" }}>
+                                Status: {letter.deliveryStatus}
+                              </p>
+                            )}
+                            {letter.expectedDeliveryDate && (
+                              <p className="font-mono text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.5)" }}>
+                                Expected delivery: {new Date(letter.expectedDeliveryDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                              </p>
+                            )}
+                            {letter.trackingUrl && (
+                              <a
+                                href={letter.trackingUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block mt-1 font-mono text-[10px] font-bold no-underline"
+                                style={{ color: "#16a34a" }}
+                              >
+                                View Letter & Tracking
+                              </a>
+                            )}
+                            {letter.error && (
+                              <p className="font-mono text-[10px] mt-0.5" style={{ color: "#C1272D" }}>
+                                There was an issue sending this letter. We&apos;ll retry automatically.
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <p className="font-mono text-[10px]" style={{ color: "rgba(0,0,0,0.4)" }}>
+                      A payment receipt has been sent to your email. Letters arrive in 3-5 business days via USPS First Class.
+                    </p>
+                  </div>
+                ) : !mailStatusLoading ? (
+                  <p className="font-mono text-xs mt-1" style={{ color: "rgba(0,0,0,0.6)" }}>
+                    Your letter{selectedReps.length > 1 ? "s are" : " is"} being printed and will arrive in 3-5 business days via USPS First Class.
+                  </p>
+                ) : null}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Account prompt — shown after first action when not logged in */}
+        {showAccountPrompt && !user && (
+          <div
+            className="fixed bottom-20 left-4 right-4 z-50 p-4 shadow-lg"
+            style={{
+              backgroundColor: "#111",
+              border: "2px solid #C1272D",
+              maxWidth: "500px",
+              marginLeft: "auto",
+              marginRight: "auto",
+            }}
+          >
+            <div className="flex items-start gap-3">
+              <div className="shrink-0 w-10 h-10 flex items-center justify-center" style={{ backgroundColor: "#C1272D" }}>
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="font-headline text-base text-white">
+                  Track Your Impact
+                </p>
+                <p className="font-mono text-[11px] mt-1" style={{ color: "rgba(255,255,255,0.6)" }}>
+                  Create a free account to earn points, track your letters, and level up your activism.
+                </p>
+                <div className="flex gap-2 mt-3">
+                  <button
+                    onClick={() => {
+                      setShowAccountPrompt(false);
+                      setAuthModalMessage("Your action was saved locally. Create an account to track it across devices and earn points!");
+                      setShowAuthModal(true);
+                    }}
+                    className="px-4 py-2 font-mono text-xs font-bold uppercase cursor-pointer border-none"
+                    style={{ backgroundColor: "#C1272D", color: "#fff" }}
+                  >
+                    Sign Up Free
+                  </button>
+                  <button
+                    onClick={() => setShowAccountPrompt(false)}
+                    className="px-4 py-2 font-mono text-xs cursor-pointer border-none"
+                    style={{ backgroundColor: "transparent", color: "rgba(255,255,255,0.4)" }}
+                  >
+                    Later
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

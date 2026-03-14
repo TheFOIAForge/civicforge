@@ -4,7 +4,9 @@ import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import { UserModeProvider } from "@/lib/user-mode-context";
 import { MyRepsProvider } from "@/lib/my-reps-context";
 import { ScorecardProvider } from "@/lib/scorecard-context";
+import { AuthProvider } from "@/lib/auth-context";
 import AppShell from "@/components/AppShell";
+import AuthModal from "@/components/AuthModal";
 
 export const metadata: Metadata = {
   title: "CheckMyRep — They Work For You",
@@ -34,13 +36,16 @@ export default function RootLayout({
     <html lang="en">
       <body className="min-h-screen flex flex-col">
         <ServiceWorkerRegistration />
-        <UserModeProvider>
-          <MyRepsProvider>
-            <ScorecardProvider>
-              <AppShell>{children}</AppShell>
-            </ScorecardProvider>
-          </MyRepsProvider>
-        </UserModeProvider>
+        <AuthProvider>
+          <UserModeProvider>
+            <MyRepsProvider>
+              <ScorecardProvider>
+                <AppShell>{children}</AppShell>
+                <AuthModal />
+              </ScorecardProvider>
+            </MyRepsProvider>
+          </UserModeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
