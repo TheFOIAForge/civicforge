@@ -45,7 +45,7 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
             <div className="font-mono" style={{ fontSize: 10, letterSpacing: "0.3em", color: "rgba(255,255,255,0.5)", textTransform: "uppercase" }}>
               CheckMyRep Congressional Comparison
             </div>
-            <h2 className="font-headline" style={{ fontSize: 28, textTransform: "uppercase", letterSpacing: "0.1em", marginTop: 4, color: "#fff" }}>
+            <h2 className="font-sans font-bold" style={{ fontSize: 28, textTransform: "uppercase", letterSpacing: "0.1em", marginTop: 4, color: "#fff" }}>
               Head to Head
             </h2>
           </div>
@@ -62,7 +62,7 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
                   />
                 ) : (
                   <div
-                    className="font-headline"
+                    className="font-sans font-bold"
                     style={{ width: 120, height: 120, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, color: "#fff", backgroundColor: PC[repA.party], border: `4px solid ${PC[repA.party]}` }}
                   >
                     {repA.firstName[0]}{repA.lastName[0]}
@@ -75,13 +75,13 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
                   {PARTY_FULL[repA.party]}
                 </div>
               </div>
-              <div className="font-headline" style={{ fontSize: 20, textTransform: "uppercase", marginTop: 8, lineHeight: 1.2, color: "#fff" }}>
+              <div className="font-sans font-bold" style={{ fontSize: 20, textTransform: "uppercase", marginTop: 8, lineHeight: 1.2, color: "#fff" }}>
                 {repA.fullName}
               </div>
               <div className="font-mono" style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", marginTop: 4 }}>
                 {repA.stateAbbr} · {repA.title}
               </div>
-              <p className="font-body hidden md:block" style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", marginTop: 8, lineHeight: 1.5, maxWidth: 200, marginLeft: "auto", marginRight: "auto", fontStyle: "italic" }}>
+              <p className="font-sans hidden md:block" style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", marginTop: 8, lineHeight: 1.5, maxWidth: 200, marginLeft: "auto", marginRight: "auto", fontStyle: "italic" }}>
                 {overall.characterizationA}
               </p>
             </div>
@@ -89,7 +89,7 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
             {/* Center VS */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
               <div style={{ width: 64, height: 64, display: "flex", alignItems: "center", justifyContent: "center", border: "3px solid rgba(255,255,255,0.3)", transform: "rotate(45deg)" }}>
-                <span className="font-headline" style={{ fontSize: 24, color: "#ff4d4d", transform: "rotate(-45deg)" }}>VS</span>
+                <span className="font-sans font-bold" style={{ fontSize: 24, color: "#ff4d4d", transform: "rotate(-45deg)" }}>VS</span>
               </div>
             </div>
 
@@ -103,7 +103,7 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
                   />
                 ) : (
                   <div
-                    className="font-headline"
+                    className="font-sans font-bold"
                     style={{ width: 120, height: 120, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, color: "#fff", backgroundColor: PC[repB.party], border: `4px solid ${PC[repB.party]}` }}
                   >
                     {repB.firstName[0]}{repB.lastName[0]}
@@ -116,13 +116,13 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
                   {PARTY_FULL[repB.party]}
                 </div>
               </div>
-              <div className="font-headline" style={{ fontSize: 20, textTransform: "uppercase", marginTop: 8, lineHeight: 1.2, color: "#fff" }}>
+              <div className="font-sans font-bold" style={{ fontSize: 20, textTransform: "uppercase", marginTop: 8, lineHeight: 1.2, color: "#fff" }}>
                 {repB.fullName}
               </div>
               <div className="font-mono" style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", marginTop: 4 }}>
                 {repB.stateAbbr} · {repB.title}
               </div>
-              <p className="font-body hidden md:block" style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", marginTop: 8, lineHeight: 1.5, maxWidth: 200, marginLeft: "auto", marginRight: "auto", fontStyle: "italic" }}>
+              <p className="font-sans hidden md:block" style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", marginTop: 8, lineHeight: 1.5, maxWidth: 200, marginLeft: "auto", marginRight: "auto", fontStyle: "italic" }}>
                 {overall.characterizationB}
               </p>
             </div>
@@ -136,7 +136,7 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
           <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center" }}>
             {/* Rep A score */}
             <div style={{ padding: "20px 0", textAlign: "center", backgroundColor: overall.winsA >= overall.winsB ? PC[repA.party] : "transparent" }}>
-              <div className="font-headline" style={{ fontSize: 64, lineHeight: 1, color: "#fff" }}>
+              <div className="font-sans font-bold" style={{ fontSize: 64, lineHeight: 1, color: "#fff" }}>
                 {overall.winsA}
               </div>
               <div className="font-mono" style={{ fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 4, color: "rgba(255,255,255,0.8)" }}>
@@ -146,7 +146,7 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
 
             {/* Center */}
             <div style={{ padding: "20px 16px", textAlign: "center" }}>
-              <div className="font-headline" style={{ fontSize: 24, color: "rgba(255,255,255,0.3)" }}>—</div>
+              <div className="font-sans font-bold" style={{ fontSize: 24, color: "rgba(255,255,255,0.3)" }}>—</div>
               {overall.ties > 0 && (
                 <div className="font-mono" style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginTop: 4, textTransform: "uppercase" }}>
                   {overall.ties} tie{overall.ties > 1 ? "s" : ""}
@@ -156,7 +156,7 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
 
             {/* Rep B score */}
             <div style={{ padding: "20px 0", textAlign: "center", backgroundColor: overall.winsB >= overall.winsA ? PC[repB.party] : "transparent" }}>
-              <div className="font-headline" style={{ fontSize: 64, lineHeight: 1, color: "#fff" }}>
+              <div className="font-sans font-bold" style={{ fontSize: 64, lineHeight: 1, color: "#fff" }}>
                 {overall.winsB}
               </div>
               <div className="font-mono" style={{ fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 4, color: "rgba(255,255,255,0.8)" }}>
@@ -167,7 +167,7 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
 
           {/* Summary */}
           <div style={{ textAlign: "center", padding: "0 24px 16px" }}>
-            <p className="font-body" style={{ fontSize: 14, color: "rgba(255,255,255,0.65)", maxWidth: 480, margin: "0 auto" }}>
+            <p className="font-sans" style={{ fontSize: 14, color: "rgba(255,255,255,0.65)", maxWidth: 480, margin: "0 auto" }}>
               {overall.overallSummary}
             </p>
           </div>
@@ -227,7 +227,7 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
                   <div style={{ padding: "14px 12px", textAlign: "center", minWidth: 150 }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                       <span style={{ fontSize: 20 }}>{cat.icon}</span>
-                      <span className="font-headline" style={{ fontSize: 14, textTransform: "uppercase", color: "#fff" }}>
+                      <span className="font-sans font-bold" style={{ fontSize: 14, textTransform: "uppercase", color: "#fff" }}>
                         {cat.label}
                       </span>
                     </div>
@@ -292,7 +292,7 @@ const TaleOfTheTape = forwardRef<HTMLDivElement, TaleOfTheTapeProps>(
             <div className="font-mono" style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
               {overall.winsA + overall.winsB + overall.ties} Categories Analyzed
             </div>
-            <div className="font-headline" style={{ fontSize: 14, textTransform: "uppercase", letterSpacing: "0.1em" }}>
+            <div className="font-sans font-bold" style={{ fontSize: 14, textTransform: "uppercase", letterSpacing: "0.1em" }}>
               {overallWinner ? (
                 <span style={{ color: PCBright[overallWinner.party] }}>
                   {overallWinner.lastName} Leads {Math.max(overall.winsA, overall.winsB)}-{Math.min(overall.winsA, overall.winsB)}

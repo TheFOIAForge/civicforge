@@ -1,21 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { mailStatusSchema, parseBody } from "@/lib/validations";
+import { rateLimit } from "@/lib/rate-limit";
+
+const limiter = rateLimit({ windowMs: 60_000, max: 20 });
 
 export async function GET(request: NextRequest) {
+  const limited = limiter.check(request);
+  if (limited) return limited;
+
   const secretKey = process.env.STRIPE_SECRET_KEY;
   if (!secretKey) {
     return NextResponse.json({ error: "Not configured" }, { status: 503 });
   }
 
   const sessionId = request.nextUrl.searchParams.get("session_id");
-  if (!sessionId) {
-    return NextResponse.json({ error: "Missing session_id" }, { status: 400 });
-  }
+  const validated = parseBody(mailStatusSchema, { session_id: sessionId });
+  if (!validated.success) return validated.response;
 
   const stripe = new Stripe(secretKey);
 
   try {
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const session = await stripe.checkout.sessions.retrieve(validated.data.session_id);
     const paymentIntentId = session.payment_intent as string;
 
     if (!paymentIntentId) {

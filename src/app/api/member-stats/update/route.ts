@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import type { MemberStats, MemberStatsPayload } from "@/data/member-stats";
 import { setCachedStats } from "../route";
+import { rateLimit } from "@/lib/rate-limit";
 
 /**
  * POST /api/member-stats/update
@@ -160,7 +161,12 @@ async function fetchMemberBillStats(
 
 // ─── Main Update Logic ──────────────────────────────────────────────────────
 
-export async function POST() {
+// Strict rate limit: 1 request per 5 minutes (long-running operation)
+const limiter = rateLimit({ windowMs: 300_000, max: 1 });
+
+export async function POST(request: NextRequest) {
+  const limited = limiter.check(request);
+  if (limited) return limited;
   const apiKey = process.env.CONGRESS_GOV_API_KEY;
   if (!apiKey) {
     return NextResponse.json(

@@ -67,7 +67,7 @@ export default function AdvancedAnalytics({
       {/* Section Header */}
       <div className="border-3 border-black bg-black text-white px-5 py-4 flex items-center gap-3">
         <span className="text-2xl">📊</span>
-        <h2 className="font-headline text-xl uppercase tracking-wide">
+        <h2 className="font-sans font-bold text-xl uppercase tracking-wide">
           Advanced Analytics
         </h2>
         <span className="ml-auto font-mono text-xs text-white/50 uppercase">
@@ -122,7 +122,7 @@ export default function AdvancedAnalytics({
 function TabHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div className="mb-6">
-      <h3 className="font-headline text-2xl uppercase mb-1">{title}</h3>
+      <h3 className="font-sans font-bold text-2xl uppercase mb-1">{title}</h3>
       <p className="font-mono text-xs text-black/40 uppercase tracking-wider">
         {subtitle}
       </p>
@@ -204,7 +204,7 @@ function RadarTab({ repA, repB }: { repA: Representative; repB: Representative }
           return (
             <div key={d.dimension} className="border-2 border-black/10 p-3">
               <div className="font-mono text-[10px] text-black/40 uppercase">{d.dimension}</div>
-              <div className="font-headline text-lg">
+              <div className="font-sans font-bold text-lg">
                 {winner ? (
                   <span style={{ color: PC[winner.party] }}>{winner.lastName}</span>
                 ) : (
@@ -312,13 +312,13 @@ function IdeologyTab({ repA, repB }: { repA: Representative; repB: Representativ
       <div className="grid grid-cols-2 gap-4 mt-4">
         <div className="border-2 border-black/10 p-3 bg-blue-50/30">
           <div className="font-mono text-[10px] text-black/40 uppercase">Liberal Quadrant</div>
-          <div className="font-body text-sm text-black/60">
+          <div className="font-sans text-sm text-black/60">
             Supports government intervention in economy, progressive social policies
           </div>
         </div>
         <div className="border-2 border-black/10 p-3 bg-red-50/30">
           <div className="font-mono text-[10px] text-black/40 uppercase">Conservative Quadrant</div>
-          <div className="font-body text-sm text-black/60">
+          <div className="font-sans text-sm text-black/60">
             Favors free markets, traditional social values, limited government
           </div>
         </div>
@@ -354,10 +354,10 @@ function HeatmapTab({ repA, repB }: { repA: Representative; repB: Representative
 
       {/* Agreement score */}
       <div className="flex items-center gap-4 mb-6 p-4 border-3 border-black/10 bg-cream/50">
-        <div className="font-headline text-4xl">{agreePct}%</div>
+        <div className="font-sans font-bold text-4xl">{agreePct}%</div>
         <div>
           <div className="font-mono text-xs text-black/40 uppercase">Vote Agreement Rate</div>
-          <div className="font-body text-sm text-black/60">
+          <div className="font-sans text-sm text-black/60">
             Agreed on {agreeCount} of {cells.length} key votes
           </div>
         </div>
@@ -463,7 +463,7 @@ function SankeyTab({ repA, repB }: { repA: Representative; repB: Representative 
         <div className="grid grid-cols-2 gap-6">
           <div className="border-3 border-black/15 p-4">
             <div className="font-mono text-[10px] text-black/40 uppercase mb-2">Total Raised</div>
-            <div className="font-headline text-3xl" style={{ color: PC[repA.party] }}>
+            <div className="font-sans font-bold text-3xl" style={{ color: PC[repA.party] }}>
               {fmtDollars(totalA)}
             </div>
             <div className="mt-3 h-6 bg-black/5 relative overflow-hidden">
@@ -476,7 +476,7 @@ function SankeyTab({ repA, repB }: { repA: Representative; repB: Representative 
           </div>
           <div className="border-3 border-black/15 p-4">
             <div className="font-mono text-[10px] text-black/40 uppercase mb-2">Total Raised</div>
-            <div className="font-headline text-3xl" style={{ color: PC[repB.party] }}>
+            <div className="font-sans font-bold text-3xl" style={{ color: PC[repB.party] }}>
               {fmtDollars(totalB)}
             </div>
             <div className="mt-3 h-6 bg-black/5 relative overflow-hidden">
@@ -801,15 +801,15 @@ function AlliancesTab({ repA, repB }: { repA: Representative; repB: Representati
       {/* Summary stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="border-3 border-black/10 p-4 text-center">
-          <div className="font-headline text-3xl">{sharedCommittees.length}</div>
+          <div className="font-sans font-bold text-3xl">{sharedCommittees.length}</div>
           <div className="font-mono text-[10px] text-black/40 uppercase">Shared Committees</div>
         </div>
         <div className="border-3 border-black/10 p-4 text-center">
-          <div className="font-headline text-3xl">{sharedCaucuses.length}</div>
+          <div className="font-sans font-bold text-3xl">{sharedCaucuses.length}</div>
           <div className="font-mono text-[10px] text-black/40 uppercase">Shared Caucuses</div>
         </div>
         <div className="border-3 border-black/10 p-4 text-center">
-          <div className="font-headline text-3xl">{sharedConnections.length}</div>
+          <div className="font-sans font-bold text-3xl">{sharedConnections.length}</div>
           <div className="font-mono text-[10px] text-black/40 uppercase">Total Shared Links</div>
         </div>
       </div>
@@ -824,14 +824,14 @@ function AlliancesTab({ repA, repB }: { repA: Representative; repB: Representati
 
           {/* Rep A hub */}
           <div className="absolute left-[15%] top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-            <div className="w-20 h-20 border-3 border-black flex items-center justify-center font-headline text-white text-sm" style={{ backgroundColor: PC[repA.party] }}>
+            <div className="w-20 h-20 border-3 border-black flex items-center justify-center font-sans font-bold text-white text-sm" style={{ backgroundColor: PC[repA.party] }}>
               {repA.lastName}
             </div>
           </div>
 
           {/* Rep B hub */}
           <div className="absolute right-[15%] top-1/2 translate-x-1/2 -translate-y-1/2 z-10">
-            <div className="w-20 h-20 border-3 border-black flex items-center justify-center font-headline text-white text-sm" style={{ backgroundColor: PC[repB.party] }}>
+            <div className="w-20 h-20 border-3 border-black flex items-center justify-center font-sans font-bold text-white text-sm" style={{ backgroundColor: PC[repB.party] }}>
               {repB.lastName}
             </div>
           </div>
@@ -1015,7 +1015,7 @@ function RankingsTab({ repA, repB }: { repA: Representative; repB: Representativ
                 <div className="w-3 h-3" style={{ backgroundColor: PC[rep.party] }} />
                 <span className="font-mono text-xs font-bold">{rep.lastName}</span>
               </div>
-              <div className="font-headline text-4xl" style={{ color: PC[rep.party] }}>
+              <div className="font-sans font-bold text-4xl" style={{ color: PC[rep.party] }}>
                 #{rank}
               </div>
               <div className="font-mono text-[10px] text-black/40">

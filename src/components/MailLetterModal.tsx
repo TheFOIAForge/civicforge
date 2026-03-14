@@ -157,9 +157,9 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
         style={{ backgroundColor: "#fff" }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5" style={{ backgroundColor: "#C1272D" }}>
+        <div className="flex items-center justify-between p-5" style={{ backgroundColor: "#0A2540" }}>
           <div>
-            <h2 className="font-headline text-2xl text-white normal-case m-0">
+            <h2 className="font-sans font-bold text-2xl text-white normal-case m-0">
               Mail This Letter
             </h2>
             <p className="font-mono text-[10px] text-white/70 mt-1">
@@ -168,7 +168,7 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
           </div>
           <button
             onClick={onClose}
-            className="text-white text-2xl font-headline cursor-pointer bg-transparent border-none p-2 hover:text-white/70"
+            className="text-white text-2xl font-sans font-bold cursor-pointer bg-transparent border-none p-2 hover:text-white/70"
             aria-label="Close"
           >
             ✕
@@ -187,7 +187,7 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
               }}
               className="flex-1 py-3 font-mono text-xs font-bold uppercase text-center cursor-pointer border-none"
               style={{
-                backgroundColor: step === s ? "#C1272D" : "transparent",
+                backgroundColor: step === s ? "#0A2540" : "transparent",
                 color: step === s ? "#fff" : "rgba(0,0,0,0.4)",
               }}
             >
@@ -326,12 +326,12 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
             {/* Info bar */}
             <div className="mt-4 flex items-center gap-3 p-3" style={{ backgroundColor: "rgba(193,39,45,0.06)", border: "1px solid rgba(193,39,45,0.15)" }}>
               <div className="shrink-0">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C1272D" strokeWidth={1.5}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0A2540" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                 </svg>
               </div>
               <div>
-                <p className="font-mono text-xs font-bold" style={{ color: "#C1272D" }}>
+                <p className="font-mono text-xs font-bold" style={{ color: "#0A2540" }}>
                   {allReps.length > 1
                     ? `${allReps.length} IDENTICAL LETTERS — RE: ${issue.toUpperCase()}`
                     : `RE: ${issue.toUpperCase()} — USPS FIRST CLASS`}
@@ -346,8 +346,8 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
 
             <button
               onClick={() => setStep("addresses")}
-              className="w-full mt-4 py-4 font-headline text-lg uppercase cursor-pointer border-none"
-              style={{ backgroundColor: "#C1272D", color: "#fff" }}
+              className="w-full mt-4 py-4 font-sans font-bold text-lg uppercase cursor-pointer border-none"
+              style={{ backgroundColor: "#0A2540", color: "#fff" }}
             >
               Continue — Enter Addresses
             </button>
@@ -393,10 +393,10 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
                         </div>
                       )}
 
-                      <p className="font-body text-sm" style={{ color: "rgba(0,0,0,0.6)" }}>
+                      <p className="font-sans text-sm" style={{ color: "rgba(0,0,0,0.6)" }}>
                         {o?.street}
                       </p>
-                      <p className="font-body text-sm" style={{ color: "rgba(0,0,0,0.6)" }}>
+                      <p className="font-sans text-sm" style={{ color: "rgba(0,0,0,0.6)" }}>
                         {o?.city}, {o?.state} {o?.zip}
                       </p>
                     </div>
@@ -485,7 +485,7 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
                 <p
                   className="mt-2 font-mono text-xs font-bold"
                   style={{
-                    color: verifyStatus === "deliverable" ? "#16a34a" : verifyStatus === "warning" ? "#ca8a04" : "#C1272D",
+                    color: verifyStatus === "deliverable" ? "#16a34a" : verifyStatus === "warning" ? "#ca8a04" : "#0A2540",
                   }}
                 >
                   {verifyStatus === "deliverable" ? "✓" : verifyStatus === "warning" ? "⚠" : "✕"} {verifyMsg}
@@ -514,9 +514,9 @@ export default function MailLetterModal({ isOpen, onClose, letterContent, rep, r
             <button
               onClick={() => setStep("pay")}
               disabled={!senderValid}
-              className="w-full mt-2 py-4 font-headline text-lg uppercase cursor-pointer border-none"
+              className="w-full mt-2 py-4 font-sans font-bold text-lg uppercase cursor-pointer border-none"
               style={{
-                backgroundColor: senderValid ? "#C1272D" : "rgba(0,0,0,0.1)",
+                backgroundColor: senderValid ? "#0A2540" : "rgba(0,0,0,0.1)",
                 color: senderValid ? "#fff" : "rgba(0,0,0,0.3)",
               }}
             >
@@ -707,7 +707,7 @@ function PayStep({
       {/* Cost info */}
       <div className="mb-4 p-3 flex items-center justify-between" style={{ backgroundColor: "rgba(193,39,45,0.06)", border: "1px solid rgba(193,39,45,0.15)" }}>
         <div>
-          <p className="font-mono text-xs font-bold" style={{ color: "#C1272D" }}>
+          <p className="font-mono text-xs font-bold" style={{ color: "#0A2540" }}>
             {allReps.length > 1
               ? `${allReps.length} LETTERS × $1.50 = $${totalCost}`
               : "USPS FIRST CLASS — $1.50"}
@@ -718,8 +718,8 @@ function PayStep({
       </div>
 
       {payError && (
-        <div className="mb-4 p-3" style={{ backgroundColor: "rgba(193,39,45,0.1)", border: "2px solid #C1272D" }}>
-          <p className="font-mono text-xs font-bold" style={{ color: "#C1272D" }}>
+        <div className="mb-4 p-3" style={{ backgroundColor: "rgba(193,39,45,0.1)", border: "2px solid #0A2540" }}>
+          <p className="font-mono text-xs font-bold" style={{ color: "#0A2540" }}>
             {payError}
           </p>
         </div>
@@ -733,7 +733,7 @@ function PayStep({
         </div>
       ) : (
         <div className="p-4 text-center" style={{ backgroundColor: "rgba(193,39,45,0.05)" }}>
-          <p className="font-mono text-xs font-bold" style={{ color: "#C1272D" }}>
+          <p className="font-mono text-xs font-bold" style={{ color: "#0A2540" }}>
             Payment service not configured
           </p>
           <p className="font-mono text-[10px] mt-1" style={{ color: "rgba(0,0,0,0.5)" }}>

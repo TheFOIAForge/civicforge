@@ -62,7 +62,7 @@ function LeaderboardCard({
       <div className={`${color} px-4 py-3 flex items-center gap-2`}>
         <span className="text-xl" aria-hidden="true">{icon}</span>
         <div>
-          <h3 className="font-headline text-base text-white uppercase">{title}</h3>
+          <h3 className="font-sans font-bold text-base text-white uppercase">{title}</h3>
           <p className="font-mono text-[10px] text-white/70 tracking-wider">{subtitle}</p>
         </div>
       </div>
@@ -73,7 +73,7 @@ function LeaderboardCard({
             href={`/directory/${m.slug}`}
             className="flex items-center gap-3 px-4 py-3 no-underline text-black hover:bg-hover transition-colors group"
           >
-            <span className="font-headline text-2xl text-gray-mid/40 w-6 text-right shrink-0">
+            <span className="font-sans font-bold text-2xl text-gray-mid/40 w-6 text-right shrink-0">
               {i + 1}
             </span>
             <div className="flex-1 min-w-0">
@@ -81,7 +81,7 @@ function LeaderboardCard({
                 <span className={`px-1.5 py-0.5 text-[10px] font-mono font-bold text-white ${partyColor(m.party)}`}>
                   {partyLabel(m.party)}
                 </span>
-                <span className="font-headline text-sm normal-case group-hover:text-red truncate">
+                <span className="font-sans font-bold text-sm normal-case group-hover:text-red truncate">
                   {m.name}
                 </span>
               </div>
@@ -93,7 +93,7 @@ function LeaderboardCard({
               </div>
             </div>
             <div className="text-right shrink-0">
-              <span className={`font-headline text-lg ${partyTextColor(m.party)}`}>
+              <span className={`font-sans font-bold text-lg ${partyTextColor(m.party)}`}>
                 {m[statKey]}{statSuffix}
               </span>
               <span className="block font-mono text-[9px] text-gray-mid uppercase">{statLabel}</span>
@@ -174,7 +174,7 @@ export default function CongressInfoGraphics() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
         <div>
-          <h2 className="font-headline text-3xl md:text-4xl">Congressional Spotlight</h2>
+          <h2 className="font-sans font-bold text-3xl md:text-4xl">Congressional Spotlight</h2>
           <p className="font-mono text-xs text-gray-mid mt-1">
             {data.source === "live" ? "LIVE DATA" : "SNAPSHOT DATA"} · {data.congress}TH CONGRESS
             {data.lastUpdated && (

@@ -1,11 +1,11 @@
 {
-  "name": "CheckMyRep — They Work For You",
+  "name": "CheckMyRep — Your Direct Line to Congress",
   "short_name": "CheckMyRep",
-  "description": "Find your representatives, draft AI-powered letters, track contacts, and hold Congress accountable. A project of CheckMyRep.",
+  "description": "Find your representatives, write letters, send emails, make calls, and track your civic engagement. Free and non-partisan.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F5F0E8",
-  "theme_color": "#000000",
+  "background_color": "#F8F7F4",
+  "theme_color": "#0A2540",
   "orientation": "portrait-primary",
   "scope": "/",
   "icons": [

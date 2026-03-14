@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
+import { verifyAddressSchema, parseBody } from "@/lib/validations";
+import { rateLimit } from "@/lib/rate-limit";
+
+const limiter = rateLimit({ windowMs: 60_000, max: 10 });
 
 export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { address_line1, address_line2, address_city, address_state, address_zip } = body;
+  const limited = limiter.check(request);
+  if (limited) return limited;
 
-    if (!address_line1 || !address_city || !address_state || !address_zip) {
-      return NextResponse.json(
-        { error: "Missing required address fields" },
-        { status: 400 }
-      );
-    }
+  try {
+    const raw = await request.json();
+    const parsed = parseBody(verifyAddressSchema, raw);
+    if (!parsed.success) return parsed.response;
+
+    const { address_line1, address_line2, address_city, address_state, address_zip } = parsed.data;
 
     const lobKey = process.env.LOB_API_KEY;
     if (!lobKey) {

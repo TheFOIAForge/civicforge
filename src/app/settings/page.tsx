@@ -119,19 +119,24 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="font-headline text-5xl md:text-6xl mb-2">Settings</h1>
-      <p className="font-mono text-sm text-gray-mid mb-2 font-bold">
-        YOUR API KEY. YOUR BROWSER. YOUR DATA. NOTHING LEAVES YOUR MACHINE.
-      </p>
+      <div className="flex items-start gap-4 mb-2">
+        <img src="/images/civic/icons/security.png" alt="" className="w-10 h-10 mt-2 opacity-80" aria-hidden="true" />
+        <div>
+          <h1 className="font-sans font-bold text-5xl md:text-6xl mb-2">Settings</h1>
+          <p className="font-mono text-sm text-gray-mid font-bold">
+            YOUR API KEY. YOUR BROWSER. YOUR DATA. NOTHING LEAVES YOUR MACHINE.
+          </p>
+        </div>
+      </div>
       {/* Star separator */}
-      <div className="mb-8" style={{ color: "#c4a44a", letterSpacing: "0.5em", fontSize: "14px" }}>
+      <div className="mb-8" style={{ color: "#C9A66B", letterSpacing: "0.5em", fontSize: "14px" }}>
         &#9733; &#9733; &#9733;
       </div>
 
       {/* API Key Section */}
       <section className="border-3 border-border p-6 bg-surface mb-6">
-        <h2 className="font-headline text-3xl mb-4">{"\u{1F511}"} Anthropic API Key</h2>
-        <p className="font-body text-base text-gray-mid mb-5">
+        <h2 className="font-sans font-bold text-3xl mb-4">{"\u{1F511}"} Anthropic API Key</h2>
+        <p className="font-sans text-base text-gray-mid mb-5">
           CheckMyRep uses your own Anthropic API key to power AI letter drafting,
           call scripts, and social posts. Your key is stored only in your
           browser&apos;s localStorage — it never touches our servers.
@@ -160,25 +165,25 @@ export default function SettingsPage() {
         <div className="flex flex-wrap gap-3">
           <button
             onClick={handleSave}
-            className="px-6 py-3 font-headline uppercase text-base cursor-pointer hover:bg-red-dark transition-colors"
-            style={{ backgroundColor: "#C1272D", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
+            className="px-6 py-3 font-sans font-bold uppercase text-base cursor-pointer hover:bg-red-dark transition-colors"
+            style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
           >
             Save Key
           </button>
           <button
             onClick={handleTest}
             disabled={testing || !apiKey.trim()}
-            className={`px-6 py-3 font-headline uppercase text-base cursor-pointer transition-colors ${
+            className={`px-6 py-3 font-sans font-bold uppercase text-base cursor-pointer transition-colors ${
               testing ? "bg-gray-mid" : "bg-black hover:bg-gray-dark"
             }`}
-            style={{ color: "#f5e6c8", border: "3px solid #1a1a1a" }}
+            style={{ color: "#F8F7F4", border: "1px solid #E5E5E5" }}
           >
             {testing ? "Testing..." : "Test Connection"}
           </button>
           {savedKey && (
             <button
               onClick={handleRemove}
-              className="px-6 py-3 font-headline uppercase text-base border-3 border-border cursor-pointer hover:bg-status-red hover:text-cream hover:border-status-red transition-colors"
+              className="px-6 py-3 font-sans font-bold uppercase text-base border-3 border-border cursor-pointer hover:bg-status-red hover:text-cream hover:border-status-red transition-colors"
             >
               Remove Key
             </button>
@@ -196,9 +201,9 @@ export default function SettingsPage() {
         )}
 
         {/* Instructions */}
-        <div className="mt-8 pt-6" style={{ borderTop: "3px solid #c4a44a" }}>
-          <h3 className="font-headline text-xl mb-4">How to Get an API Key</h3>
-          <ol className="font-body text-base text-gray-mid space-y-3 list-decimal list-inside">
+        <div className="mt-8 pt-6" style={{ borderTop: "1px solid #E5E5E5" }}>
+          <h3 className="font-sans font-bold text-xl mb-4">How to Get an API Key</h3>
+          <ol className="font-sans text-base text-gray-mid space-y-3 list-decimal list-inside">
             <li>
               Go to{" "}
               <a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer" className="text-red font-bold">
@@ -220,14 +225,14 @@ export default function SettingsPage() {
       </section>
 
       {/* Star separator */}
-      <div className="text-center mb-6" style={{ color: "#c4a44a", letterSpacing: "0.5em", fontSize: "14px" }}>
+      <div className="text-center mb-6" style={{ color: "#C9A66B", letterSpacing: "0.5em", fontSize: "14px" }}>
         &#9733; &#9733; &#9733;
       </div>
 
       {/* Email Service (Optional) */}
       <section className="border-3 border-border p-6 bg-surface mb-6">
-        <h2 className="font-headline text-3xl mb-4">&#9993; Email Service (Optional)</h2>
-        <p className="font-body text-base text-gray-mid mb-5">
+        <h2 className="font-sans font-bold text-3xl mb-4">&#9993; Email Service (Optional)</h2>
+        <p className="font-sans text-base text-gray-mid mb-5">
           Enter your email service API key to send letters directly from CheckMyRep
           without opening your email client. Your key is stored only in your
           browser&apos;s localStorage.
@@ -290,15 +295,15 @@ export default function SettingsPage() {
               setEmailSaved(true);
             }}
             disabled={!emailApiKey.trim() || !senderEmail.trim()}
-            className={`px-6 py-3 font-headline uppercase text-base cursor-pointer transition-colors ${
+            className={`px-6 py-3 font-sans font-bold uppercase text-base cursor-pointer transition-colors ${
               !emailApiKey.trim() || !senderEmail.trim()
                 ? "bg-gray-mid border-gray-mid"
                 : "hover:bg-red-dark hover:border-red-dark"
             }`}
             style={{
-              backgroundColor: (!emailApiKey.trim() || !senderEmail.trim()) ? undefined : "#C1272D",
-              color: "#f5e6c8",
-              border: "3px solid #1a1a1a",
+              backgroundColor: (!emailApiKey.trim() || !senderEmail.trim()) ? undefined : "#0A2540",
+              color: "#F8F7F4",
+              border: "1px solid #E5E5E5",
             }}
           >
             Save Email Config
@@ -311,7 +316,7 @@ export default function SettingsPage() {
                 setSenderEmail("");
                 setEmailSaved(false);
               }}
-              className="px-6 py-3 font-headline uppercase text-base border-3 border-border cursor-pointer hover:bg-status-red hover:text-cream hover:border-status-red transition-colors"
+              className="px-6 py-3 font-sans font-bold uppercase text-base border-3 border-border cursor-pointer hover:bg-status-red hover:text-cream hover:border-status-red transition-colors"
             >
               Remove Config
             </button>
@@ -329,8 +334,8 @@ export default function SettingsPage() {
 
       {/* Data Management */}
       <section className="border-3 border-border p-6 bg-surface">
-        <h2 className="font-headline text-3xl mb-4">{"\u{1F5C4}\u{FE0F}"} Data Management</h2>
-        <p className="font-body text-base text-gray-mid mb-5">
+        <h2 className="font-sans font-bold text-3xl mb-4">{"\u{1F5C4}\u{FE0F}"} Data Management</h2>
+        <p className="font-sans text-base text-gray-mid mb-5">
           All your data is stored in your browser. Nothing is sent to external
           servers (except API calls to Anthropic when you generate content).
         </p>
@@ -368,14 +373,14 @@ export default function SettingsPage() {
       </section>
 
       {/* Star separator */}
-      <div className="text-center my-6" style={{ color: "#c4a44a", letterSpacing: "0.5em", fontSize: "14px" }}>
+      <div className="text-center my-6" style={{ color: "#C9A66B", letterSpacing: "0.5em", fontSize: "14px" }}>
         &#9733; &#9733; &#9733;
       </div>
 
       {/* API Status */}
       <section className="border-3 border-border p-6 bg-surface">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-headline text-3xl">API Status</h2>
+          <h2 className="font-sans font-bold text-3xl">API Status</h2>
           <button
             onClick={fetchApiStatus}
             disabled={apisLoading}
@@ -384,7 +389,7 @@ export default function SettingsPage() {
             {apisLoading ? "Checking..." : "Refresh"}
           </button>
         </div>
-        <p className="font-body text-base text-gray-mid mb-5">
+        <p className="font-sans text-base text-gray-mid mb-5">
           Real-time status of the data sources powering CheckMyRep.
         </p>
 

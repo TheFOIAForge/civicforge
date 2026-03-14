@@ -39,8 +39,8 @@ export default function ShareAction({ action, repName, issue }: ShareActionProps
 
   return (
     <div className="border-3 border-black bg-black text-white p-5 mt-4">
-      <p className="font-headline text-lg mb-3">Share what you did</p>
-      <p className="font-body text-sm text-white/70 mb-4">
+      <p className="font-sans font-bold text-lg mb-3">Share what you did</p>
+      <p className="font-sans text-sm text-white/70 mb-4">
         Inspire others to take action. Let people know you showed up.
       </p>
 

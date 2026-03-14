@@ -15,7 +15,7 @@ const AdvancedAnalytics = dynamic(
   () => import("@/components/compare/AdvancedAnalytics"),
   { ssr: false, loading: () => (
     <div className="mt-10 border-3 border-black bg-surface p-8 text-center">
-      <div className="font-headline text-xl uppercase mb-2">Loading Advanced Analytics...</div>
+      <div className="font-sans font-bold text-xl uppercase mb-2">Loading Advanced Analytics...</div>
       <p className="font-mono text-xs text-gray-mid">Preparing 8 visualization tabs</p>
     </div>
   )}
@@ -33,7 +33,7 @@ function LoadingComparison() {
           <path className="opacity-80" d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
         </svg>
       </div>
-      <div className="font-headline text-2xl uppercase mb-2">Comparing Representatives</div>
+      <div className="font-sans font-bold text-2xl uppercase mb-2">Comparing Representatives</div>
       <p className="font-mono text-xs text-gray-mid uppercase tracking-wider mb-8">
         Loading voting records, funding data, and committee assignments...
       </p>
@@ -187,12 +187,17 @@ function ComparePageInner() {
     <div className={`max-w-6xl mx-auto px-4 py-8 ${isEmbed ? "py-4" : ""}`}>
       {/* Header */}
       <div data-print-hide>
-        <h1 className="font-headline text-5xl md:text-6xl mb-2">
-          Compare Representatives
-        </h1>
-        <p className="font-mono text-sm text-gray-mid mb-8 font-bold uppercase tracking-wider">
-          Side-by-side comparison of voting records, funding, legislation, and more
-        </p>
+        <div className="flex items-start gap-4 mb-8">
+          <img src="/images/civic/icons/candidates.png" alt="" className="w-12 h-12 mt-1 opacity-80" aria-hidden="true" />
+          <div>
+            <h1 className="font-sans font-bold text-5xl md:text-6xl mb-2">
+              Compare Representatives
+            </h1>
+            <p className="font-mono text-sm text-gray-mid font-bold uppercase tracking-wider">
+              Side-by-side comparison of voting records, funding, legislation, and more
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Selection area */}
@@ -206,7 +211,7 @@ function ComparePageInner() {
             onSelect={handleSelectA}
             onClear={handleClearA}
           />
-          <div className="hidden lg:flex items-center justify-center font-headline text-3xl text-red pt-12">
+          <div className="hidden lg:flex items-center justify-center font-sans font-bold text-3xl text-red pt-12">
             VS
           </div>
           <RepSelector
@@ -222,8 +227,9 @@ function ComparePageInner() {
         {/* Status message */}
         {!repA && !repB && (
           <div className="mt-6 text-center border-3 border-border bg-cream-dark px-6 py-8">
-            <div className="font-headline text-2xl mb-2">Pick Two Representatives</div>
-            <p className="font-body text-gray-mid">
+            <img src="/images/civic/icons/info.png" alt="" className="w-10 h-10 mx-auto mb-3 opacity-50" aria-hidden="true" />
+            <div className="font-sans font-bold text-2xl mb-2">Pick Two Representatives</div>
+            <p className="font-sans text-gray-mid">
               Select two members of Congress above to see a detailed side-by-side comparison
               with verdicts, infographics, and shareable results.
             </p>
@@ -281,27 +287,28 @@ function ComparePageInner() {
 
             {/* Bottom CTA */}
             <div className="border-3 border-black bg-cream-dark p-8 text-center mt-8" data-print-hide>
-              <h3 className="font-headline text-2xl uppercase mb-3">Take Action</h3>
-              <p className="font-body text-gray-mid mb-6">
+              <img src="/images/civic/icons/fax.png" alt="" className="w-8 h-8 mx-auto mb-3 opacity-60" aria-hidden="true" />
+              <h3 className="font-sans font-bold text-2xl uppercase mb-3">Take Action</h3>
+              <p className="font-sans text-gray-mid mb-6">
                 Now that you&apos;ve compared these representatives, make your voice heard.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <a
                   href={`/draft?rep=${enrichedA.slug}`}
-                  className="px-6 py-3 font-headline text-sm uppercase no-underline hover:opacity-90 transition-colors border-3 border-black"
-                  style={{ backgroundColor: "#C1272D", color: "#f5e6c8" }}
+                  className="px-6 py-3 font-sans font-bold text-sm uppercase no-underline hover:opacity-90 transition-colors border-3 border-black"
+                  style={{ backgroundColor: "#0A2540", color: "#F8F7F4" }}
                 >
                   Write to {enrichedA.lastName}
                 </a>
                 <a
                   href={`/draft?rep=${enrichedB.slug}`}
-                  className="px-6 py-3 bg-black text-cream font-headline text-sm uppercase no-underline hover:opacity-90 transition-colors border-3 border-black"
+                  className="px-6 py-3 bg-black text-cream font-sans font-bold text-sm uppercase no-underline hover:opacity-90 transition-colors border-3 border-black"
                 >
                   Write to {enrichedB.lastName}
                 </a>
                 <a
                   href="/directory"
-                  className="px-6 py-3 bg-surface text-black font-headline text-sm uppercase no-underline hover:bg-cream-dark transition-colors border-3 border-black"
+                  className="px-6 py-3 bg-surface text-black font-sans font-bold text-sm uppercase no-underline hover:bg-cream-dark transition-colors border-3 border-black"
                 >
                   Compare Others
                 </a>
@@ -320,7 +327,7 @@ export default function ComparePage() {
   return (
     <Suspense fallback={
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <h1 className="font-headline text-5xl md:text-6xl mb-2">Compare Representatives</h1>
+        <h1 className="font-sans font-bold text-5xl md:text-6xl mb-2">Compare Representatives</h1>
         <p className="font-mono text-sm text-gray-mid mb-8 font-bold uppercase tracking-wider">Loading...</p>
       </div>
     }>

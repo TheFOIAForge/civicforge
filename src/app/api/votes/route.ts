@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cache, TTL } from "@/lib/cache";
+import { rateLimit } from "@/lib/rate-limit";
+
+const limiter = rateLimit({ windowMs: 60_000, max: 30 });
 
 interface CongressAction {
   actionDate: string;
@@ -168,6 +171,9 @@ async function fetchRollCallVotes(
 }
 
 export async function GET(request: NextRequest) {
+  const limited = limiter.check(request);
+  if (limited) return limited;
+
   const billNumber = request.nextUrl.searchParams.get("billNumber") || "";
   const congress = request.nextUrl.searchParams.get("congress") || "119";
 

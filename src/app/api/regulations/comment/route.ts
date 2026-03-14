@@ -1,30 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
+import { regulationsCommentSchema, parseBody } from "@/lib/validations";
+import { rateLimit } from "@/lib/rate-limit";
 
 const REGULATIONS_API = "https://api.regulations.gov/v4/comments";
 
-interface CommentRequest {
-  documentId: string;
-  comment: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-}
+const limiter = rateLimit({ windowMs: 60_000, max: 5 });
 
 export async function POST(request: NextRequest) {
+  const limited = limiter.check(request);
+  if (limited) return limited;
+
   const apiKey = process.env.REGULATIONS_GOV_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
-      {
-        error:
-          "REGULATIONS_GOV_API_KEY is not configured. Get a free API key at https://open.gsa.gov/api/regulationsgov/ and add it to your .env.local file.",
-      },
-      { status: 500 }
+      { error: "Regulations.gov API not configured" },
+      { status: 503 }
     );
   }
 
-  let body: CommentRequest;
+  let raw: unknown;
   try {
-    body = await request.json();
+    raw = await request.json();
   } catch {
     return NextResponse.json(
       { error: "Invalid request body." },
@@ -32,17 +28,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { documentId, comment, firstName, lastName, email } = body;
+  const parsed = parseBody(regulationsCommentSchema, raw);
+  if (!parsed.success) return parsed.response;
 
-  if (!documentId || !comment || !firstName || !lastName || !email) {
-    return NextResponse.json(
-      {
-        error:
-          "Missing required fields: documentId, comment, firstName, lastName, email.",
-      },
-      { status: 400 }
-    );
-  }
+  const { documentId, comment, firstName, lastName, email } = parsed.data;
 
   try {
     const res = await fetch(REGULATIONS_API, {

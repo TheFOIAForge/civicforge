@@ -85,7 +85,7 @@ export default function RepSelector({ slot, members, selected, otherSelected, on
       <div className="border-3 border-black p-5 bg-white relative">
         <button
           onClick={onClear}
-          className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-black text-white font-headline text-sm hover:bg-red transition-colors cursor-pointer"
+          className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-black text-white font-sans font-bold text-sm hover:bg-red transition-colors cursor-pointer"
           aria-label="Remove selection"
         >
           ✕
@@ -101,12 +101,12 @@ export default function RepSelector({ slot, members, selected, otherSelected, on
               className="w-16 h-16 object-cover border-2 border-black"
             />
           ) : (
-            <div className={`w-16 h-16 flex items-center justify-center border-2 border-black font-headline text-2xl text-white ${selected.party === "R" ? "bg-red" : selected.party === "D" ? "bg-[#1a3a6b]" : "bg-[#6b5b3e]"}`}>
+            <div className={`w-16 h-16 flex items-center justify-center border-2 border-black font-sans font-bold text-2xl text-white ${selected.party === "R" ? "bg-red" : selected.party === "D" ? "bg-[#1a3a6b]" : "bg-[#6b5b3e]"}`}>
               {selected.firstName[0]}{selected.lastName[0]}
             </div>
           )}
           <div>
-            <div className="font-headline text-xl uppercase">{selected.fullName}</div>
+            <div className="font-sans font-bold text-xl uppercase">{selected.fullName}</div>
             <div className="flex items-center gap-2 mt-1">
               <span className={`px-2 py-0.5 font-mono text-xs font-bold ${PARTY_COLORS[selected.party]}`}>
                 {PARTY_LABELS[selected.party]}

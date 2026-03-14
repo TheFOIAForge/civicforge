@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cache, TTL } from "@/lib/cache";
 import { transformBillsToIssueLegislation } from "@/lib/transformers/congress-gov";
+import { rateLimit } from "@/lib/rate-limit";
+
+const limiter = rateLimit({ windowMs: 60_000, max: 30 });
 
 export async function GET(request: NextRequest) {
+  const limited = limiter.check(request);
+  if (limited) return limited;
   const query = request.nextUrl.searchParams.get("query") || "";
   const congress = request.nextUrl.searchParams.get("congress") || "119";
   const billNumber = request.nextUrl.searchParams.get("billNumber") || "";

@@ -61,12 +61,17 @@ export default function MyRepsPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      <h1 className="font-headline text-5xl md:text-6xl mb-2">My Representatives</h1>
-      <p className="font-mono text-sm text-gray-mid mb-2 font-bold">
-        SAVE YOUR REPS FOR QUICK ACCESS ACROSS CHECKMYREP
-      </p>
+      <div className="flex items-start gap-4 mb-2">
+        <img src="/images/civic/icons/voter-reg.png" alt="" className="w-10 h-10 mt-2 opacity-80" aria-hidden="true" />
+        <div>
+          <h1 className="font-sans font-bold text-5xl md:text-6xl mb-2">My Representatives</h1>
+          <p className="font-mono text-sm text-gray-mid font-bold">
+            SAVE YOUR REPS FOR QUICK ACCESS ACROSS CHECKMYREP
+          </p>
+        </div>
+      </div>
       {/* Star separator */}
-      <div className="mb-8" style={{ color: "#c4a44a", letterSpacing: "0.5em", fontSize: "14px" }}>
+      <div className="mb-8" style={{ color: "#C9A66B", letterSpacing: "0.5em", fontSize: "14px" }}>
         &#9733; &#9733; &#9733;
       </div>
 
@@ -74,9 +79,9 @@ export default function MyRepsPage() {
       {hasSavedReps ? (
         <section className="mb-10">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-headline text-2xl">
+            <h2 className="font-sans font-bold text-2xl">
               Your Saved Representatives
-              <span className="ml-3 px-2 py-1 font-mono text-xs font-bold align-middle" style={{ backgroundColor: "#C1272D", color: "#f5e6c8", border: "3px solid #1a1a1a" }}>
+              <span className="ml-3 px-2 py-1 font-mono text-xs font-bold align-middle" style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}>
                 {myReps.length}
               </span>
             </h2>
@@ -84,7 +89,7 @@ export default function MyRepsPage() {
               <Link
                 href="/draft"
                 className="px-4 py-2 font-mono text-sm font-bold no-underline hover:bg-black transition-colors"
-                style={{ backgroundColor: "#C1272D", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
+                style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
               >
                 WRITE TO THEM
               </Link>
@@ -101,7 +106,7 @@ export default function MyRepsPage() {
                   <button
                     onClick={() => { clearMyReps(); setShowClearConfirm(false); }}
                     className="px-3 py-1.5 font-mono text-xs font-bold cursor-pointer"
-                    style={{ backgroundColor: "#C1272D", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
+                    style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
                   >
                     YES
                   </button>
@@ -133,8 +138,8 @@ export default function MyRepsPage() {
                 </button>
 
                 <div className="flex items-start gap-4 mb-4">
-                  <div className={`w-14 h-14 ${partyBg(rep.party)} flex items-center justify-center shrink-0 overflow-hidden relative`} style={{ border: "3px solid #1a1a1a" }}>
-                    <span className="font-headline text-xl text-cream">{rep.firstName[0]}{rep.lastName[0]}</span>
+                  <div className={`w-14 h-14 ${partyBg(rep.party)} flex items-center justify-center shrink-0 overflow-hidden relative`} style={{ border: "1px solid #E5E5E5" }}>
+                    <span className="font-sans font-bold text-xl text-cream">{rep.firstName[0]}{rep.lastName[0]}</span>
                     {rep.photoUrl && (
                       <img src={rep.photoUrl} alt={rep.fullName} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                     )}
@@ -147,7 +152,7 @@ export default function MyRepsPage() {
                       <span className="font-mono text-xs text-gray-mid font-bold">{rep.chamber}</span>
                     </div>
                     <Link href={`/directory/${rep.slug}`} className="no-underline text-black hover:text-red transition-colors">
-                      <h3 className="font-headline text-lg normal-case">{rep.fullName}</h3>
+                      <h3 className="font-sans font-bold text-lg normal-case">{rep.fullName}</h3>
                     </Link>
                     <p className="font-mono text-xs text-gray-mid">
                       {rep.title} — {rep.state}{rep.district ? `, ${rep.district}` : ""}
@@ -159,16 +164,16 @@ export default function MyRepsPage() {
                 <div className="flex gap-3 mb-4 text-center">
                   {rep.partyLoyalty > 0 && (
                     <div className="flex-1 bg-cream-dark p-2 border-3 border-border-light">
-                      <span className="block font-headline text-lg">{rep.partyLoyalty}%</span>
+                      <span className="block font-sans font-bold text-lg">{rep.partyLoyalty}%</span>
                       <span className="font-mono text-[9px] text-gray-mid font-bold">PARTY LOYAL</span>
                     </div>
                   )}
                   <div className="flex-1 bg-cream-dark p-2 border-3 border-border-light">
-                    <span className="block font-headline text-lg">{rep.billsIntroduced}</span>
+                    <span className="block font-sans font-bold text-lg">{rep.billsIntroduced}</span>
                     <span className="font-mono text-[9px] text-gray-mid font-bold">BILLS</span>
                   </div>
                   <div className="flex-1 bg-cream-dark p-2 border-3 border-border-light">
-                    <span className="block font-headline text-lg">{rep.committees.length}</span>
+                    <span className="block font-sans font-bold text-lg">{rep.committees.length}</span>
                     <span className="font-mono text-[9px] text-gray-mid font-bold">COMMITTEES</span>
                   </div>
                 </div>
@@ -178,14 +183,14 @@ export default function MyRepsPage() {
                   <Link
                     href={`/draft?rep=${rep.slug}`}
                     className="flex-1 px-3 py-2.5 font-mono text-xs font-bold no-underline text-center hover:bg-black transition-colors"
-                    style={{ backgroundColor: "#C1272D", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
+                    style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
                   >
                     WRITE
                   </Link>
                   <Link
                     href={`/draft?rep=${rep.slug}&mode=call`}
                     className="flex-1 px-3 py-2.5 font-mono text-xs font-bold no-underline text-center hover:bg-red transition-colors"
-                    style={{ backgroundColor: "#1a1a1a", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
+                    style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
                   >
                     CALL SCRIPT
                   </Link>
@@ -210,9 +215,9 @@ export default function MyRepsPage() {
         /* Empty state */
         <section className="border-3 border-border bg-surface p-8 md:p-12 mb-10 text-center">
           <div className="max-w-lg mx-auto">
-            <p className="font-headline text-4xl mb-2" style={{ color: "#c4a44a" }}>&#9733;</p>
-            <h2 className="font-headline text-2xl mb-3">No Representatives Saved Yet</h2>
-            <p className="font-body text-base text-gray-mid mb-6 leading-relaxed">
+            <img src="/images/civic/icons/contact.png" alt="" className="w-14 h-14 mx-auto mb-4 opacity-50" aria-hidden="true" />
+            <h2 className="font-sans font-bold text-2xl mb-3">No Representatives Saved Yet</h2>
+            <p className="font-sans text-base text-gray-mid mb-6 leading-relaxed">
               Enter your address below to find and save your elected officials.
               Your saved reps appear across CheckMyRep — in the drafting tool,
               vote lookup, and more.
@@ -223,10 +228,10 @@ export default function MyRepsPage() {
 
       {/* Address Lookup */}
       <section className="border-3 border-border bg-surface p-6 md:p-8 mb-8">
-        <h2 className="font-headline text-2xl mb-2">
+        <h2 className="font-sans font-bold text-2xl mb-2">
           {hasSavedReps ? "Update Your Representatives" : "Find Your Representatives"}
         </h2>
-        <p className="font-body text-sm text-gray-mid mb-5">
+        <p className="font-sans text-sm text-gray-mid mb-5">
           Enter your home address or ZIP code. We use the Google Civic Information API to find
           your exact federal and state representatives.
         </p>
@@ -244,8 +249,8 @@ export default function MyRepsPage() {
           <button
             type="submit"
             disabled={lookupLoading}
-            className="px-8 py-4 font-headline uppercase text-base tracking-wider cursor-pointer disabled:bg-gray-mid disabled:border-gray-mid transition-colors"
-            style={{ backgroundColor: "#C1272D", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
+            className="px-8 py-4 font-sans font-bold uppercase text-base tracking-wider cursor-pointer disabled:bg-gray-mid disabled:border-gray-mid transition-colors"
+            style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
           >
             {lookupLoading ? "Searching..." : "Find My Reps"}
           </button>
@@ -261,11 +266,11 @@ export default function MyRepsPage() {
         {lookupResults && lookupResults.length > 0 && (
           <div className="mt-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-headline text-xl">Found {lookupResults.length} Representatives</h3>
+              <h3 className="font-sans font-bold text-xl">Found {lookupResults.length} Representatives</h3>
               <button
                 onClick={() => handleSaveAll(lookupResults)}
                 className="px-5 py-2.5 font-mono text-sm font-bold cursor-pointer hover:bg-red transition-colors"
-                style={{ backgroundColor: "#1a1a1a", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
+                style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
               >
                 SAVE ALL AS MY REPS
               </button>
@@ -276,8 +281,8 @@ export default function MyRepsPage() {
                   key={rep.id}
                   className="border-3 border-border bg-cream-dark p-4"
                 >
-                  <div className={`w-12 h-12 ${partyBg(rep.party)} flex items-center justify-center mb-2 overflow-hidden relative`} style={{ border: "3px solid #1a1a1a" }}>
-                    <span className="font-headline text-lg text-cream">{rep.firstName[0]}{rep.lastName[0]}</span>
+                  <div className={`w-12 h-12 ${partyBg(rep.party)} flex items-center justify-center mb-2 overflow-hidden relative`} style={{ border: "1px solid #E5E5E5" }}>
+                    <span className="font-sans font-bold text-lg text-cream">{rep.firstName[0]}{rep.lastName[0]}</span>
                     {rep.photoUrl && (
                       <img src={rep.photoUrl} alt={rep.fullName} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                     )}
@@ -285,14 +290,14 @@ export default function MyRepsPage() {
                   <span className={`inline-block px-2 py-0.5 text-xs font-mono font-bold ${partyBg(rep.party)} text-cream`}>
                     {rep.party === "D" ? "DEM" : rep.party === "R" ? "GOP" : "IND"}
                   </span>
-                  <h4 className="font-headline text-lg mt-1 normal-case">{rep.fullName}</h4>
+                  <h4 className="font-sans font-bold text-lg mt-1 normal-case">{rep.fullName}</h4>
                   <p className="font-mono text-xs text-gray-mid">
                     {rep.title} — {rep.state}{rep.district ? `, ${rep.district}` : ""}
                   </p>
                   <button
                     onClick={() => saveRep(rep)}
                     className="mt-3 w-full px-3 py-2 font-mono text-xs font-bold cursor-pointer hover:bg-black transition-colors"
-                    style={{ backgroundColor: "#C1272D", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
+                    style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
                   >
                     SAVE THIS REP
                   </button>
@@ -305,35 +310,35 @@ export default function MyRepsPage() {
 
       {/* How it works */}
       <section className="border-3 border-border bg-cream-dark p-6 mb-8">
-        <h2 className="font-headline text-xl normal-case mb-1">How Saved Reps Work</h2>
-        <div className="mb-4" style={{ color: "#c4a44a", letterSpacing: "0.5em", fontSize: "12px" }}>
+        <h2 className="font-sans font-bold text-xl normal-case mb-1">How Saved Reps Work</h2>
+        <div className="mb-4" style={{ color: "#C9A66B", letterSpacing: "0.5em", fontSize: "12px" }}>
           &#9733; &#9733; &#9733;
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="flex items-start gap-3">
-            <span className="font-headline text-lg text-red shrink-0">1.</span>
+            <img src="/images/civic/icons/polling-place.png" alt="" className="w-8 h-8 shrink-0 opacity-70" aria-hidden="true" />
             <div>
-              <p className="font-body text-sm font-bold">Find &amp; Save</p>
-              <p className="font-body text-sm text-gray-mid">
+              <p className="font-sans text-sm font-bold">Find &amp; Save</p>
+              <p className="font-sans text-sm text-gray-mid">
                 Look up your address. Save all your federal reps in one click.
               </p>
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <span className="font-headline text-lg text-red shrink-0">2.</span>
+            <img src="/images/civic/icons/globe.png" alt="" className="w-8 h-8 shrink-0 opacity-70" aria-hidden="true" />
             <div>
-              <p className="font-body text-sm font-bold">Personalized Everywhere</p>
-              <p className="font-body text-sm text-gray-mid">
+              <p className="font-sans text-sm font-bold">Personalized Everywhere</p>
+              <p className="font-sans text-sm text-gray-mid">
                 Your reps show up first in drafting, vote lookup, and comparison tools.
               </p>
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <span className="font-headline text-lg text-red shrink-0">3.</span>
+            <img src="/images/civic/icons/mail.png" alt="" className="w-8 h-8 shrink-0 opacity-70" aria-hidden="true" />
             <div>
-              <p className="font-body text-sm font-bold">One-Tap Action</p>
-              <p className="font-body text-sm text-gray-mid">
-                Write, call, or post about your reps with a single tap from this page.
+              <p className="font-sans text-sm font-bold">One-Tap Action</p>
+              <p className="font-sans text-sm text-gray-mid">
+                Write, call, or email your reps with a single tap from this page.
               </p>
             </div>
           </div>

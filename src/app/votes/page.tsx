@@ -304,15 +304,20 @@ export default function VotesPage() {
       {/* ═══════════════════════════════════════════ */}
       {/* SECTION A: Educational Header              */}
       {/* ═══════════════════════════════════════════ */}
-      <h1 className="font-headline text-5xl md:text-6xl mb-2">Vote Lookup</h1>
-      <p className="font-mono text-sm text-gray-mid mb-8 font-bold">
-        HOW DID YOUR REPRESENTATIVE VOTE? FIND OUT.
-      </p>
+      <div className="flex items-start gap-4 mb-8">
+        <img src="/images/civic/icons/ballot.png" alt="" className="w-10 h-10 mt-2 opacity-80" aria-hidden="true" />
+        <div>
+          <h1 className="font-sans font-bold text-5xl md:text-6xl mb-2">Vote Lookup</h1>
+          <p className="font-mono text-sm text-gray-mid font-bold">
+            HOW DID YOUR REPRESENTATIVE VOTE? FIND OUT.
+          </p>
+        </div>
+      </div>
 
       {/* What are congressional votes? */}
       <section className="border-3 border-border bg-surface p-6 md:p-8 mb-6">
-        <h2 className="font-headline text-2xl mb-2">Understanding Congressional Votes</h2>
-        <p className="font-body text-base text-gray-mid leading-relaxed mb-5">
+        <h2 className="font-sans font-bold text-2xl mb-2">Understanding Congressional Votes</h2>
+        <p className="font-sans text-base text-gray-mid leading-relaxed mb-5">
           Congress decides the fate of legislation through several types of votes.
           Not all votes are created equal — some record every member&apos;s position while
           others leave no individual trace.
@@ -320,10 +325,12 @@ export default function VotesPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="border-2 border-border p-4 bg-cream-dark">
             <div className="flex items-center gap-2 mb-2">
-              <span className="w-8 h-8 bg-green flex items-center justify-center text-white font-headline text-sm shrink-0">R</span>
-              <h3 className="font-headline text-lg normal-case">Roll Call Votes</h3>
+              <div className="w-8 h-8 bg-green flex items-center justify-center shrink-0 rounded-lg">
+                <img src="/images/civic/icons/polling-place.png" alt="" className="w-5 h-5" style={{ filter: "brightness(10)" }} aria-hidden="true" />
+              </div>
+              <h3 className="font-sans font-bold text-lg normal-case">Roll Call Votes</h3>
             </div>
-            <p className="font-body text-sm text-gray-mid leading-relaxed">
+            <p className="font-sans text-sm text-gray-mid leading-relaxed">
               Every member&apos;s position is recorded and made public. This is the most
               transparent type of vote and the primary tool for holding representatives
               accountable. Roll call votes are what this page tracks.
@@ -331,10 +338,10 @@ export default function VotesPage() {
           </div>
           <div className="border-2 border-border p-4 bg-cream-dark">
             <div className="flex items-center gap-2 mb-2">
-              <span className="w-8 h-8 bg-gray-mid flex items-center justify-center text-white font-headline text-sm shrink-0">V</span>
-              <h3 className="font-headline text-lg normal-case">Voice Votes</h3>
+              <span className="w-8 h-8 bg-gray-mid flex items-center justify-center text-white font-sans font-bold text-sm shrink-0">V</span>
+              <h3 className="font-sans font-bold text-lg normal-case">Voice Votes</h3>
             </div>
-            <p className="font-body text-sm text-gray-mid leading-relaxed">
+            <p className="font-sans text-sm text-gray-mid leading-relaxed">
               Members say &quot;aye&quot; or &quot;no&quot; aloud and the presiding officer
               judges which side prevails. No individual positions are recorded — making
               it impossible to know how your representative voted.
@@ -342,10 +349,10 @@ export default function VotesPage() {
           </div>
           <div className="border-2 border-border p-4 bg-cream-dark">
             <div className="flex items-center gap-2 mb-2">
-              <span className="w-8 h-8 bg-blue flex items-center justify-center text-white font-headline text-sm shrink-0">U</span>
-              <h3 className="font-headline text-lg normal-case">Unanimous Consent</h3>
+              <span className="w-8 h-8 bg-blue flex items-center justify-center text-white font-sans font-bold text-sm shrink-0">U</span>
+              <h3 className="font-sans font-bold text-lg normal-case">Unanimous Consent</h3>
             </div>
-            <p className="font-body text-sm text-gray-mid leading-relaxed">
+            <p className="font-sans text-sm text-gray-mid leading-relaxed">
               Passed without formal objection. Often used for routine or non-controversial
               matters. A single member can block unanimous consent by objecting — but
               most routine legislation passes this way.
@@ -356,14 +363,12 @@ export default function VotesPage() {
 
       {/* Why votes matter callout */}
       <div className="border-3 border-red bg-cream-dark p-5 mb-8 flex gap-4 items-start">
-        <div className="w-12 h-12 bg-red flex items-center justify-center text-white shrink-0">
-          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+        <div className="w-12 h-12 bg-red flex items-center justify-center shrink-0 rounded-xl">
+          <img src="/images/civic/icons/info.png" alt="" className="w-7 h-7" style={{ filter: "brightness(10)" }} aria-hidden="true" />
         </div>
         <div>
-          <h3 className="font-headline text-lg normal-case mb-1">Why Votes Matter</h3>
-          <p className="font-body text-sm text-gray-mid leading-relaxed">
+          <h3 className="font-sans font-bold text-lg normal-case mb-1">Why Votes Matter</h3>
+          <p className="font-sans text-sm text-gray-mid leading-relaxed">
             A representative&apos;s voting record is the most concrete, verifiable measure of
             their priorities. Campaign promises are rhetoric — votes are action. Use this
             tool to see if your elected officials vote the way they promised.
@@ -376,11 +381,14 @@ export default function VotesPage() {
       {/* ═══════════════════════════════════════════ */}
       <section className="mb-8">
         <div className="flex flex-wrap items-end justify-between gap-4 mb-4">
-          <div>
-            <h2 className="font-headline text-3xl">Recent Roll Call Votes</h2>
-            <p className="font-mono text-xs text-gray-mid font-bold mt-1">
-              LIVE FROM CONGRESS.GOV — CLICK ANY VOTE TO SEE FULL DETAILS
-            </p>
+          <div className="flex items-start gap-3">
+            <img src="/images/civic/icons/calendar.png" alt="" className="w-8 h-8 mt-1 opacity-70" aria-hidden="true" />
+            <div>
+              <h2 className="font-sans font-bold text-3xl">Recent Roll Call Votes</h2>
+              <p className="font-mono text-xs text-gray-mid font-bold mt-1">
+                LIVE FROM CONGRESS.GOV — CLICK ANY VOTE TO SEE FULL DETAILS
+              </p>
+            </div>
           </div>
           <div className="flex gap-2">
             {(["ALL", "House", "Senate"] as const).map((ch) => (
@@ -445,7 +453,7 @@ export default function VotesPage() {
                     {rv.result.toUpperCase()}
                   </span>
                 </div>
-                <h3 className="font-body text-sm font-bold leading-snug mb-2 line-clamp-2 group-hover:text-red transition-colors">
+                <h3 className="font-sans text-sm font-bold leading-snug mb-2 line-clamp-2 group-hover:text-red transition-colors">
                   {rv.billTitle || rv.question}
                 </h3>
                 <div className="flex items-center justify-between">
@@ -465,7 +473,7 @@ export default function VotesPage() {
           </div>
         ) : (
           <div className="border-3 border-border-light p-8 bg-surface text-center">
-            <p className="font-body text-base text-gray-mid">
+            <p className="font-sans text-base text-gray-mid">
               No recent roll call votes found. Try searching for a specific bill below.
             </p>
           </div>
@@ -476,7 +484,10 @@ export default function VotesPage() {
       {/* SECTION C: Bill Search                     */}
       {/* ═══════════════════════════════════════════ */}
       <section className="mb-8">
-        <h2 className="font-headline text-3xl mb-4">Look Up a Bill</h2>
+        <div className="flex items-center gap-3 mb-4">
+          <img src="/images/civic/icons/online.png" alt="" className="w-7 h-7 opacity-70" aria-hidden="true" />
+          <h2 className="font-sans font-bold text-3xl">Look Up a Bill</h2>
+        </div>
         <div className="border-3 border-border p-5 bg-cream-dark" role="search" aria-label="Look up bill votes">
           <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-4 items-end">
             <div>
@@ -529,7 +540,7 @@ export default function VotesPage() {
               </svg>
             </div>
             <div>
-              <h3 className="font-headline text-xl normal-case">Notable Bills to Explore</h3>
+              <h3 className="font-sans font-bold text-xl normal-case">Notable Bills to Explore</h3>
               <p className="font-mono text-[10px] text-gray-mid font-bold">CLICK ANY BILL TO SEE ITS FULL VOTE RECORD</p>
             </div>
           </div>
@@ -558,7 +569,7 @@ export default function VotesPage() {
                     {bill.congress}th
                   </span>
                 </div>
-                <p className="font-body text-sm text-gray-mid leading-relaxed mb-2">{bill.desc}</p>
+                <p className="font-sans text-sm text-gray-mid leading-relaxed mb-2">{bill.desc}</p>
                 <span className="font-mono text-xs font-bold text-gray-mid group-hover:text-red transition-colors">
                   LOOK UP VOTES &rarr;
                 </span>
@@ -593,8 +604,8 @@ export default function VotesPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
-          <p className="font-headline text-2xl mb-2">Bill Not Found</p>
-          <p className="font-body text-base text-gray-mid mb-4">{error}</p>
+          <p className="font-sans font-bold text-2xl mb-2">Bill Not Found</p>
+          <p className="font-sans text-base text-gray-mid mb-4">{error}</p>
           <div className="border-2 border-border-light p-4 bg-surface inline-block text-left">
             <p className="font-mono text-xs font-bold text-gray-mid mb-2">TRY THESE FORMATS:</p>
             <ul className="font-mono text-sm space-y-1">
@@ -621,7 +632,7 @@ export default function VotesPage() {
                   {result.bill.number}
                 </span>
                 <div>
-                  <h2 className="font-headline text-2xl normal-case mb-2">{result.bill.title}</h2>
+                  <h2 className="font-sans font-bold text-2xl normal-case mb-2">{result.bill.title}</h2>
                   {result.bill.sponsors.length > 0 && (
                     <p className="font-mono text-sm text-gray-mid">
                       <span className="font-bold">SPONSOR:</span> {result.bill.sponsors.join(", ")}
@@ -645,7 +656,7 @@ export default function VotesPage() {
                 )}
               </div>
               {result.bill.latestActionText && (
-                <p className="font-body text-base text-gray-mid mt-3 italic">
+                <p className="font-sans text-base text-gray-mid mt-3 italic">
                   {result.bill.latestActionText}
                 </p>
               )}
@@ -706,7 +717,7 @@ export default function VotesPage() {
           {result.rollCallVotes.length > 0 && partySplit && result.voteTotals && (
             <div className="border-3 border-border bg-surface p-6">
               <div className="flex items-center gap-3 mb-4 flex-wrap">
-                <h3 className="font-headline text-2xl">Party Breakdown</h3>
+                <h3 className="font-sans font-bold text-2xl">Party Breakdown</h3>
                 <span className={`px-3 py-1 font-mono text-xs font-bold ${
                   partyLine
                     ? "bg-status-red text-white"
@@ -718,25 +729,25 @@ export default function VotesPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 {/* Democrats */}
-                <div className="border-2 border-blue-900 p-4">
+                <div className="border-2 border-navy p-4">
                   <h4 className="font-mono text-sm font-bold text-blue-900 mb-3">DEMOCRATS</h4>
                   <div className="flex gap-4 items-center">
                     <div className="text-center">
-                      <span className="block font-headline text-2xl text-green">{partySplit.dems.yea}</span>
+                      <span className="block font-sans font-bold text-2xl text-green">{partySplit.dems.yea}</span>
                       <span className="font-mono text-[10px] font-bold text-gray-mid">YEA</span>
                     </div>
                     <div className="text-center">
-                      <span className="block font-headline text-2xl text-status-red">{partySplit.dems.nay}</span>
+                      <span className="block font-sans font-bold text-2xl text-status-red">{partySplit.dems.nay}</span>
                       <span className="font-mono text-[10px] font-bold text-gray-mid">NAY</span>
                     </div>
                     {partySplit.dems.notVoting > 0 && (
                       <div className="text-center">
-                        <span className="block font-headline text-2xl text-gray-mid">{partySplit.dems.notVoting}</span>
+                        <span className="block font-sans font-bold text-2xl text-gray-mid">{partySplit.dems.notVoting}</span>
                         <span className="font-mono text-[10px] font-bold text-gray-mid">NV</span>
                       </div>
                     )}
                   </div>
-                  <div className="mt-3 flex h-3 border border-blue-900 overflow-hidden">
+                  <div className="mt-3 flex h-3 border border-navy overflow-hidden">
                     <div className="bg-green h-full" style={{ width: `${(partySplit.dems.yea / Math.max(1, partySplit.dems.yea + partySplit.dems.nay + partySplit.dems.notVoting)) * 100}%` }} />
                     <div className="bg-status-red h-full" style={{ width: `${(partySplit.dems.nay / Math.max(1, partySplit.dems.yea + partySplit.dems.nay + partySplit.dems.notVoting)) * 100}%` }} />
                     <div className="bg-gray-light h-full flex-1" />
@@ -748,16 +759,16 @@ export default function VotesPage() {
                   <h4 className="font-mono text-sm font-bold text-red mb-3">REPUBLICANS</h4>
                   <div className="flex gap-4 items-center">
                     <div className="text-center">
-                      <span className="block font-headline text-2xl text-green">{partySplit.reps.yea}</span>
+                      <span className="block font-sans font-bold text-2xl text-green">{partySplit.reps.yea}</span>
                       <span className="font-mono text-[10px] font-bold text-gray-mid">YEA</span>
                     </div>
                     <div className="text-center">
-                      <span className="block font-headline text-2xl text-status-red">{partySplit.reps.nay}</span>
+                      <span className="block font-sans font-bold text-2xl text-status-red">{partySplit.reps.nay}</span>
                       <span className="font-mono text-[10px] font-bold text-gray-mid">NAY</span>
                     </div>
                     {partySplit.reps.notVoting > 0 && (
                       <div className="text-center">
-                        <span className="block font-headline text-2xl text-gray-mid">{partySplit.reps.notVoting}</span>
+                        <span className="block font-sans font-bold text-2xl text-gray-mid">{partySplit.reps.notVoting}</span>
                         <span className="font-mono text-[10px] font-bold text-gray-mid">NV</span>
                       </div>
                     )}
@@ -776,11 +787,11 @@ export default function VotesPage() {
                   <h4 className="font-mono text-sm font-bold text-gray-mid mb-2">INDEPENDENTS</h4>
                   <div className="flex gap-4 items-center">
                     <div className="text-center">
-                      <span className="block font-headline text-xl text-green">{partySplit.inds.yea}</span>
+                      <span className="block font-sans font-bold text-xl text-green">{partySplit.inds.yea}</span>
                       <span className="font-mono text-[10px] font-bold text-gray-mid">YEA</span>
                     </div>
                     <div className="text-center">
-                      <span className="block font-headline text-xl text-status-red">{partySplit.inds.nay}</span>
+                      <span className="block font-sans font-bold text-xl text-status-red">{partySplit.inds.nay}</span>
                       <span className="font-mono text-[10px] font-bold text-gray-mid">NAY</span>
                     </div>
                   </div>
@@ -799,7 +810,7 @@ export default function VotesPage() {
                         key={i}
                         className={`inline-flex items-center gap-1.5 px-2 py-1 border font-mono text-[10px] font-bold ${
                           partyLabel(v.party) === "DEM"
-                            ? "border-blue-900 text-blue-900"
+                            ? "border-navy text-blue-900"
                             : "border-red text-red"
                         }`}
                       >
@@ -820,25 +831,25 @@ export default function VotesPage() {
           {/* ── Overall Vote Totals ── */}
           {result.rollCallVotes.length > 0 && result.voteTotals && (
             <div className="border-3 border-border bg-surface p-6">
-              <h3 className="font-headline text-2xl mb-4">Roll Call Vote Results</h3>
+              <h3 className="font-sans font-bold text-2xl mb-4">Roll Call Vote Results</h3>
 
               {/* Totals bar */}
               <div className="border-2 border-border p-4 bg-cream-dark mb-6">
                 <div className="flex flex-wrap gap-6 items-center justify-center">
                   <div className="text-center">
-                    <span className="block font-headline text-3xl text-green">{result.voteTotals.yea}</span>
+                    <span className="block font-sans font-bold text-3xl text-green">{result.voteTotals.yea}</span>
                     <span className="font-mono text-xs font-bold text-gray-mid">YEA</span>
                   </div>
                   <div className="w-px h-10 bg-border-light hidden sm:block" />
                   <div className="text-center">
-                    <span className="block font-headline text-3xl text-status-red">{result.voteTotals.nay}</span>
+                    <span className="block font-sans font-bold text-3xl text-status-red">{result.voteTotals.nay}</span>
                     <span className="font-mono text-xs font-bold text-gray-mid">NAY</span>
                   </div>
                   {result.voteTotals.notVoting > 0 && (
                     <>
                       <div className="w-px h-10 bg-border-light hidden sm:block" />
                       <div className="text-center">
-                        <span className="block font-headline text-3xl text-gray-mid">{result.voteTotals.notVoting}</span>
+                        <span className="block font-sans font-bold text-3xl text-gray-mid">{result.voteTotals.notVoting}</span>
                         <span className="font-mono text-xs font-bold text-gray-mid">NOT VOTING</span>
                       </div>
                     </>
@@ -847,7 +858,7 @@ export default function VotesPage() {
                     <>
                       <div className="w-px h-10 bg-border-light hidden sm:block" />
                       <div className="text-center">
-                        <span className="block font-headline text-3xl text-gray-mid">{result.voteTotals.present}</span>
+                        <span className="block font-sans font-bold text-3xl text-gray-mid">{result.voteTotals.present}</span>
                         <span className="font-mono text-xs font-bold text-gray-mid">PRESENT</span>
                       </div>
                     </>
@@ -949,7 +960,7 @@ export default function VotesPage() {
                             isSaved ? "bg-red/5" : i % 2 === 0 ? "bg-surface" : "bg-cream-dark"
                           } hover:bg-hover transition-colors`}
                         >
-                          <td className="px-4 py-3 font-body text-base font-bold">
+                          <td className="px-4 py-3 font-sans text-base font-bold">
                             {isSaved && <span className="text-red mr-1" title="Saved representative">★</span>}
                             {v.memberName}
                           </td>
@@ -987,8 +998,8 @@ export default function VotesPage() {
           {/* ── Vote Comparison Tool ── */}
           {result.rollCallVotes.length > 0 && (
             <div className="border-3 border-border bg-surface p-6">
-              <h3 className="font-headline text-2xl mb-2">Compare Two Representatives</h3>
-              <p className="font-body text-sm text-gray-mid mb-4">
+              <h3 className="font-sans font-bold text-2xl mb-2">Compare Two Representatives</h3>
+              <p className="font-sans text-sm text-gray-mid mb-4">
                 See how two members voted side-by-side on this bill.
               </p>
 
@@ -1046,7 +1057,7 @@ export default function VotesPage() {
                           else if (!compareB) setCompareB(rep.fullName);
                           else setCompareA(rep.fullName);
                         }}
-                        className="px-2 py-1 border border-border font-mono text-[10px] font-bold cursor-pointer hover:bg-red hover:text-white hover:border-red transition-colors"
+                        className="px-2 py-1 border border-border font-mono text-[10px] font-bold cursor-pointer hover:bg-red hover:text-cream hover:border-red transition-colors"
                       >
                         ★ {rep.fullName}
                       </button>
@@ -1067,19 +1078,19 @@ export default function VotesPage() {
                           </span>
                           <span className="font-mono text-xs text-gray-mid">{comparisonResult.voteA.state}</span>
                         </div>
-                        <p className="font-headline text-lg normal-case mb-2">{comparisonResult.voteA.memberName}</p>
+                        <p className="font-sans font-bold text-lg normal-case mb-2">{comparisonResult.voteA.memberName}</p>
                         <span className={`inline-block px-4 py-2 text-sm font-mono font-bold border ${voteBadgeBg(comparisonResult.voteA.vote)} ${voteColor(comparisonResult.voteA.vote)}`}>
                           {comparisonResult.voteA.vote.toUpperCase()}
                         </span>
                       </>
                     ) : (
-                      <p className="font-body text-sm text-gray-mid">
+                      <p className="font-sans text-sm text-gray-mid">
                         {compareA ? `"${compareA}" not found in this vote` : "Enter a name above"}
                       </p>
                     )}
                   </div>
 
-                  <div className="sm:hidden text-center font-headline text-lg text-gray-mid -my-2">VS</div>
+                  <div className="sm:hidden text-center font-sans font-bold text-lg text-gray-mid -my-2">VS</div>
 
                   <div className={`border-2 p-4 ${comparisonResult.voteB ? "border-border" : "border-border-light"}`}>
                     {comparisonResult.voteB ? (
@@ -1090,13 +1101,13 @@ export default function VotesPage() {
                           </span>
                           <span className="font-mono text-xs text-gray-mid">{comparisonResult.voteB.state}</span>
                         </div>
-                        <p className="font-headline text-lg normal-case mb-2">{comparisonResult.voteB.memberName}</p>
+                        <p className="font-sans font-bold text-lg normal-case mb-2">{comparisonResult.voteB.memberName}</p>
                         <span className={`inline-block px-4 py-2 text-sm font-mono font-bold border ${voteBadgeBg(comparisonResult.voteB.vote)} ${voteColor(comparisonResult.voteB.vote)}`}>
                           {comparisonResult.voteB.vote.toUpperCase()}
                         </span>
                       </>
                     ) : (
-                      <p className="font-body text-sm text-gray-mid">
+                      <p className="font-sans text-sm text-gray-mid">
                         {compareB ? `"${compareB}" not found in this vote` : "Enter a name above"}
                       </p>
                     )}
@@ -1109,7 +1120,7 @@ export default function VotesPage() {
           {/* ── Action Timeline ── */}
           {result.actions.length > 0 && (
             <div className="border-3 border-border bg-surface p-6">
-              <h3 className="font-headline text-2xl mb-4">
+              <h3 className="font-sans font-bold text-2xl mb-4">
                 {result.rollCallVotes.length > 0 ? "Legislative Timeline" : "Action History"}
               </h3>
               <div className="relative">
@@ -1118,11 +1129,11 @@ export default function VotesPage() {
                   {result.actions.map((action, i) => (
                     <div key={i} className="flex gap-4 relative">
                       <div className={`w-10 h-10 shrink-0 flex items-center justify-center z-10 ${actionAccent(action.text)}`}>
-                        <span className="font-headline text-xs text-white">{actionIcon(action.text)}</span>
+                        <span className="font-sans font-bold text-xs text-white">{actionIcon(action.text)}</span>
                       </div>
                       <div className="flex-1 pb-2">
                         <p className="font-mono text-xs font-bold text-gray-mid">{action.date}</p>
-                        <p className="font-body text-base mt-1">{action.text}</p>
+                        <p className="font-sans text-base mt-1">{action.text}</p>
                       </div>
                     </div>
                   ))}
@@ -1138,8 +1149,8 @@ export default function VotesPage() {
       {/* ═══════════════════════════════════════════ */}
       {!loading && (
         <section className="border-3 border-border bg-surface p-6 md:p-8 mt-8">
-          <h2 className="font-headline text-2xl mb-2">How to Use Vote Data</h2>
-          <p className="font-body text-sm text-gray-mid leading-relaxed mb-5">
+          <h2 className="font-sans font-bold text-2xl mb-2">How to Use Vote Data</h2>
+          <p className="font-sans text-sm text-gray-mid leading-relaxed mb-5">
             Congressional votes are public record. Here&apos;s how to turn that transparency into action.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1149,8 +1160,8 @@ export default function VotesPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
               </div>
-              <h3 className="font-headline text-lg normal-case mb-1">Hold Your Rep Accountable</h3>
-              <p className="font-body text-sm text-gray-mid leading-relaxed mb-3">
+              <h3 className="font-sans font-bold text-lg normal-case mb-1">Hold Your Rep Accountable</h3>
+              <p className="font-sans text-sm text-gray-mid leading-relaxed mb-3">
                 Reference specific votes when writing to your representative. Saying
                 &quot;you voted NAY on HR 1234&quot; is far more powerful than general complaints.
               </p>
@@ -1164,8 +1175,8 @@ export default function VotesPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
-              <h3 className="font-headline text-lg normal-case mb-1">Track Voting Patterns</h3>
-              <p className="font-body text-sm text-gray-mid leading-relaxed mb-3">
+              <h3 className="font-sans font-bold text-lg normal-case mb-1">Track Voting Patterns</h3>
+              <p className="font-sans text-sm text-gray-mid leading-relaxed mb-3">
                 One vote doesn&apos;t tell the whole story. Look at how representatives vote
                 over time, especially on issues you care about. Check their party loyalty
                 score on their profile page.
@@ -1180,8 +1191,8 @@ export default function VotesPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="font-headline text-lg normal-case mb-1">Follow the Money</h3>
-              <p className="font-body text-sm text-gray-mid leading-relaxed mb-3">
+              <h3 className="font-sans font-bold text-lg normal-case mb-1">Follow the Money</h3>
+              <p className="font-sans text-sm text-gray-mid leading-relaxed mb-3">
                 Cross-reference how your rep votes with who donates to their campaigns.
                 Every member profile includes campaign finance data and lobbying filings
                 so you can connect the dots.

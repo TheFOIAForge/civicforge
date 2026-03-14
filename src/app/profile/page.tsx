@@ -5,6 +5,20 @@ import { getLevelForPoints, getNextLevel, getProgressToNextLevel, LEVELS } from 
 import { createClient } from "@/lib/supabase-browser";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import {
+  Mail,
+  Phone,
+  PenLine,
+  Trophy,
+  Flame,
+  Users,
+  Star,
+  LogOut,
+  Check,
+  Clock,
+} from "lucide-react";
 
 interface ActionRecord {
   id: string;
@@ -56,22 +70,22 @@ export default function ProfilePage() {
   if (!user) {
     return (
       <div className="max-w-lg mx-auto px-4 py-16 text-center">
-        <h1 className="font-headline text-4xl uppercase mb-4" style={{ color: "#1a1a1a" }}>
-          Your Profile
-        </h1>
-        <p className="font-body text-base mb-6" style={{ color: "#5a5a5a" }}>
-          Create an account to track your activism, earn points, and level up.
+        {/* Forclaude security icon */}
+        <img src="/images/civic/icons/security.png" alt="" className="w-16 h-16 mx-auto mb-4 opacity-60" aria-hidden="true" />
+        <h1 className="text-3xl font-bold text-navy mb-3">Your Profile</h1>
+        <p className="text-gray-500 mb-6">
+          Create an account to track your civic engagement, earn points, and level up.
         </p>
-        <button
+        <Button
           onClick={() => {
-            setAuthModalMessage("Create an account to start tracking your activism");
+            setAuthModalMessage("Create an account to start tracking your civic engagement");
             setShowAuthModal(true);
           }}
-          className="px-8 py-4 font-headline text-lg uppercase cursor-pointer"
-          style={{ backgroundColor: "#C1272D", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
+          variant="primary"
+          size="lg"
         >
           Sign Up / Log In
-        </button>
+        </Button>
       </div>
     );
   }
@@ -83,172 +97,142 @@ export default function ProfilePage() {
   const totalActions = (engagement?.letters_sent || 0) + (engagement?.calls_made || 0) + (engagement?.emails_sent || 0);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
-      {/* Profile header */}
-      <div className="p-5 mb-6" style={{ backgroundColor: "#1a1a1a", color: "#f5e6c8", border: "3px solid #1a1a1a" }}>
-        <div className="flex items-center gap-4">
-          {/* Avatar */}
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+      {/* Profile header card — uses gradient hero with forclaude globe as watermark */}
+      <Card padding="md" className="mb-6 bg-gradient-hero border-none text-white relative overflow-hidden">
+        <img
+          src="/images/civic/icons/globe.png"
+          alt=""
+          className="absolute top-4 right-4 w-24 h-24 opacity-10"
+          aria-hidden="true"
+        />
+        <div className="flex items-center gap-4 relative z-10">
           <div
-            className="w-16 h-16 flex items-center justify-center shrink-0 text-2xl font-headline"
-            style={{ backgroundColor: currentLevel.color, border: "3px solid #c4a44a" }}
+            className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 text-2xl font-bold"
+            style={{ backgroundColor: currentLevel.color }}
           >
             {profile?.display_name?.[0]?.toUpperCase() || "?"}
           </div>
           <div className="flex-1">
-            <h1 className="font-headline text-2xl normal-case" style={{ color: "#f5e6c8" }}>{profile?.display_name || "Activist"}</h1>
+            <h1 className="text-2xl font-bold text-white">{profile?.display_name || "Citizen"}</h1>
             <div className="flex items-center gap-2 mt-1">
               <span
-                className="px-2 py-0.5 font-mono text-[10px] font-bold uppercase"
-                style={{ backgroundColor: currentLevel.color, color: "#f5e6c8" }}
+                className="px-2.5 py-0.5 text-xs font-semibold rounded-full"
+                style={{ backgroundColor: currentLevel.color }}
               >
                 {currentLevel.name}
               </span>
-              <span className="font-mono text-xs" style={{ color: "#c4a44a" }}>
-                {totalPoints} pts
-              </span>
+              <span className="text-sm text-white/70">{totalPoints} points</span>
             </div>
           </div>
-          <button
-            onClick={signOut}
-            className="px-3 py-2 font-mono text-[10px] font-bold uppercase cursor-pointer"
-            style={{ backgroundColor: "rgba(245,230,200,0.1)", color: "#c4a44a", border: "2px solid #c4a44a" }}
-          >
+          <Button onClick={signOut} variant="ghost" size="sm" className="text-white/70 hover:text-white hover:bg-white/10" icon={<LogOut className="w-4 h-4" />}>
             Sign Out
-          </button>
+          </Button>
         </div>
 
         {/* Level progress */}
         {nextLevel && (
-          <div className="mt-4">
-            <div className="flex justify-between mb-1">
-              <span className="font-mono text-[10px]" style={{ color: "#c4a44a" }}>
-                {currentLevel.name}
-              </span>
-              <span className="font-mono text-[10px]" style={{ color: "#c4a44a" }}>
-                {nextLevel.name} ({nextLevel.minPoints} pts)
-              </span>
+          <div className="mt-5 relative z-10">
+            <div className="flex justify-between mb-1.5 text-xs text-white/60">
+              <span>{currentLevel.name}</span>
+              <span>{nextLevel.name} ({nextLevel.minPoints} pts)</span>
             </div>
-            <div className="h-2 w-full" style={{ backgroundColor: "rgba(245,230,200,0.15)" }}>
+            <div className="h-2 w-full rounded-full bg-white/15">
               <div
-                className="h-full transition-all"
+                className="h-full rounded-full transition-all"
                 style={{ width: `${progress * 100}%`, backgroundColor: currentLevel.color }}
               />
             </div>
-            <p className="font-mono text-[10px] mt-1" style={{ color: "rgba(245,230,200,0.5)" }}>
+            <p className="text-xs text-white/50 mt-1.5">
               {nextLevel.minPoints - totalPoints} points to {nextLevel.name}
             </p>
           </div>
         )}
-      </div>
+      </Card>
 
-      {/* Star separator */}
-      <div className="text-center mb-6" style={{ color: "#c4a44a", letterSpacing: "0.5em", fontSize: "14px" }}>
-        &#9733; &#9733; &#9733;
-      </div>
-
-      {/* Stats grid */}
-      <div className="grid grid-cols-4 gap-2 mb-6">
+      {/* Stats grid — with forclaude civic icons as accents */}
+      <div className="grid grid-cols-4 gap-3 mb-6">
         {[
-          { label: "Letters", value: engagement?.letters_sent || 0, color: "#C1272D" },
-          { label: "Calls", value: engagement?.calls_made || 0, color: "#1a1a1a" },
-          { label: "Emails", value: engagement?.emails_sent || 0, color: "#1a1a1a" },
-          { label: "Mailed", value: engagement?.letters_mailed || 0, color: "#16a34a" },
+          { label: "Letters", value: engagement?.letters_sent || 0, Icon: Mail, color: "text-navy", civicIcon: "/images/civic/icons/mail.png" },
+          { label: "Calls", value: engagement?.calls_made || 0, Icon: Phone, color: "text-teal", civicIcon: "/images/civic/icons/contact.png" },
+          { label: "Emails", value: engagement?.emails_sent || 0, Icon: PenLine, color: "text-gold-dark", civicIcon: "/images/civic/icons/email.png" },
+          { label: "Mailed", value: engagement?.letters_mailed || 0, Icon: Check, color: "text-green" },
         ].map((s) => (
-          <div key={s.label} className="p-3 text-center" style={{ border: "3px solid #1a1a1a", backgroundColor: "#faf6ee" }}>
-            <div className="font-headline text-2xl" style={{ color: s.color }}>
-              {s.value}
-            </div>
-            <div className="font-mono text-[10px] font-bold uppercase" style={{ color: "#5a5a5a" }}>
-              {s.label}
-            </div>
-          </div>
+          <Card key={s.label} padding="sm" className="text-center">
+            {s.civicIcon ? (
+              <img src={s.civicIcon} alt="" className="w-5 h-5 mx-auto mb-1 opacity-70" aria-hidden="true" />
+            ) : (
+              <s.Icon className={`w-4 h-4 mx-auto mb-1 ${s.color}`} />
+            )}
+            <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
+            <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">{s.label}</div>
+          </Card>
         ))}
       </div>
 
       {/* Streak + unique stats */}
-      <div className="grid grid-cols-3 gap-2 mb-6">
-        <div className="p-3 text-center" style={{ backgroundColor: "#faf6ee", border: "3px solid #c4a44a" }}>
-          <div className="font-headline text-xl" style={{ color: "#c4a44a" }}>
-            {engagement?.streak_days || 0}
-          </div>
-          <div className="font-mono text-[10px] font-bold" style={{ color: "#5a5a5a" }}>DAY STREAK</div>
-        </div>
-        <div className="p-3 text-center" style={{ backgroundColor: "#faf6ee", border: "3px solid #1a1a1a" }}>
-          <div className="font-headline text-xl" style={{ color: "#1a1a1a" }}>
-            {engagement?.unique_reps || 0}
-          </div>
-          <div className="font-mono text-[10px] font-bold" style={{ color: "#5a5a5a" }}>REPS CONTACTED</div>
-        </div>
-        <div className="p-3 text-center" style={{ backgroundColor: "#faf6ee", border: "3px solid #C1272D" }}>
-          <div className="font-headline text-xl" style={{ color: "#C1272D" }}>
-            {engagement?.unique_issues || 0}
-          </div>
-          <div className="font-mono text-[10px] font-bold" style={{ color: "#5a5a5a" }}>ISSUES</div>
-        </div>
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        <Card padding="sm" className="text-center border-gold/30">
+          <Flame className="w-4 h-4 mx-auto mb-1 text-gold-dark" />
+          <div className="text-xl font-bold text-gold-dark">{engagement?.streak_days || 0}</div>
+          <div className="text-[10px] text-gray-500 font-medium">DAY STREAK</div>
+        </Card>
+        <Card padding="sm" className="text-center">
+          <img src="/images/civic/icons/candidates.png" alt="" className="w-5 h-5 mx-auto mb-1 opacity-70" aria-hidden="true" />
+          <div className="text-xl font-bold text-navy">{engagement?.unique_reps || 0}</div>
+          <div className="text-[10px] text-gray-500 font-medium">REPS CONTACTED</div>
+        </Card>
+        <Card padding="sm" className="text-center">
+          <img src="/images/civic/icons/ballot.png" alt="" className="w-5 h-5 mx-auto mb-1 opacity-70" aria-hidden="true" />
+          <div className="text-xl font-bold text-teal">{engagement?.unique_issues || 0}</div>
+          <div className="text-[10px] text-gray-500 font-medium">ISSUES</div>
+        </Card>
       </div>
 
       {/* Level roadmap */}
-      <div className="mb-6 p-4" style={{ border: "3px solid #1a1a1a", backgroundColor: "#faf6ee" }}>
-        <p className="font-mono text-xs font-bold mb-3" style={{ color: "#5a5a5a" }}>
-          LEVEL ROADMAP
-        </p>
-        <div className="space-y-2">
+      <Card padding="md" className="mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Trophy className="w-4 h-4 text-gold-dark" />
+          <p className="text-sm font-semibold text-navy">Level Roadmap</p>
+        </div>
+        <div className="space-y-1.5">
           {LEVELS.map((level) => {
             const isUnlocked = totalPoints >= level.minPoints;
             const isCurrent = level.name === currentLevel.name;
             return (
               <div
                 key={level.name}
-                className="flex items-center gap-3 py-2 px-3"
-                style={{
-                  backgroundColor: isCurrent ? "rgba(193,39,45,0.08)" : "transparent",
-                  border: isCurrent ? "3px solid #C1272D" : "2px solid rgba(26,26,26,0.1)",
-                  opacity: isUnlocked ? 1 : 0.4,
-                }}
+                className={`flex items-center gap-3 py-2.5 px-3 rounded-xl transition-all
+                  ${isCurrent ? "bg-navy-50 border border-navy/20" : isUnlocked ? "bg-gray-50" : "opacity-40"}`}
               >
                 <div
-                  className="w-3 h-3 shrink-0"
-                  style={{ backgroundColor: isUnlocked ? level.color : "rgba(26,26,26,0.15)" }}
+                  className="w-3 h-3 rounded-full shrink-0"
+                  style={{ backgroundColor: isUnlocked ? level.color : "#D1D5DB" }}
                 />
-                <span className="font-headline text-sm flex-1" style={{ color: isUnlocked ? "#1a1a1a" : "#5a5a5a" }}>
+                <span className={`text-sm font-medium flex-1 ${isUnlocked ? "text-navy" : "text-gray-400"}`}>
                   {level.name}
                 </span>
-                <span className="font-mono text-[10px] font-bold" style={{ color: "#5a5a5a" }}>
-                  {level.minPoints} pts
-                </span>
-                {isUnlocked && (
-                  <span className="font-mono text-[10px]" style={{ color: "#16a34a" }}>&#10003;</span>
-                )}
+                <span className="text-xs text-gray-400">{level.minPoints} pts</span>
+                {isUnlocked && <Check className="w-4 h-4 text-green" />}
               </div>
             );
           })}
         </div>
-      </div>
+      </Card>
 
-      {/* Star separator */}
-      <div className="text-center mb-4" style={{ color: "#c4a44a", letterSpacing: "0.5em", fontSize: "14px" }}>
-        &#9733; &#9733; &#9733;
-      </div>
-
-      {/* Tabs: Actions / Points */}
-      <div className="flex mb-4" style={{ border: "3px solid #1a1a1a" }}>
+      {/* Tabs */}
+      <div className="flex rounded-xl bg-gray-100 p-1 mb-4">
         <button
           onClick={() => setActiveTab("actions")}
-          className="flex-1 py-2.5 font-mono text-xs font-bold uppercase cursor-pointer border-none"
-          style={{
-            backgroundColor: activeTab === "actions" ? "#1a1a1a" : "#faf6ee",
-            color: activeTab === "actions" ? "#f5e6c8" : "#5a5a5a",
-          }}
+          className={`flex-1 py-2 text-sm font-medium rounded-lg cursor-pointer transition-all border-none
+            ${activeTab === "actions" ? "bg-white text-navy shadow-sm" : "text-gray-500 bg-transparent"}`}
         >
           Action History ({totalActions})
         </button>
         <button
           onClick={() => setActiveTab("points")}
-          className="flex-1 py-2.5 font-mono text-xs font-bold uppercase cursor-pointer border-none"
-          style={{
-            backgroundColor: activeTab === "points" ? "#1a1a1a" : "#faf6ee",
-            color: activeTab === "points" ? "#f5e6c8" : "#5a5a5a",
-          }}
+          className={`flex-1 py-2 text-sm font-medium rounded-lg cursor-pointer transition-all border-none
+            ${activeTab === "points" ? "bg-white text-navy shadow-sm" : "text-gray-500 bg-transparent"}`}
         >
           Points Log
         </button>
@@ -258,63 +242,48 @@ export default function ProfilePage() {
       {activeTab === "actions" && (
         <div className="space-y-2">
           {actions.length === 0 && (
-            <div className="p-6 text-center" style={{ backgroundColor: "#faf6ee", border: "3px solid #1a1a1a" }}>
-              <p className="font-body text-sm" style={{ color: "#5a5a5a" }}>
+            <Card padding="lg" className="text-center">
+              <p className="text-sm text-gray-500">
                 No actions yet.{" "}
-                <Link href="/draft" className="font-bold no-underline" style={{ color: "#C1272D" }}>
-                  Write your first letter
-                </Link>
+                <Link href="/draft" className="font-semibold text-navy">Write your first letter</Link>
                 {" "}to get started!
               </p>
-            </div>
+            </Card>
           )}
           {actions.map((a) => {
-            const methodColor = a.method === "letter" ? "#C1272D" : a.method === "call" ? "#1a1a1a" : "#1a1a1a";
-            const methodLabel = a.method === "letter" ? "LETTER" : a.method === "call" ? "CALL" : "EMAIL";
+            const methodIcon = a.method === "letter" ? <Mail className="w-3.5 h-3.5" /> : a.method === "call" ? <Phone className="w-3.5 h-3.5" /> : <PenLine className="w-3.5 h-3.5" />;
+            const methodColor = a.method === "letter" ? "bg-navy text-white" : a.method === "call" ? "bg-teal text-white" : "bg-gold-dark text-white";
             return (
-              <div
-                key={a.id}
-                className="flex items-center gap-3 p-3"
-                style={{ border: "3px solid #1a1a1a", backgroundColor: "#faf6ee" }}
-              >
-                <div
-                  className="px-2 py-1 font-mono text-[9px] font-bold shrink-0"
-                  style={{ backgroundColor: methodColor, color: "#f5e6c8" }}
-                >
-                  {methodLabel}
+              <Card key={a.id} padding="sm" className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${methodColor}`}>
+                  {methodIcon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-mono text-xs font-bold truncate" style={{ color: "#1a1a1a" }}>
-                    {a.rep_name}
-                  </p>
-                  <p className="font-mono text-[10px] truncate" style={{ color: "#5a5a5a" }}>
-                    {a.issue || "General"} &middot; {new Date(a.created_at).toLocaleDateString()}
+                  <p className="text-sm font-medium text-navy truncate">{a.rep_name}</p>
+                  <p className="text-xs text-gray-400 truncate">
+                    {a.issue || "General"} · {new Date(a.created_at).toLocaleDateString()}
                   </p>
                 </div>
                 <div className="text-right shrink-0">
                   {a.delivery_status === "mailed" && (
-                    <span className="font-mono text-[10px] font-bold" style={{ color: "#16a34a" }}>
-                      MAILED
+                    <span className="text-xs font-medium text-green flex items-center gap-1">
+                      <Check className="w-3 h-3" /> Mailed
                     </span>
                   )}
                   {a.lob_tracking_url && (
-                    <a
-                      href={a.lob_tracking_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block font-mono text-[9px] no-underline mt-0.5"
-                      style={{ color: "#c4a44a" }}
-                    >
+                    <a href={a.lob_tracking_url} target="_blank" rel="noopener noreferrer"
+                      className="block text-xs text-teal mt-0.5">
                       Track
                     </a>
                   )}
                   {a.expected_delivery_date && (
-                    <p className="font-mono text-[9px]" style={{ color: "#5a5a5a" }}>
-                      ETA {new Date(a.expected_delivery_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    <p className="text-[10px] text-gray-400 flex items-center gap-0.5 mt-0.5">
+                      <Clock className="w-3 h-3" />
+                      {new Date(a.expected_delivery_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                     </p>
                   )}
                 </div>
-              </div>
+              </Card>
             );
           })}
         </div>
@@ -324,27 +293,22 @@ export default function ProfilePage() {
       {activeTab === "points" && (
         <div className="space-y-1">
           {pointEvents.length === 0 && (
-            <div className="p-6 text-center" style={{ backgroundColor: "#faf6ee", border: "3px solid #1a1a1a" }}>
-              <p className="font-body text-sm" style={{ color: "#5a5a5a" }}>
+            <Card padding="lg" className="text-center">
+              <p className="text-sm text-gray-500">
                 No points earned yet. Take action to start earning!
               </p>
-            </div>
+            </Card>
           )}
           {pointEvents.map((pe) => (
             <div
               key={pe.id}
-              className="flex items-center justify-between py-2 px-3"
-              style={{ borderBottom: "2px solid rgba(26,26,26,0.1)" }}
+              className="flex items-center justify-between py-3 px-1 border-b border-gray-100 last:border-0"
             >
               <div>
-                <p className="font-mono text-xs" style={{ color: "#1a1a1a" }}>{pe.description}</p>
-                <p className="font-mono text-[10px]" style={{ color: "#5a5a5a" }}>
-                  {new Date(pe.created_at).toLocaleDateString()}
-                </p>
+                <p className="text-sm text-navy">{pe.description}</p>
+                <p className="text-xs text-gray-400">{new Date(pe.created_at).toLocaleDateString()}</p>
               </div>
-              <span className="font-headline text-lg" style={{ color: "#16a34a" }}>
-                +{pe.points}
-              </span>
+              <span className="text-lg font-bold text-green">+{pe.points}</span>
             </div>
           ))}
         </div>

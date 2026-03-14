@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { createCheckoutSchema, parseBody } from "@/lib/validations";
+import { rateLimit } from "@/lib/rate-limit";
+
+const limiter = rateLimit({ windowMs: 60_000, max: 5 });
 
 export async function POST(request: NextRequest) {
+  const limited = limiter.check(request);
+  if (limited) return limited;
+
   try {
     const secretKey = process.env.STRIPE_SECRET_KEY;
     if (!secretKey) {
@@ -13,27 +20,28 @@ export async function POST(request: NextRequest) {
 
     const stripe = new Stripe(secretKey);
 
-    const body = await request.json();
-    const { contactLogId, senderAddress, senderEmail, letterContent } = body;
+    const raw = await request.json();
+    const parsed = parseBody(createCheckoutSchema, raw);
+    if (!parsed.success) return parsed.response;
+
+    const { contactLogId, senderAddress, senderEmail, letterContent } = parsed.data;
 
     // Support both single rep (legacy) and multiple reps
     const recipients: Array<{ repName: string; repOfficeAddress: Record<string, string> }> = [];
 
-    if (body.recipients && Array.isArray(body.recipients)) {
-      // New multi-rep format
-      for (const r of body.recipients) {
+    if (parsed.data.recipients && Array.isArray(parsed.data.recipients)) {
+      for (const r of parsed.data.recipients) {
         if (r.repName && r.repOfficeAddress) {
-          recipients.push(r);
+          recipients.push({ repName: r.repName, repOfficeAddress: r.repOfficeAddress as unknown as Record<string, string> });
         }
       }
-    } else if (body.repName && body.repOfficeAddress) {
-      // Legacy single-rep format
-      recipients.push({ repName: body.repName, repOfficeAddress: body.repOfficeAddress });
+    } else if (parsed.data.repName && parsed.data.repOfficeAddress) {
+      recipients.push({ repName: parsed.data.repName, repOfficeAddress: parsed.data.repOfficeAddress as unknown as Record<string, string> });
     }
 
-    if (!contactLogId || recipients.length === 0 || !senderAddress || !letterContent) {
+    if (recipients.length === 0) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "At least one recipient is required" },
         { status: 400 }
       );
     }

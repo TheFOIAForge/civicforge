@@ -19,18 +19,24 @@ export default function ScorecardPage() {
   if (!hasSavedReps) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="font-headline text-5xl md:text-6xl mb-2">My Scorecard</h1>
-        <p className="font-mono text-sm text-gray-mid font-bold mb-8">
-          TRACK HOW YOUR REPRESENTATIVES VOTE ON ISSUES YOU CARE ABOUT
-        </p>
+        <div className="flex items-start gap-4 mb-8">
+          <img src="/images/civic/icons/voter-guide.png" alt="" className="w-10 h-10 mt-1 opacity-80" aria-hidden="true" />
+          <div>
+            <h1 className="font-sans font-bold text-5xl md:text-6xl mb-2">My Scorecard</h1>
+            <p className="font-mono text-sm text-gray-mid font-bold">
+              TRACK HOW YOUR REPRESENTATIVES VOTE ON ISSUES YOU CARE ABOUT
+            </p>
+          </div>
+        </div>
         <div className="border-3 border-border p-16 text-center bg-surface">
-          <h2 className="font-headline text-3xl mb-3">Save Your Representatives First</h2>
-          <p className="font-body text-lg text-gray-mid mb-6">
+          <img src="/images/civic/illustrations/track-ballot.png" alt="" className="w-20 h-20 mx-auto mb-4 opacity-50" aria-hidden="true" />
+          <h2 className="font-sans font-bold text-3xl mb-3">Save Your Representatives First</h2>
+          <p className="font-sans text-lg text-gray-mid mb-6">
             Add your representatives to see how their votes align with your positions.
           </p>
           <Link
             href="/my-reps"
-            className="inline-block px-8 py-4 bg-red text-cream font-headline uppercase text-base no-underline hover:bg-red-dark transition-colors border-3 border-black"
+            className="inline-block px-8 py-4 bg-red text-cream font-sans font-bold uppercase text-base no-underline hover:bg-red-dark transition-colors border-3 border-black"
           >
             Find My Representatives
           </Link>
@@ -43,18 +49,24 @@ export default function ScorecardPage() {
   if (userVotes.length === 0) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="font-headline text-5xl md:text-6xl mb-2">My Scorecard</h1>
-        <p className="font-mono text-sm text-gray-mid font-bold mb-8">
-          TRACK HOW YOUR REPRESENTATIVES VOTE ON ISSUES YOU CARE ABOUT
-        </p>
+        <div className="flex items-start gap-4 mb-8">
+          <img src="/images/civic/icons/voter-guide.png" alt="" className="w-10 h-10 mt-1 opacity-80" aria-hidden="true" />
+          <div>
+            <h1 className="font-sans font-bold text-5xl md:text-6xl mb-2">My Scorecard</h1>
+            <p className="font-mono text-sm text-gray-mid font-bold">
+              TRACK HOW YOUR REPRESENTATIVES VOTE ON ISSUES YOU CARE ABOUT
+            </p>
+          </div>
+        </div>
         <div className="border-3 border-border p-16 text-center bg-surface">
-          <h2 className="font-headline text-3xl mb-3">Start Voting on Bills</h2>
-          <p className="font-body text-lg text-gray-mid mb-6">
+          <img src="/images/civic/icons/ballot.png" alt="" className="w-12 h-12 mx-auto mb-4 opacity-50" aria-hidden="true" />
+          <h2 className="font-sans font-bold text-3xl mb-3">Start Voting on Bills</h2>
+          <p className="font-sans text-lg text-gray-mid mb-6">
             Record your position on bills to see how your representatives align with you.
           </p>
           <Link
             href="/votes"
-            className="inline-block px-8 py-4 bg-red text-cream font-headline uppercase text-base no-underline hover:bg-red-dark transition-colors border-3 border-black"
+            className="inline-block px-8 py-4 bg-red text-cream font-sans font-bold uppercase text-base no-underline hover:bg-red-dark transition-colors border-3 border-black"
           >
             Vote on Bills
           </Link>
@@ -71,10 +83,15 @@ export default function ScorecardPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="font-headline text-5xl md:text-6xl mb-2">My Scorecard</h1>
-      <p className="font-mono text-sm text-gray-mid font-bold mb-8">
-        TRACK HOW YOUR REPRESENTATIVES VOTE ON ISSUES YOU CARE ABOUT
-      </p>
+      <div className="flex items-start gap-4 mb-8">
+        <img src="/images/civic/icons/voter-guide.png" alt="" className="w-10 h-10 mt-1 opacity-80" aria-hidden="true" />
+        <div>
+          <h1 className="font-sans font-bold text-5xl md:text-6xl mb-2">My Scorecard</h1>
+          <p className="font-mono text-sm text-gray-mid font-bold">
+            TRACK HOW YOUR REPRESENTATIVES VOTE ON ISSUES YOU CARE ABOUT
+          </p>
+        </div>
+      </div>
 
       {/* Rep alignment cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
@@ -92,13 +109,13 @@ export default function ScorecardPage() {
               {/* Rep info */}
               <div className="flex items-center gap-3 mb-5">
                 <div className={`w-12 h-12 ${rep.party === "D" ? "bg-dem" : rep.party === "R" ? "bg-rep" : "bg-ind"} flex items-center justify-center shrink-0 overflow-hidden relative`}>
-                  <span className="font-headline text-base text-white">{rep.firstName[0]}{rep.lastName[0]}</span>
+                  <span className="font-sans font-bold text-base text-white">{rep.firstName[0]}{rep.lastName[0]}</span>
                   {rep.photoUrl && (
                     <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
                   )}
                 </div>
                 <div>
-                  <h2 className="font-headline text-lg normal-case leading-tight">{rep.fullName}</h2>
+                  <h2 className="font-sans font-bold text-lg normal-case leading-tight">{rep.fullName}</h2>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className={`px-2 py-0.5 font-mono text-[10px] font-bold ${badge.cls}`}>
                       {badge.label}
@@ -120,7 +137,7 @@ export default function ScorecardPage() {
                   }}
                 >
                   <div className="w-20 h-20 bg-surface flex items-center justify-center" style={{ borderRadius: "50%" }}>
-                    <span className="font-headline text-2xl">
+                    <span className="font-sans font-bold text-2xl">
                       {hasData ? `${alignment.score}%` : "N/A"}
                     </span>
                   </div>
@@ -148,7 +165,7 @@ export default function ScorecardPage() {
 
       {/* Vote comparison table */}
       <section className="border-3 border-border bg-surface p-6 mb-8">
-        <h2 className="font-headline text-2xl mb-4">Your Votes vs. Your Reps</h2>
+        <h2 className="font-sans font-bold text-2xl mb-4">Your Votes vs. Your Reps</h2>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -182,7 +199,7 @@ export default function ScorecardPage() {
                     key={vote.billId}
                     className={`border-t border-border-light ${i % 2 === 0 ? "bg-surface" : "bg-cream-dark"}`}
                   >
-                    <td className="px-4 py-3 font-body text-sm font-bold max-w-[200px]">
+                    <td className="px-4 py-3 font-sans text-sm font-bold max-w-[200px]">
                       <span className="line-clamp-2">{vote.billTitle}</span>
                       <span className="block font-mono text-[10px] text-gray-mid mt-0.5">
                         {vote.billId}
@@ -236,7 +253,7 @@ export default function ScorecardPage() {
       <div className="text-center">
         <Link
           href="/votes"
-          className="inline-block px-8 py-4 bg-red text-cream font-headline uppercase text-base no-underline hover:bg-red-dark transition-colors border-3 border-black"
+          className="inline-block px-8 py-4 bg-red text-cream font-sans font-bold uppercase text-base no-underline hover:bg-red-dark transition-colors border-3 border-black"
         >
           Vote on More Bills &rarr;
         </Link>

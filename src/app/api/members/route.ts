@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAllMembers, searchMembers, getLeadershipMembers, getFeaturedMembers } from "@/lib/members";
 import { getAllVotingStats } from "@/lib/voteview";
+import { rateLimit } from "@/lib/rate-limit";
+
+const limiter = rateLimit({ windowMs: 60_000, max: 60 });
 
 // Enrich base member data with Voteview voting stats (bulk, single CSV fetch per chamber)
 async function enrichWithVotingStats<T extends { id: string; chamber: string; partyLoyalty: number; votesCast: number; missedVotes: number }>(members: T[]): Promise<T[]> {
@@ -22,6 +25,9 @@ async function enrichWithVotingStats<T extends { id: string; chamber: string; pa
 }
 
 export async function GET(request: NextRequest) {
+  const limited = limiter.check(request);
+  if (limited) return limited;
+
   const params = request.nextUrl.searchParams;
   const search = params.get("search") || "";
   const state = params.get("state") || undefined;

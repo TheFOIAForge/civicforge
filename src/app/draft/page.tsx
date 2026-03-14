@@ -11,30 +11,58 @@ import { useMyReps } from "@/lib/my-reps-context";
 import { useAuth } from "@/lib/auth-context";
 import { recordAction } from "@/lib/points";
 import MailLetterModal from "@/components/MailLetterModal";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import {
+  Mail,
+  Phone,
+  PenLine,
+  Search,
+  Check,
+  X,
+  Copy,
+  Printer,
+  ExternalLink,
+  Sparkles,
+  Send,
+  ArrowRight,
+  Heart,
+  Globe,
+  TrendingUp,
+  GraduationCap,
+  Plane,
+  Users,
+  Swords,
+  Home as HomeIcon,
+  Star,
+  ChevronDown,
+  RotateCcw,
+  UserPlus,
+} from "lucide-react";
 
 type Mode = "letter" | "call" | "social";
 
-const modeConfig: Record<Mode, { label: string; emoji: string; desc: string; action: string; hint: string; icon: string }> = {
-  letter: { label: "Mail a Letter", emoji: "\u{2709}\u{FE0F}", desc: "Physical letter via USPS", action: "GENERATE LETTER", hint: "Strongest impact — lands on their desk", icon: "mail" },
-  call: { label: "Make a Call", emoji: "\u{1F4DE}", desc: "Talking points for a phone call", action: "GENERATE SCRIPT", hint: "Fastest way to get a staffer's attention", icon: "phone" },
-  social: { label: "Send an Email", emoji: "\u{1F4F1}", desc: "Email their office directly", action: "GENERATE EMAIL", hint: "Quick and convenient digital contact", icon: "email" },
+const modeConfig: Record<Mode, { label: string; desc: string; action: string; hint: string; Icon: typeof Mail; civicIcon: string }> = {
+  letter: { label: "Mail a Letter", desc: "Physical letter via USPS", action: "GENERATE LETTER", hint: "Strongest impact — lands on their desk", Icon: Mail, civicIcon: "/images/civic/icons/mail.png" },
+  call: { label: "Make a Call", desc: "Talking points for a phone call", action: "GENERATE SCRIPT", hint: "Fastest way to get attention", Icon: Phone, civicIcon: "/images/civic/icons/contact.png" },
+  social: { label: "Send an Email", desc: "Email their office directly", action: "GENERATE EMAIL", hint: "Quick and convenient", Icon: PenLine, civicIcon: "/images/civic/icons/email.png" },
 };
 
 const quickTopics = [
-  { label: "Healthcare", slug: "healthcare", icon: "🏥" },
-  { label: "Climate", slug: "environment", icon: "🌍" },
-  { label: "Economy", slug: "economy", icon: "💰" },
-  { label: "Education", slug: "education", icon: "📚" },
-  { label: "Immigration", slug: "immigration", icon: "🌐" },
-  { label: "Housing", slug: "housing", icon: "🏠" },
-  { label: "Civil Rights", slug: "civil-rights", icon: "⚖️" },
-  { label: "Defense", slug: "defense", icon: "🛡️" },
+  { label: "Healthcare", slug: "healthcare", Icon: Heart },
+  { label: "Climate", slug: "environment", Icon: Globe },
+  { label: "Economy", slug: "economy", Icon: TrendingUp },
+  { label: "Education", slug: "education", Icon: GraduationCap },
+  { label: "Immigration", slug: "immigration", Icon: Plane },
+  { label: "Housing", slug: "housing", Icon: HomeIcon },
+  { label: "Civil Rights", slug: "civil-rights", Icon: Users },
+  { label: "Defense", slug: "defense", Icon: Swords },
 ];
 
-function partyBg(party: string) {
-  if (party === "D") return "bg-dem";
-  if (party === "R") return "bg-rep";
-  return "bg-ind";
+function partyConfig(party: string) {
+  if (party === "D") return { label: "Democrat", bg: "bg-blue", text: "text-blue", light: "bg-blue-light" };
+  if (party === "R") return { label: "Republican", bg: "bg-red", text: "text-red", light: "bg-red-light" };
+  return { label: "Independent", bg: "bg-purple-600", text: "text-purple-600", light: "bg-purple-50" };
 }
 
 const US_STATES = [
@@ -57,7 +85,6 @@ function DraftInner() {
   );
   const mode: Mode = selectedModes.has("letter") ? "letter" : selectedModes.has("call") ? "call" : "social";
   const [selectedReps, setSelectedReps] = useState<Representative[]>([]);
-  // Convenience: first selected rep (for backwards compat with single-rep logic)
   const selectedRep = selectedReps.length > 0 ? selectedReps[0] : null;
   const [selectedIssueSlug, setSelectedIssueSlug] = useState(
     searchParams.get("issue") || ""
@@ -119,7 +146,6 @@ function DraftInner() {
     if (mailSuccessParam) {
       setMailSuccess(true);
       setMailSessionId(mailSuccessParam);
-      // Update contact log entry
       try {
         const pending = sessionStorage.getItem("checkmyrep_pending_mail");
         if (pending) {
@@ -135,16 +161,15 @@ function DraftInner() {
           sessionStorage.removeItem("checkmyrep_pending_mail");
         }
       } catch { /* ignore */ }
-      // Clean URL
       window.history.replaceState({}, "", "/draft");
     }
   }, [searchParams]);
 
-  // Poll for mail status after successful payment
+  // Poll for mail status
   const pollMailStatus = useCallback(async (sessionId: string) => {
     setMailStatusLoading(true);
     let attempts = 0;
-    const maxAttempts = 20; // ~60 seconds max
+    const maxAttempts = 20;
     const poll = async () => {
       try {
         const res = await fetch(`/api/mail/status?session_id=${sessionId}`);
@@ -152,7 +177,6 @@ function DraftInner() {
         const data = await res.json();
         if (data.letters && data.letters.length > 0) {
           setMailLetters(data.letters);
-          // Update localStorage contact log with Lob details
           try {
             const logs = JSON.parse(localStorage.getItem("checkmyrep_contacts") || "[]");
             const idx = logs.findIndex((l: Record<string, string>) => l.stripeSessionId === sessionId);
@@ -180,18 +204,14 @@ function DraftInner() {
   }, []);
 
   useEffect(() => {
-    if (mailSessionId) {
-      pollMailStatus(mailSessionId);
-    }
+    if (mailSessionId) pollMailStatus(mailSessionId);
   }, [mailSessionId, pollMailStatus]);
 
-  // Auto-advance step when rep is selected
   useEffect(() => {
     if (selectedRep && step < 3) setStep(3);
   }, [selectedRep, step]);
 
   const selectedIssue = selectedIssueSlug ? getIssueBySlug(selectedIssueSlug) : undefined;
-
   const hasFilters = chamberFilter !== "All" || partyFilter !== "All" || stateFilter !== "All" || repSearch.length >= 2;
 
   const filteredReps = allReps.filter((r) => {
@@ -313,11 +333,8 @@ function DraftInner() {
         }
         logs.push(logEntry);
         localStorage.setItem("checkmyrep_contacts", JSON.stringify(logs));
-      } catch {
-        // Silently fail on storage errors
-      }
+      } catch { /* ignore */ }
 
-      // Save to Supabase if logged in, or prompt to create account
       if (user) {
         recordAction(user.id, {
           repId: selectedRep.id,
@@ -376,7 +393,6 @@ function DraftInner() {
     }
     setOutput(concern);
     setError("");
-    // Save to contact log for each selected rep
     try {
       const logs = JSON.parse(localStorage.getItem("checkmyrep_contacts") || "[]");
       const logId = Date.now().toString();
@@ -402,7 +418,6 @@ function DraftInner() {
       localStorage.setItem("checkmyrep_contacts", JSON.stringify(logs));
     } catch { /* ignore */ }
 
-    // Save to Supabase if logged in, or prompt to create account
     if (user) {
       for (const rep of selectedReps) {
         recordAction(user.id, {
@@ -430,59 +445,53 @@ function DraftInner() {
   const canGenerate = selectedRep && concern.trim().length > 0;
 
   return (
-      <div className="min-h-screen pb-24" style={{ backgroundColor: "#ffffff" }} data-print-content>
-        {/* Dark hero header */}
-        <div
-          className="relative px-5 pt-8 pb-6 overflow-hidden"
-          style={{
-            background: "linear-gradient(180deg, rgba(140,20,25,0.95) 0%, rgba(140,20,25,0.9) 50%, rgba(140,20,25,0.3) 100%)",
-          }}
-        >
-          {/* Grid overlay */}
-          <div
-            className="absolute inset-0 opacity-[0.06]"
-            style={{
-              backgroundImage: "linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)",
-              backgroundSize: "40px 40px",
-            }}
-          />
-          <div className="relative z-10">
-            <h1
-              className="font-headline text-3xl md:text-4xl uppercase leading-none"
-              style={{ color: "#FFFFFF", textShadow: "0 2px 10px rgba(0,0,0,0.8)" }}
-            >
-              Write Congress
-            </h1>
-            <p className="mt-2 font-body text-base" style={{ color: "rgba(255,255,255,0.8)" }}>
-              Pick a rep, write or paste your message, and send it.
-            </p>
+    <div className="min-h-screen pb-24" data-print-content>
+      {/* Header */}
+      <div className="bg-gradient-hero px-4 sm:px-6 pt-8 pb-8 relative overflow-hidden">
+        <div className="absolute inset-0 pattern-dots opacity-[0.04]" />
+        <img
+          src="/images/civic/illustrations/sign-envelope.png"
+          alt=""
+          className="absolute right-4 bottom-0 w-28 sm:w-36 opacity-[0.15]"
+          aria-hidden="true"
+        />
+        <div className="relative z-10 max-w-3xl mx-auto">
+          <div className="flex items-center gap-3 mb-2">
+            <img src="/images/civic/icons/capitol.png" alt="" className="w-7 h-7 opacity-80" aria-hidden="true" />
+            <span className="text-sm text-white/60 font-medium">CheckMyRep</span>
           </div>
+          <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+            Write Congress
+          </h1>
+          <p className="mt-2 text-white/70">
+            Pick a rep, write or paste your message, and send it.
+          </p>
         </div>
+      </div>
 
-        {/* Main content */}
+      {/* Main content */}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 -mt-4 relative z-10">
         {!output ? (
-          <div className="px-4 py-6 space-y-6" data-print-hide>
+          <div className="space-y-6" data-print-hide>
 
-            {/* ── STEP 1: Choose how to reach them (multi-select) ── */}
-            <div>
+            {/* Step 1: Choose how to reach them */}
+            <Card padding="md">
               <div className="flex items-center gap-3 mb-4">
-                <div
-                  className="w-8 h-8 flex items-center justify-center font-headline text-base shrink-0"
-                  style={{ backgroundColor: "#C1272D", color: "#fff" }}
-                >
+                <div className="w-8 h-8 rounded-xl bg-navy text-white flex items-center justify-center text-sm font-semibold shrink-0">
                   1
                 </div>
-                <h2 className="font-headline text-lg uppercase" style={{ color: "#111827" }}>
+                <h2 className="text-lg font-semibold text-navy">
                   How do you want to reach them?
                 </h2>
               </div>
-              <p className="font-mono text-[11px] mb-3 font-bold" style={{ color: "rgba(0,0,0,0.4)" }}>
-                SELECT ONE OR MORE — WE&apos;LL HANDLE THE REST
+              <p className="text-xs text-gray-500 mb-3">
+                Select one or more — we&apos;ll handle the rest
               </p>
-              <div className="grid grid-cols-1 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {(["letter", "call", "social"] as Mode[]).map((m) => {
                   const isSelected = selectedModes.has(m);
-                  const actionImg = m === "letter" ? "/images/actions/write-letter.jpg" : m === "call" ? "/images/actions/call-script.jpg" : "/images/actions/social-post.jpg";
+                  const cfg = modeConfig[m];
+                  const colors = m === "letter" ? "border-navy bg-navy-50" : m === "call" ? "border-teal bg-teal-50" : "border-gold-dark bg-gold-50";
                   return (
                     <button
                       key={m}
@@ -498,134 +507,98 @@ function DraftInner() {
                         });
                         setOutput("");
                       }}
-                      className="relative text-left overflow-hidden border-2 cursor-pointer transition-all"
-                      style={{
-                        borderColor: isSelected ? "#C1272D" : "rgba(0,0,0,0.12)",
-                        backgroundColor: isSelected ? "rgba(193,39,45,0.15)" : "rgba(0,0,0,0.03)",
-                        height: "90px",
-                      }}
+                      className={`relative text-left p-4 rounded-xl cursor-pointer transition-all border-2
+                        ${isSelected ? colors : "border-gray-200 bg-white hover:border-gray-300"}`}
                     >
-                      <div className="flex items-center h-full">
-                        <div className="flex-1 px-4 py-3 relative z-10">
-                          <span
-                            className="block font-headline text-lg uppercase"
-                            style={{ color: isSelected ? "#111827" : "rgba(0,0,0,0.7)" }}
-                          >
-                            {modeConfig[m].label}
-                          </span>
-                          <span
-                            className="block font-mono text-xs mt-1"
-                            style={{ color: isSelected ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.4)" }}
-                          >
-                            {modeConfig[m].hint}
-                          </span>
+                      <div className="flex items-start gap-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 overflow-hidden
+                          ${isSelected ? (m === "letter" ? "bg-navy text-white" : m === "call" ? "bg-teal text-white" : "bg-gold-dark text-white") : "bg-gray-100 text-gray-500"}`}>
+                          <img src={cfg.civicIcon} alt="" className="w-6 h-6" style={{ filter: isSelected ? "brightness(10)" : "grayscale(0.5) opacity(0.6)" }} aria-hidden="true" />
                         </div>
-                        <div className="relative h-full w-[45%] shrink-0">
-                          <img src={actionImg} alt="" className="absolute inset-0 w-full h-full object-cover" />
-                          <div className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.4) 30%, transparent 100%)" }} />
-                        </div>
-                        {/* Checkbox indicator */}
-                        <div
-                          className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center z-10 border-2"
-                          style={{
-                            backgroundColor: isSelected ? "#C1272D" : "transparent",
-                            borderColor: isSelected ? "#C1272D" : "rgba(0,0,0,0.3)",
-                          }}
-                        >
-                          {isSelected && (
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                          )}
+                        <div className="flex-1 min-w-0">
+                          <span className={`block text-sm font-semibold ${isSelected ? "text-navy" : "text-gray-700"}`}>
+                            {cfg.label}
+                          </span>
+                          <span className="block text-xs text-gray-500 mt-0.5">{cfg.hint}</span>
                         </div>
                       </div>
+                      {isSelected && (
+                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-navy flex items-center justify-center">
+                          <Check className="w-3 h-3 text-white" />
+                        </div>
+                      )}
                     </button>
                   );
                 })}
               </div>
               {selectedModes.size > 1 && (
-                <p className="font-mono text-[11px] mt-2 font-bold" style={{ color: "#C1272D" }}>
-                  {selectedModes.size} METHODS SELECTED — WRITE ONCE, SEND {selectedModes.size} WAYS
+                <p className="text-xs text-teal font-medium mt-2">
+                  {selectedModes.size} methods selected — write once, send {selectedModes.size} ways
                 </p>
               )}
-            </div>
+            </Card>
 
-            {/* ── STEP 2: Pick your rep ── */}
-            <div className="relative z-40">
+            {/* Step 2: Pick your rep */}
+            <Card padding="md" className="relative z-40">
               <div className="flex items-center gap-3 mb-4">
-                <div
-                  className="w-8 h-8 flex items-center justify-center font-headline text-base shrink-0"
-                  style={{ backgroundColor: step >= 1 ? "#C1272D" : "rgba(0,0,0,0.15)", color: "#fff" }}
-                >
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm font-semibold shrink-0
+                  ${step >= 1 ? "bg-navy text-white" : "bg-gray-200 text-gray-500"}`}>
                   2
                 </div>
-                <h2 className="font-headline text-lg uppercase" style={{ color: "#111827" }}>
+                <h2 className="text-lg font-semibold text-navy">
                   Who are you writing to?
                 </h2>
               </div>
 
-              {/* Saved reps — multi-select */}
+              {/* Saved reps */}
               {hasSavedReps && (
                 <div className="mb-4">
-                  <p className="font-mono text-xs font-bold mb-3" style={{ color: "rgba(0,0,0,0.5)" }}>
-                    YOUR SAVED REPRESENTATIVES — TAP TO SELECT (MULTIPLE OK)
+                  <p className="text-xs text-gray-500 mb-3">
+                    Your saved representatives — tap to select
                   </p>
                   <div className="grid grid-cols-1 gap-2">
                     {myReps.map((rep) => {
                       const isRepSelected = selectedReps.some((r) => r.id === rep.id);
+                      const party = partyConfig(rep.party);
                       return (
-                      <button
-                        key={rep.id}
-                        onClick={() => {
-                          setSelectedReps((prev) => {
-                            const exists = prev.some((r) => r.id === rep.id);
-                            const next = exists ? prev.filter((r) => r.id !== rep.id) : [...prev, rep];
-                            if (next.length > 0) setStep(3);
-                            return next;
-                          });
-                          setTimeout(() => document.getElementById("step-3-topics")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
-                        }}
-                        className="flex items-center gap-3 p-4 text-left cursor-pointer transition-all"
-                        style={{
-                          backgroundColor: isRepSelected ? "rgba(193,39,45,0.1)" : "rgba(0,0,0,0.03)",
-                          border: isRepSelected ? "2px solid #C1272D" : "2px solid rgba(0,0,0,0.1)",
-                        }}
-                      >
-                        {/* Checkbox */}
-                        <div
-                          className="w-6 h-6 flex items-center justify-center shrink-0 border-2"
-                          style={{
-                            backgroundColor: isRepSelected ? "#C1272D" : "transparent",
-                            borderColor: isRepSelected ? "#C1272D" : "rgba(0,0,0,0.3)",
+                        <button
+                          key={rep.id}
+                          onClick={() => {
+                            setSelectedReps((prev) => {
+                              const exists = prev.some((r) => r.id === rep.id);
+                              const next = exists ? prev.filter((r) => r.id !== rep.id) : [...prev, rep];
+                              if (next.length > 0) setStep(3);
+                              return next;
+                            });
+                            setTimeout(() => document.getElementById("step-3-topics")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
                           }}
+                          className={`flex items-center gap-3 p-3 rounded-xl text-left cursor-pointer transition-all border-2
+                            ${isRepSelected ? "border-navy bg-navy-50" : "border-gray-200 bg-white hover:border-gray-300"}`}
                         >
-                          {isRepSelected && (
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                          )}
-                        </div>
-                        <div className={`w-12 h-12 ${partyBg(rep.party)} flex items-center justify-center shrink-0 overflow-hidden relative`}>
-                          <span className="font-headline text-lg text-white">{rep.firstName[0]}{rep.lastName[0]}</span>
-                          {rep.photoUrl && (
-                            <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <span className="block font-headline text-base normal-case" style={{ color: "#111827" }}>
-                            {rep.fullName}
-                          </span>
-                          <span className="block font-mono text-xs" style={{ color: "rgba(0,0,0,0.5)" }}>
-                            {rep.party === "D" ? "Democrat" : rep.party === "R" ? "Republican" : "Independent"} — {rep.chamber}
-                          </span>
-                        </div>
-                      </button>
+                          {/* Checkbox */}
+                          <div className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 border-2
+                            ${isRepSelected ? "bg-navy border-navy" : "border-gray-300"}`}>
+                            {isRepSelected && <Check className="w-3 h-3 text-white" />}
+                          </div>
+                          <div className={`w-10 h-10 ${party.bg} rounded-xl flex items-center justify-center shrink-0 overflow-hidden relative`}>
+                            <span className="text-white font-semibold text-sm">{rep.firstName[0]}{rep.lastName[0]}</span>
+                            {rep.photoUrl && (
+                              <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover rounded-xl" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className="block text-sm font-semibold text-navy">{rep.fullName}</span>
+                            <span className="block text-xs text-gray-500">
+                              {party.label} — {rep.chamber}
+                            </span>
+                          </div>
+                        </button>
                       );
                     })}
                   </div>
                   {selectedReps.length > 1 && (
-                    <p className="font-mono text-[11px] mt-2 font-bold" style={{ color: "#C1272D" }}>
-                      {selectedReps.length} REPRESENTATIVES SELECTED
+                    <p className="text-xs text-navy font-medium mt-2">
+                      {selectedReps.length} representatives selected
                     </p>
                   )}
                 </div>
@@ -633,134 +606,102 @@ function DraftInner() {
 
               {/* Search for other reps */}
               <div ref={resultsRef}>
-                  {hasSavedReps && !showAllReps ? (
-                    <button
-                      onClick={() => setShowAllReps(true)}
-                      className="w-full p-3 font-mono text-xs font-bold uppercase text-center cursor-pointer transition-colors"
-                      style={{
-                        color: "rgba(0,0,0,0.5)",
-                        border: "1px dashed rgba(0,0,0,0.15)",
-                        backgroundColor: "transparent",
-                      }}
-                    >
-                      Search All Members of Congress →
-                    </button>
-                  ) : (
-                    <>
-                      {!hasSavedReps && (
-                        <p className="font-mono text-xs mb-3" style={{ color: "rgba(0,0,0,0.5)" }}>
-                          Search for your representative, or{" "}
-                          <Link href="/my-reps" className="no-underline font-bold" style={{ color: "#C1272D" }}>
-                            save your reps
-                          </Link>{" "}
-                          for one-tap access next time.
-                        </p>
-                      )}
+                {hasSavedReps && !showAllReps ? (
+                  <button
+                    onClick={() => setShowAllReps(true)}
+                    className="w-full p-3 text-sm text-gray-500 font-medium text-center cursor-pointer transition-colors
+                      border-2 border-dashed border-gray-300 rounded-xl bg-transparent hover:border-navy hover:text-navy"
+                  >
+                    Search All Members of Congress
+                  </button>
+                ) : (
+                  <>
+                    {!hasSavedReps && (
+                      <p className="text-xs text-gray-500 mb-3">
+                        Search for your representative, or{" "}
+                        <Link href="/my-reps" className="font-semibold text-navy">
+                          save your reps
+                        </Link>{" "}
+                        for one-tap access next time.
+                      </p>
+                    )}
 
-                      {/* Unified filter row — single row of chips */}
-                      <div className="flex flex-wrap items-center gap-1.5 mb-3">
-                        {/* Chamber chips */}
-                        {(["All", "Senate", "House"] as const).map((c) => (
-                          <button
-                            key={c}
-                            onClick={() => { setChamberFilter(c); setShowResults(true); setHighlightIdx(-1); }}
-                            className="px-3 py-1.5 rounded-full font-mono text-[11px] font-bold uppercase cursor-pointer transition-all"
-                            style={{
-                              backgroundColor: chamberFilter === c ? "rgba(0,0,0,0.1)" : "rgba(0,0,0,0.03)",
-                              color: chamberFilter === c ? "#111827" : "rgba(0,0,0,0.4)",
-                              border: chamberFilter === c ? "1px solid rgba(0,0,0,0.15)" : "1px solid rgba(0,0,0,0.1)",
-                            }}
-                          >
-                            {c === "All" ? "All" : c}
-                          </button>
-                        ))}
-
-                        {/* Divider */}
-                        <div className="w-px h-5 mx-1" style={{ backgroundColor: "rgba(0,0,0,0.12)" }} />
-
-                        {/* Party chips — color coded */}
-                        {(["D", "R", "I"] as const).map((p) => {
-                          const isActive = partyFilter === p;
-                          const colors = {
-                            D: { bg: isActive ? "#1a5fb4" : "rgba(26,95,180,0.15)", border: isActive ? "#3584e4" : "rgba(26,95,180,0.3)", label: "DEM" },
-                            R: { bg: isActive ? "#C1272D" : "rgba(193,39,45,0.15)", border: isActive ? "#e85555" : "rgba(193,39,45,0.3)", label: "GOP" },
-                            I: { bg: isActive ? "#8B6914" : "rgba(139,105,20,0.15)", border: isActive ? "#c49b1a" : "rgba(139,105,20,0.3)", label: "IND" },
-                          };
-                          const c = colors[p];
-                          return (
-                            <button
-                              key={p}
-                              onClick={() => { setPartyFilter(partyFilter === p ? "All" : p); setShowResults(true); setHighlightIdx(-1); }}
-                              className="px-3 py-1.5 rounded-full font-mono text-[11px] font-bold uppercase cursor-pointer transition-all"
-                              style={{
-                                backgroundColor: c.bg,
-                                color: isActive ? "#fff" : "rgba(0,0,0,0.5)",
-                                border: `1px solid ${c.border}`,
-                              }}
-                            >
-                              {c.label}
-                            </button>
-                          );
-                        })}
-
-                        {/* Divider */}
-                        <div className="w-px h-5 mx-1" style={{ backgroundColor: "rgba(0,0,0,0.12)" }} />
-
-                        {/* State dropdown */}
-                        <select
-                          value={stateFilter}
-                          onChange={(e) => { setStateFilter(e.target.value); setShowResults(true); setHighlightIdx(-1); }}
-                          className="px-3 py-1.5 rounded-full font-mono text-[11px] font-bold uppercase cursor-pointer"
-                          style={{
-                            backgroundColor: stateFilter === "All" ? "rgba(0,0,0,0.03)" : "rgba(0,0,0,0.1)",
-                            color: stateFilter === "All" ? "rgba(0,0,0,0.4)" : "#111827",
-                            border: stateFilter === "All" ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(0,0,0,0.15)",
-                          }}
+                    {/* Filter chips */}
+                    <div className="flex flex-wrap items-center gap-1.5 mb-3">
+                      {(["All", "Senate", "House"] as const).map((c) => (
+                        <button
+                          key={c}
+                          onClick={() => { setChamberFilter(c); setShowResults(true); setHighlightIdx(-1); }}
+                          className={`px-3 py-1.5 text-xs font-medium rounded-full cursor-pointer transition-all border
+                            ${chamberFilter === c ? "bg-navy text-white border-navy" : "bg-white text-gray-600 border-gray-200 hover:border-navy"}`}
                         >
-                          <option value="All">State</option>
-                          {US_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-                        </select>
-
-                        {/* Clear button */}
-                        {activeFilterCount > 0 && (
+                          {c}
+                        </button>
+                      ))}
+                      <div className="w-px h-4 mx-1 bg-gray-200" />
+                      {(["D", "R", "I"] as const).map((p) => {
+                        const isActive = partyFilter === p;
+                        const labels = { D: "Dem", R: "GOP", I: "Ind" };
+                        const colors = {
+                          D: isActive ? "bg-blue text-white border-blue" : "text-blue border-gray-200 hover:border-blue",
+                          R: isActive ? "bg-red text-white border-red" : "text-red border-gray-200 hover:border-red",
+                          I: isActive ? "bg-purple-600 text-white border-purple-600" : "text-purple-600 border-gray-200 hover:border-purple-600",
+                        };
+                        return (
                           <button
-                            onClick={() => { setChamberFilter("All"); setPartyFilter("All"); setStateFilter("All"); }}
-                            className="px-2 py-1.5 rounded-full font-mono text-[10px] font-bold cursor-pointer transition-all"
-                            style={{ color: "#C1272D", border: "1px solid rgba(193,39,45,0.3)" }}
+                            key={p}
+                            onClick={() => { setPartyFilter(partyFilter === p ? "All" : p); setShowResults(true); setHighlightIdx(-1); }}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-full cursor-pointer transition-all border bg-white ${colors[p]}`}
                           >
-                            ✕ CLEAR
+                            {labels[p]}
                           </button>
-                        )}
-                      </div>
+                        );
+                      })}
+                      <div className="w-px h-4 mx-1 bg-gray-200" />
+                      <select
+                        value={stateFilter}
+                        onChange={(e) => { setStateFilter(e.target.value); setShowResults(true); setHighlightIdx(-1); }}
+                        className={`px-3 py-1.5 text-xs font-medium rounded-full cursor-pointer border transition-all
+                          ${stateFilter === "All" ? "bg-white text-gray-600 border-gray-200" : "bg-navy text-white border-navy"}`}
+                      >
+                        <option value="All">State</option>
+                        {US_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                      {activeFilterCount > 0 && (
+                        <button
+                          onClick={() => { setChamberFilter("All"); setPartyFilter("All"); setStateFilter("All"); }}
+                          className="px-2 py-1.5 text-xs font-medium text-red cursor-pointer bg-transparent border-none"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
 
-                      {/* Search input */}
-                      <div className="relative">
-                        <input
-                          ref={searchInputRef}
-                          type="text"
-                          value={repSearch}
-                          onChange={(e) => { setRepSearch(e.target.value); setShowResults(true); setHighlightIdx(-1); }}
-                          onFocus={() => setShowResults(true)}
-                          onKeyDown={handleSearchKeyDown}
-                          placeholder="Search by name or state..."
-                          className="w-full px-4 py-3 font-mono text-sm focus:outline-none"
-                          style={{
-                            backgroundColor: "rgba(0,0,0,0.04)",
-                            border: "2px solid rgba(0,0,0,0.12)",
-                            color: "#111827",
-                          }}
-                        />
-                        {hasFilters && (
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[10px] font-bold pointer-events-none" style={{ color: "rgba(0,0,0,0.4)" }}>
-                            {filteredReps.length} FOUND
-                          </span>
-                        )}
-                        {showResults && hasFilters && dropdownReps.length > 0 && (
-                          <div
-                            className="absolute z-40 left-0 right-0 top-full mt-1 max-h-72 overflow-y-auto shadow-lg"
-                            style={{ backgroundColor: "#fff", border: "2px solid rgba(0,0,0,0.1)" }}
-                          >
-                            {dropdownReps.map((rep, idx) => (
+                    {/* Search input */}
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        ref={searchInputRef}
+                        type="text"
+                        value={repSearch}
+                        onChange={(e) => { setRepSearch(e.target.value); setShowResults(true); setHighlightIdx(-1); }}
+                        onFocus={() => setShowResults(true)}
+                        onKeyDown={handleSearchKeyDown}
+                        placeholder="Search by name or state..."
+                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm
+                          placeholder:text-gray-400 focus:bg-white focus:border-navy focus:outline-none transition-all"
+                      />
+                      {hasFilters && (
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                          {filteredReps.length} found
+                        </span>
+                      )}
+                      {showResults && hasFilters && dropdownReps.length > 0 && (
+                        <div className="absolute z-40 left-0 right-0 top-full mt-1 max-h-72 overflow-y-auto
+                          bg-white border border-gray-200 rounded-xl shadow-lg">
+                          {dropdownReps.map((rep, idx) => {
+                            const party = partyConfig(rep.party);
+                            return (
                               <button
                                 key={rep.id}
                                 onClick={() => {
@@ -774,120 +715,99 @@ function DraftInner() {
                                   setTimeout(() => document.getElementById("step-3-topics")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
                                 }}
                                 onMouseEnter={() => setHighlightIdx(idx)}
-                                className="w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer transition-colors"
-                                style={{
-                                  backgroundColor: idx === highlightIdx ? "rgba(0,0,0,0.05)" : "transparent",
-                                  borderBottom: "1px solid rgba(0,0,0,0.06)",
-                                }}
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer transition-colors border-b border-gray-100
+                                  ${idx === highlightIdx ? "bg-gray-50" : "bg-white hover:bg-gray-50"}`}
                               >
-                                <span className={`w-8 h-8 ${partyBg(rep.party)} flex items-center justify-center shrink-0 overflow-hidden relative`}>
-                                  <span className="font-headline text-[10px] text-white">{rep.firstName[0]}{rep.lastName[0]}</span>
+                                <div className={`w-8 h-8 ${party.bg} rounded-lg flex items-center justify-center shrink-0 overflow-hidden relative`}>
+                                  <span className="text-white text-xs font-semibold">{rep.firstName[0]}{rep.lastName[0]}</span>
                                   {rep.photoUrl && (
-                                    <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                                    <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover rounded-lg" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                                   )}
-                                </span>
-                                <span className="font-mono text-sm font-bold flex-1" style={{ color: "#111827" }}>{rep.fullName}</span>
-                                <span className="font-mono text-[11px]" style={{ color: "rgba(0,0,0,0.4)" }}>
-                                  {rep.party === "D" ? "DEM" : rep.party === "R" ? "GOP" : "IND"} · {rep.stateAbbr} · {rep.chamber}
+                                </div>
+                                <span className="text-sm font-medium text-navy flex-1">{rep.fullName}</span>
+                                <span className="text-xs text-gray-400">
+                                  {party.label.slice(0, 3)} · {rep.stateAbbr} · {rep.chamber}
                                 </span>
                               </button>
-                            ))}
-                            {filteredReps.length > 30 && (
-                              <div className="px-4 py-2 font-mono text-[10px] text-center" style={{ color: "rgba(0,0,0,0.4)" }}>
-                                Showing 30 of {filteredReps.length} — type to narrow results
-                              </div>
-                            )}
-                          </div>
-                        )}
-                        {showResults && hasFilters && dropdownReps.length === 0 && (
-                          <div
-                            className="absolute z-40 left-0 right-0 top-full mt-1 p-4 shadow-lg"
-                            style={{ backgroundColor: "#fff", border: "2px solid rgba(0,0,0,0.1)" }}
-                          >
-                            <p className="font-mono text-sm text-center" style={{ color: "rgba(0,0,0,0.5)" }}>
-                              No representatives found. Try different filters.
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </>
-                  )}
-                </div>
+                            );
+                          })}
+                          {filteredReps.length > 30 && (
+                            <div className="px-4 py-2 text-xs text-center text-gray-400">
+                              Showing 30 of {filteredReps.length} — type to narrow
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {showResults && hasFilters && dropdownReps.length === 0 && (
+                        <div className="absolute z-40 left-0 right-0 top-full mt-1 p-4 bg-white border border-gray-200 rounded-xl shadow-lg">
+                          <p className="text-sm text-center text-gray-500">
+                            No representatives found. Try different filters.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
 
-              {/* Selected reps display */}
+              {/* Selected reps pills */}
               {selectedReps.length > 0 && (
                 <div className="mt-4">
-                  <p className="font-mono text-[11px] mb-2 font-bold" style={{ color: "#C1272D" }}>
-                    {selectedReps.length === 1 ? "SELECTED REPRESENTATIVE" : `${selectedReps.length} REPRESENTATIVES SELECTED`}
+                  <p className="text-xs text-navy font-medium mb-2">
+                    {selectedReps.length === 1 ? "Selected representative" : `${selectedReps.length} representatives selected`}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {selectedReps.map((rep) => {
-                      const borderColor = rep.party === "D" ? "#1E40AF" : rep.party === "R" ? "#B91C1C" : "#78350F";
-                      const bgColor = rep.party === "D" ? "rgba(30,64,175,0.08)" : rep.party === "R" ? "rgba(185,28,28,0.08)" : "rgba(120,53,15,0.08)";
+                      const party = partyConfig(rep.party);
                       return (
-                      <div
-                        key={rep.id}
-                        className="flex items-center gap-2 px-3 py-2"
-                        style={{ backgroundColor: bgColor, border: `2px solid ${borderColor}` }}
-                      >
-                        <div className={`w-8 h-8 ${partyBg(rep.party)} flex items-center justify-center shrink-0 overflow-hidden relative`}>
-                          <span className="font-headline text-[10px] text-white">{rep.firstName[0]}{rep.lastName[0]}</span>
-                          {rep.photoUrl && (
-                            <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                          )}
-                        </div>
-                        <div>
-                          <span className="block font-headline text-sm normal-case" style={{ color: "#111827" }}>{rep.fullName}</span>
-                          <span className="block font-mono text-[10px]" style={{ color: "rgba(0,0,0,0.5)" }}>
-                            {rep.party === "D" ? "DEM" : rep.party === "R" ? "GOP" : "IND"} · {rep.stateAbbr} · {rep.chamber}
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => setSelectedReps((prev) => prev.filter((r) => r.id !== rep.id))}
-                          className="ml-1 font-mono text-xs font-bold cursor-pointer"
-                          style={{ color: borderColor }}
-                          aria-label={`Remove ${rep.fullName}`}
+                        <div
+                          key={rep.id}
+                          className="flex items-center gap-2 px-3 py-1.5 bg-navy-50 border border-navy/20 rounded-full"
                         >
-                          ✕
-                        </button>
-                      </div>
+                          <div className={`w-6 h-6 ${party.bg} rounded-full flex items-center justify-center shrink-0 overflow-hidden relative`}>
+                            <span className="text-white text-[10px] font-semibold">{rep.firstName[0]}{rep.lastName[0]}</span>
+                            {rep.photoUrl && (
+                              <img src={rep.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover rounded-full" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                            )}
+                          </div>
+                          <span className="text-sm font-medium text-navy">{rep.fullName}</span>
+                          <button
+                            onClick={() => setSelectedReps((prev) => prev.filter((r) => r.id !== rep.id))}
+                            className="text-gray-400 hover:text-red cursor-pointer bg-transparent border-none p-0"
+                            aria-label={`Remove ${rep.fullName}`}
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       );
                     })}
                   </div>
                 </div>
               )}
-            </div>
+            </Card>
 
-            {/* ── STEP 3: What's on your mind? ── */}
-            <div id="step-3-topics">
+            {/* Step 3: What's on your mind? */}
+            <Card padding="md" id="step-3-topics">
               <div className="flex items-center gap-3 mb-4">
-                <div
-                  className="w-8 h-8 flex items-center justify-center font-headline text-base shrink-0"
-                  style={{ backgroundColor: selectedRep ? "#C1272D" : "rgba(0,0,0,0.15)", color: "#fff" }}
-                >
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm font-semibold shrink-0
+                  ${selectedRep ? "bg-navy text-white" : "bg-gray-200 text-gray-500"}`}>
                   3
                 </div>
-                <h2
-                  className="font-headline text-lg uppercase"
-                  style={{ color: selectedRep ? "#111827" : "rgba(0,0,0,0.3)" }}
-                >
+                <h2 className={`text-lg font-semibold ${selectedRep ? "text-navy" : "text-gray-400"}`}>
                   What&apos;s on your mind?
                 </h2>
               </div>
 
-              {/* Quick topic cards — pick a topic to pre-fill */}
-              <p className="font-mono text-[11px] mb-2 font-bold" style={{ color: "rgba(0,0,0,0.4)" }}>
-                TAP A TOPIC TO GET STARTED
-              </p>
-              <div className="grid grid-cols-2 gap-3">
+              {/* Quick topics */}
+              <p className="text-xs text-gray-500 mb-3">Pick a topic to get started</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
                 {quickTopics.map((topic) => {
                   const isSelected = selectedIssueSlug === topic.slug;
                   return (
                     <button
                       key={topic.slug}
                       onClick={() => {
-                        const wasSelected = selectedIssueSlug === topic.slug;
-                        if (wasSelected) {
+                        if (selectedIssueSlug === topic.slug) {
                           setSelectedIssueSlug("");
                           setConcern("");
                           return;
@@ -897,462 +817,318 @@ function DraftInner() {
                         if (iss && iss.talkingPoints.length > 0) {
                           setConcern(iss.talkingPoints[0]);
                         }
-                        // Scroll textarea into view and focus
                         setTimeout(() => {
                           const ta = document.getElementById("draft-concern");
                           if (ta) { ta.scrollIntoView({ behavior: "smooth", block: "center" }); ta.focus(); }
                         }, 100);
                       }}
-                      className="relative text-left overflow-hidden cursor-pointer transition-all"
-                      style={{
-                        border: isSelected ? "2px solid #C1272D" : "2px solid rgba(0,0,0,0.08)",
-                        backgroundColor: "#000",
-                        height: "100px",
-                        boxShadow: isSelected ? "0 0 12px rgba(193,39,45,0.3)" : "none",
-                      }}
+                      className={`flex items-center gap-2 p-3 rounded-xl text-left cursor-pointer transition-all border-2
+                        ${isSelected ? "border-navy bg-navy-50" : "border-gray-200 bg-white hover:border-gray-300"}`}
                     >
-                      {/* Full background illustration */}
-                      <img
-                        src={`/images/icons/topics/${topic.slug}.jpg`}
-                        alt=""
-                        className="absolute inset-0 w-full h-full object-cover"
-                        style={{ opacity: isSelected ? 1 : 0.6 }}
-                      />
-                      {/* Dark overlay for text readability */}
-                      <div className="absolute inset-0" style={{ background: "linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.1) 100%)" }} />
-                      {/* Label — bottom left */}
-                      <div className="relative z-10 h-full flex items-end p-3">
-                        <span
-                          className="font-headline text-lg uppercase leading-tight"
-                          style={{
-                            color: "#fff",
-                            textShadow: "0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.7)",
-                          }}
-                        >
-                          {topic.label}
-                        </span>
-                      </div>
-                      {/* Selected check */}
-                      {isSelected && (
-                        <div className="absolute top-2 right-2 w-5 h-5 flex items-center justify-center z-10" style={{ backgroundColor: "#C1272D" }}>
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                      )}
+                      <topic.Icon className={`w-4 h-4 shrink-0 ${isSelected ? "text-navy" : "text-gray-400"}`} />
+                      <span className={`text-sm font-medium ${isSelected ? "text-navy" : "text-gray-600"}`}>
+                        {topic.label}
+                      </span>
                     </button>
                   );
                 })}
               </div>
 
-
               {/* Concern textarea */}
               <label
                 htmlFor="draft-concern"
-                className="font-mono text-xs block mb-2 font-bold"
-                style={{ color: selectedIssueSlug ? "#C1272D" : "rgba(0,0,0,0.5)" }}
+                className="text-xs text-gray-500 block mb-2 font-medium"
               >
-                WRITE YOUR LETTER OR DESCRIBE YOUR CONCERN
+                Write your letter or describe your concern
               </label>
               <textarea
                 id="draft-concern"
                 value={concern}
                 onChange={(e) => setConcern(e.target.value)}
                 placeholder="Write your full letter here, paste one you've already written, or just describe your concern and use 'Generate with AI' to draft it for you..."
-                rows={3}
-                className="w-full px-4 py-3 font-body text-base focus:outline-none resize-none transition-all"
-                style={{
-                  backgroundColor: selectedIssueSlug ? "rgba(193,39,45,0.03)" : "rgba(0,0,0,0.04)",
-                  border: selectedIssueSlug ? "2px solid #C1272D" : "2px solid rgba(0,0,0,0.12)",
-                  color: "#111827",
-                }}
+                rows={4}
+                className={`w-full px-4 py-3 text-sm rounded-xl border-2 focus:outline-none resize-none transition-all
+                  ${selectedIssueSlug ? "border-navy bg-navy-50" : "border-gray-200 bg-gray-50 focus:border-navy focus:bg-white"}`}
               />
-            </div>
+            </Card>
 
             {/* Error */}
             {error && (
-              <div
-                className="p-4 font-mono text-sm font-bold"
-                role="alert"
-                style={{ backgroundColor: "rgba(193,39,45,0.15)", border: "2px solid #C1272D", color: "#C1272D" }}
-              >
+              <div className="p-4 bg-red-light border border-red/20 rounded-xl text-sm text-red font-medium" role="alert">
                 {error}
                 {error.includes("API key") && (
-                  <Link href="/settings" className="ml-2 underline" style={{ color: "#C1272D" }}>
-                    Go to Settings
-                  </Link>
+                  <Link href="/settings" className="ml-2 underline text-red">Go to Settings</Link>
                 )}
               </div>
             )}
 
-            {/* ── ACTION BUTTONS ── */}
-            <div className="flex gap-3">
-              <button
+            {/* Action buttons */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
                 onClick={handleUseOwn}
                 disabled={!canGenerate}
-                className="flex-1 py-5 font-headline uppercase text-xl tracking-wider cursor-pointer transition-all"
-                style={{
-                  backgroundColor: canGenerate ? "#111" : "rgba(0,0,0,0.08)",
-                  color: canGenerate ? "#fff" : "rgba(0,0,0,0.3)",
-                  border: "none",
-                }}
+                variant="outline"
+                size="lg"
+                className="flex-1"
+                icon={<Send className="w-4 h-4" />}
               >
-                {selectedReps.length === 0 ? "↑ Pick a rep first" : !concern.trim() ? "↑ Write your message" : selectedReps.length > 1 ? `SEND TO ${selectedReps.length} REPS` : "SEND AS-IS"}
-              </button>
-              <button
+                {selectedReps.length === 0 ? "Pick a rep first" : !concern.trim() ? "Write your message" : selectedReps.length > 1 ? `Send to ${selectedReps.length} reps` : "Send as-is"}
+              </Button>
+              <Button
                 onClick={handleGenerate}
                 disabled={loading || !canGenerate}
-                className="flex-1 py-5 font-headline uppercase text-lg tracking-wider cursor-pointer transition-all"
-                style={{
-                  backgroundColor: loading ? "#999" : canGenerate ? "#C1272D" : "rgba(0,0,0,0.08)",
-                  color: loading ? "#fff" : canGenerate ? "#fff" : "rgba(0,0,0,0.3)",
-                  border: "none",
-                  textShadow: canGenerate ? "0 2px 8px rgba(0,0,0,0.5)" : "none",
-                  boxShadow: canGenerate && !loading ? "0 0 30px rgba(193,39,45,0.4)" : "none",
-                }}
+                loading={loading}
+                variant="primary"
+                size="lg"
+                className="flex-1"
+                icon={!loading ? <Sparkles className="w-4 h-4" /> : undefined}
               >
-                {loading ? "Drafting..." : "GENERATE WITH AI"}
-              </button>
+                {loading ? "Drafting..." : "Generate with AI"}
+              </Button>
             </div>
 
             {/* Loading state */}
             {loading && (
-              <div className="p-6 text-center" style={{ backgroundColor: "rgba(0,0,0,0.03)", border: "2px solid rgba(0,0,0,0.1)" }}>
-                <div className="font-headline text-2xl mb-2 motion-safe:animate-pulse" style={{ color: "#C1272D" }}>
-                  Drafting...
-                </div>
-                <p className="font-mono text-xs font-bold" style={{ color: "rgba(0,0,0,0.5)" }}>
-                  Injecting {selectedRep?.fullName}&apos;s voting record + committee data
+              <Card padding="md" className="text-center">
+                <svg className="animate-spin h-6 w-6 text-navy mx-auto mb-3" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                <p className="text-navy font-medium">Drafting your message...</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Using {selectedRep?.fullName}&apos;s voting record and committee data
                 </p>
-              </div>
+              </Card>
             )}
           </div>
         ) : (
-          /* ── OUTPUT VIEW — Dark themed ── */
-          <div ref={outputRef} className="px-4 py-6">
+          /* Output view */
+          <div ref={outputRef} className="space-y-0">
             {/* Print-only header */}
             <div className="hidden" data-print-show data-print-header>
-              <h1 style={{ fontFamily: "Arial Black, sans-serif", fontSize: "18pt", textTransform: "uppercase", marginBottom: "4pt" }}>
-                {mode === "letter" ? "Letter" : mode === "call" ? "Call Script" : "Social Posts"} to {selectedRep?.fullName}
+              <h1 style={{ fontSize: "18pt", marginBottom: "4pt" }}>
+                {mode === "letter" ? "Letter" : mode === "call" ? "Call Script" : "Email"} to {selectedRep?.fullName}
               </h1>
-              <p style={{ fontFamily: "Courier New, monospace", fontSize: "9pt", color: "#666", marginBottom: "4pt" }}>
-                {selectedRep?.title} — {selectedRep?.state}{selectedRep?.district ? `, ${selectedRep.district}` : ""} — {selectedRep?.party === "D" ? "Democrat" : selectedRep?.party === "R" ? "Republican" : "Independent"}
-              </p>
-              <p style={{ fontFamily: "Courier New, monospace", fontSize: "9pt", color: "#666" }}>
-                Issue: {selectedIssue ? selectedIssue.name : "General Concern"} — Generated {new Date().toLocaleDateString()}
+              <p style={{ fontSize: "9pt", color: "#6B7280" }}>
+                {selectedRep?.title} — {selectedRep?.state}{selectedRep?.district ? `, ${selectedRep.district}` : ""} — Generated {new Date().toLocaleDateString()}
               </p>
             </div>
 
             {/* Action bar */}
-            <div className="p-4 mb-0" style={{ backgroundColor: "#C1272D" }} data-print-hide>
-              <div className="mb-3">
-                <p className="font-headline text-lg normal-case" style={{ color: "#fff" }}>
+            <Card padding="md" className="rounded-b-none border-b-0" data-print-hide>
+              <div className="mb-4">
+                <p className="text-lg font-semibold text-navy">
                   Your Message to {selectedReps.length > 1 ? `${selectedReps.length} Representatives` : selectedRep?.fullName}
                 </p>
                 {selectedReps.length > 1 && (
-                  <p className="font-mono text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.8)" }}>
+                  <p className="text-xs text-gray-500 mt-0.5">
                     {selectedReps.map((r) => r.fullName).join(" · ")}
                   </p>
                 )}
-                <p className="font-mono text-[10px]" style={{ color: "rgba(255,255,255,0.7)" }}>
-                  {selectedIssue ? selectedIssue.name.toUpperCase() : "GENERAL CONCERN"} — {selectedModes.size} delivery method{selectedModes.size > 1 ? "s" : ""} selected
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {selectedIssue ? selectedIssue.name : "General concern"} — {selectedModes.size} delivery method{selectedModes.size > 1 ? "s" : ""}
                 </p>
               </div>
 
-              {/* Delivery method buttons — one for each selected mode */}
               <div className="flex gap-2 flex-wrap">
                 {selectedModes.has("letter") && selectedRep && (
-                  <button
-                    onClick={() => setMailModalOpen(true)}
-                    className="flex items-center gap-2 px-5 py-3 font-mono text-sm font-bold cursor-pointer"
-                    style={{ backgroundColor: "#fff", color: "#111", border: "none" }}
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    {selectedReps.length > 1 ? `MAIL ${selectedReps.length} LETTERS — $${(selectedReps.length * 1.5).toFixed(2)}` : "MAIL LETTER — $1.50"}
-                  </button>
+                  <Button onClick={() => setMailModalOpen(true)} variant="primary" icon={<Mail className="w-4 h-4" />}>
+                    {selectedReps.length > 1 ? `Mail ${selectedReps.length} Letters — $${(selectedReps.length * 1.5).toFixed(2)}` : "Mail Letter — $1.50"}
+                  </Button>
                 )}
                 {selectedModes.has("call") && selectedRep && (
-                  <a
-                    href={`tel:${selectedRep.offices?.[0]?.phone || ""}`}
-                    className="flex items-center gap-2 px-5 py-3 font-mono text-sm font-bold no-underline"
-                    style={{ backgroundColor: "#fff", color: "#111" }}
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                    CALL NOW
+                  <a href={`tel:${selectedRep.offices?.[0]?.phone || ""}`}>
+                    <Button variant="teal" icon={<Phone className="w-4 h-4" />}>Call Now</Button>
                   </a>
                 )}
                 {selectedModes.has("social") && (
-                  <a
-                    href={getMailtoLink()}
-                    className="flex items-center gap-2 px-5 py-3 font-mono text-sm font-bold no-underline"
-                    style={{ backgroundColor: "#fff", color: "#111" }}
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    SEND EMAIL
+                  <a href={getMailtoLink()}>
+                    <Button variant="secondary" icon={<PenLine className="w-4 h-4" />}>Send Email</Button>
                   </a>
                 )}
                 {(selectedRep?.contactForm || selectedRep?.website) && (
-                  <button
-                    onClick={handleOpenContactForm}
-                    className="flex items-center gap-2 px-4 py-3 font-mono text-sm font-bold cursor-pointer"
-                    style={{ backgroundColor: "rgba(0,0,0,0.3)", color: "#fff", border: "none" }}
-                  >
-                    COPY & OPEN FORM
-                  </button>
+                  <Button onClick={handleOpenContactForm} variant="outline" icon={<ExternalLink className="w-4 h-4" />}>
+                    Copy &amp; Open Form
+                  </Button>
                 )}
-                <button
-                  onClick={handlePrint}
-                  className="flex items-center gap-2 px-4 py-3 font-mono text-sm font-bold cursor-pointer"
-                  style={{ backgroundColor: "rgba(0,0,0,0.3)", color: "#fff", border: "none" }}
-                >
-                  PRINT
-                </button>
-                <button
-                  onClick={handleCopy}
-                  className="flex items-center gap-2 px-4 py-3 font-mono text-sm font-bold cursor-pointer"
-                  style={{ backgroundColor: "rgba(0,0,0,0.3)", color: "#fff", border: "none" }}
-                >
-                  {copied ? "COPIED!" : "COPY"}
-                </button>
+                <Button onClick={handlePrint} variant="ghost" icon={<Printer className="w-4 h-4" />}>Print</Button>
+                <Button onClick={handleCopy} variant="ghost" icon={<Copy className="w-4 h-4" />}>
+                  {copied ? "Copied!" : "Copy"}
+                </Button>
               </div>
-            </div>
+            </Card>
 
-            {/* Letter content — white bg for readability */}
-            <div className="p-5 md:p-8" style={{ backgroundColor: "#fff" }} data-print-letter>
-              <div className="font-body text-base leading-relaxed whitespace-pre-wrap max-w-3xl" style={{ color: "#111" }}>
+            {/* Letter content */}
+            <div className="p-6 md:p-8 bg-white border border-gray-200 border-t-0 rounded-b-xl" data-print-letter>
+              <div className="text-sm leading-relaxed whitespace-pre-wrap max-w-3xl text-gray-800">
                 {output}
               </div>
             </div>
 
             {/* Bottom actions */}
-            <div className="p-4 flex flex-col gap-3" style={{ backgroundColor: "rgba(0,0,0,0.03)", borderTop: "1px solid rgba(0,0,0,0.1)" }} data-print-hide>
-              <div className="flex gap-2 flex-wrap">
+            <Card padding="md" className="mt-4" data-print-hide>
+              <div className="flex gap-2 flex-wrap mb-4">
                 {selectedModes.has("letter") && selectedRep && (
-                  <button
-                    onClick={() => setMailModalOpen(true)}
-                    className="flex-1 px-4 py-3 font-mono text-xs font-bold cursor-pointer"
-                    style={{ backgroundColor: "#C1272D", color: "#fff", border: "none" }}
-                  >
-                    {selectedReps.length > 1 ? `MAIL ${selectedReps.length} LETTERS — $${(selectedReps.length * 1.5).toFixed(2)}` : "MAIL LETTER — $1.50"}
-                  </button>
+                  <Button onClick={() => setMailModalOpen(true)} variant="primary" icon={<Mail className="w-4 h-4" />}>
+                    {selectedReps.length > 1 ? `Mail ${selectedReps.length} Letters` : "Mail Letter — $1.50"}
+                  </Button>
                 )}
                 {selectedModes.has("call") && selectedRep && (
-                  <a
-                    href={`tel:${selectedRep.offices?.[0]?.phone || ""}`}
-                    className="flex-1 text-center px-4 py-3 font-mono text-xs font-bold no-underline"
-                    style={{ backgroundColor: "#1B2A4A", color: "#fff" }}
-                  >
-                    CALL NOW
+                  <a href={`tel:${selectedRep.offices?.[0]?.phone || ""}`}>
+                    <Button variant="teal" icon={<Phone className="w-4 h-4" />}>Call Now</Button>
                   </a>
                 )}
                 {selectedModes.has("social") && (
-                  <a
-                    href={getMailtoLink()}
-                    className="flex-1 text-center px-4 py-3 font-mono text-xs font-bold no-underline"
-                    style={{ backgroundColor: "#111", color: "#fff" }}
-                  >
-                    SEND EMAIL
+                  <a href={getMailtoLink()}>
+                    <Button variant="secondary" icon={<PenLine className="w-4 h-4" />}>Send Email</Button>
                   </a>
                 )}
-                <button
-                  onClick={handleCopy}
-                  className="flex-1 px-4 py-3 font-mono text-xs font-bold cursor-pointer"
-                  style={{ backgroundColor: "rgba(0,0,0,0.08)", color: "#111827", border: "none" }}
-                >
-                  {copied ? "COPIED!" : "COPY TO CLIPBOARD"}
-                </button>
+                <Button onClick={handleCopy} variant="outline" icon={<Copy className="w-4 h-4" />}>
+                  {copied ? "Copied!" : "Copy"}
+                </Button>
               </div>
 
-              {/* Next steps — simplified cards */}
-              <div className="grid grid-cols-2 gap-2 mt-2">
+              {/* Next steps */}
+              <div className="grid grid-cols-2 gap-3">
                 {mode !== "call" && (
                   <button
                     onClick={() => { setSelectedModes(new Set(["call"])); setOutput(""); }}
-                    className="p-3 text-left cursor-pointer"
-                    style={{ backgroundColor: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)" }}
+                    className="p-3 text-left rounded-xl bg-gray-50 border border-gray-200 hover:border-navy cursor-pointer transition-all"
                   >
-                    <span className="block text-lg mb-1">📞</span>
-                    <span className="block font-headline text-sm normal-case" style={{ color: "#111827" }}>Call Too</span>
-                    <span className="block font-mono text-[10px] mt-1" style={{ color: "rgba(0,0,0,0.4)" }}>
-                      Letters + calls = 3x impact
-                    </span>
+                    <Phone className="w-5 h-5 text-teal mb-1" />
+                    <span className="block text-sm font-semibold text-navy">Call Too</span>
+                    <span className="block text-xs text-gray-500 mt-0.5">Letters + calls = 3x impact</span>
                   </button>
                 )}
                 {mode !== "social" && (
                   <button
                     onClick={() => { setSelectedModes(new Set(["social"])); setOutput(""); }}
-                    className="p-3 text-left cursor-pointer"
-                    style={{ backgroundColor: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)" }}
+                    className="p-3 text-left rounded-xl bg-gray-50 border border-gray-200 hover:border-navy cursor-pointer transition-all"
                   >
-                    <span className="block text-lg mb-1">📱</span>
-                    <span className="block font-headline text-sm normal-case" style={{ color: "#111827" }}>Go Public</span>
-                    <span className="block font-mono text-[10px] mt-1" style={{ color: "rgba(0,0,0,0.4)" }}>
-                      Add accountability pressure
-                    </span>
+                    <PenLine className="w-5 h-5 text-gold-dark mb-1" />
+                    <span className="block text-sm font-semibold text-navy">Email Too</span>
+                    <span className="block text-xs text-gray-500 mt-0.5">Add another channel</span>
                   </button>
                 )}
                 <button
                   onClick={() => { setOutput(""); setSelectedReps([]); }}
-                  className="p-3 text-left cursor-pointer"
-                  style={{ backgroundColor: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)" }}
+                  className="p-3 text-left rounded-xl bg-gray-50 border border-gray-200 hover:border-navy cursor-pointer transition-all"
                 >
-                  <span className="block text-lg mb-1">👥</span>
-                  <span className="block font-headline text-sm normal-case" style={{ color: "#111827" }}>Another Rep</span>
-                  <span className="block font-mono text-[10px] mt-1" style={{ color: "rgba(0,0,0,0.4)" }}>
-                    Both senators + house rep
-                  </span>
+                  <Users className="w-5 h-5 text-navy mb-1" />
+                  <span className="block text-sm font-semibold text-navy">Another Rep</span>
+                  <span className="block text-xs text-gray-500 mt-0.5">Both senators + house rep</span>
                 </button>
                 <button
                   onClick={() => { setOutput(""); setError(""); }}
-                  className="p-3 text-left cursor-pointer"
-                  style={{ backgroundColor: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)" }}
+                  className="p-3 text-left rounded-xl bg-gray-50 border border-gray-200 hover:border-navy cursor-pointer transition-all"
                 >
-                  <span className="block text-lg mb-1">✏️</span>
-                  <span className="block font-headline text-sm normal-case" style={{ color: "#111827" }}>Edit & Redo</span>
-                  <span className="block font-mono text-[10px] mt-1" style={{ color: "rgba(0,0,0,0.4)" }}>
-                    Tweak your concern & regenerate
-                  </span>
+                  <RotateCcw className="w-5 h-5 text-gray-500 mb-1" />
+                  <span className="block text-sm font-semibold text-navy">Edit &amp; Redo</span>
+                  <span className="block text-xs text-gray-500 mt-0.5">Tweak and regenerate</span>
                 </button>
               </div>
 
-              <p className="mt-2 text-center font-mono text-xs" style={{ color: "rgba(0,0,0,0.3)" }}>
-                This message was auto-saved to your{" "}
-                <Link href="/my-reps" className="no-underline font-bold" style={{ color: "#C1272D" }}>
-                  contact log
-                </Link>.
+              <p className="mt-4 text-center text-xs text-gray-400">
+                Auto-saved to your{" "}
+                <Link href="/my-reps" className="text-navy font-medium">contact log</Link>.
               </p>
-            </div>
+            </Card>
 
             {/* Mail success banner */}
             {mailSuccess && (
-              <div className="p-4" style={{ backgroundColor: "rgba(22,163,74,0.1)", borderTop: "3px solid #16a34a" }} data-print-hide>
-                <p className="font-headline text-lg" style={{ color: "#16a34a" }}>
+              <Card padding="md" className="mt-4 border-green/30 bg-green-light" data-print-hide>
+                <p className="text-lg font-semibold text-green">
                   Letter{mailLetters.length > 1 ? "s" : ""} Mailed!
                 </p>
 
                 {mailStatusLoading && mailLetters.length === 0 && (
-                  <p className="font-mono text-xs mt-1" style={{ color: "rgba(0,0,0,0.5)" }}>
-                    Processing your letter{selectedReps.length > 1 ? "s" : ""}...
-                  </p>
+                  <p className="text-xs text-gray-500 mt-1">Processing your letter{selectedReps.length > 1 ? "s" : ""}...</p>
                 )}
 
                 {mailLetters.length > 0 ? (
-                  <div className="mt-2 space-y-3">
+                  <div className="mt-3 space-y-3">
                     {mailLetters.map((letter, i) => (
-                      <div key={i} className="p-3" style={{ backgroundColor: "rgba(255,255,255,0.7)", border: "1px solid rgba(22,163,74,0.2)" }}>
+                      <div key={i} className="p-3 bg-white rounded-xl border border-green/20">
                         <div className="flex items-start gap-3">
-                          {/* PDF thumbnail proof */}
                           {letter.thumbnailUrl && (
                             <a href={letter.trackingUrl || "#"} target="_blank" rel="noopener noreferrer" className="shrink-0">
                               <img
                                 src={letter.thumbnailUrl}
                                 alt={`Letter to ${letter.repName}`}
-                                className="border"
-                                style={{ width: "64px", height: "auto", borderColor: "rgba(0,0,0,0.1)" }}
+                                className="w-16 h-auto rounded-lg border border-gray-200"
                               />
                             </a>
                           )}
                           <div className="flex-1 min-w-0">
-                            <p className="font-mono text-xs font-bold" style={{ color: "#111" }}>
-                              {letter.repName}
-                            </p>
+                            <p className="text-sm font-semibold text-navy">{letter.repName}</p>
                             {letter.deliveryStatus && (
-                              <p className="font-mono text-[10px] mt-0.5" style={{ color: "#16a34a" }}>
-                                Status: {letter.deliveryStatus}
-                              </p>
+                              <p className="text-xs text-green mt-0.5">Status: {letter.deliveryStatus}</p>
                             )}
                             {letter.expectedDeliveryDate && (
-                              <p className="font-mono text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.5)" }}>
-                                Expected delivery: {new Date(letter.expectedDeliveryDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                              <p className="text-xs text-gray-500 mt-0.5">
+                                Expected: {new Date(letter.expectedDeliveryDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
                               </p>
                             )}
                             {letter.trackingUrl && (
-                              <a
-                                href={letter.trackingUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-block mt-1 font-mono text-[10px] font-bold no-underline"
-                                style={{ color: "#16a34a" }}
-                              >
-                                View Letter & Tracking
+                              <a href={letter.trackingUrl} target="_blank" rel="noopener noreferrer"
+                                className="inline-block mt-1 text-xs font-medium text-teal">
+                                View Letter &amp; Tracking
                               </a>
                             )}
                             {letter.error && (
-                              <p className="font-mono text-[10px] mt-0.5" style={{ color: "#C1272D" }}>
-                                There was an issue sending this letter. We&apos;ll retry automatically.
-                              </p>
+                              <p className="text-xs text-red mt-0.5">Issue sending — we&apos;ll retry automatically.</p>
                             )}
                           </div>
                         </div>
                       </div>
                     ))}
-                    <p className="font-mono text-[10px]" style={{ color: "rgba(0,0,0,0.4)" }}>
-                      A payment receipt has been sent to your email. Letters arrive in 3-5 business days via USPS First Class.
+                    <p className="text-xs text-gray-500">
+                      Receipt sent to your email. Letters arrive in 3-5 business days via USPS First Class.
                     </p>
                   </div>
                 ) : !mailStatusLoading ? (
-                  <p className="font-mono text-xs mt-1" style={{ color: "rgba(0,0,0,0.6)" }}>
-                    Your letter{selectedReps.length > 1 ? "s are" : " is"} being printed and will arrive in 3-5 business days via USPS First Class.
+                  <p className="text-xs text-gray-500 mt-1">
+                    Your letter{selectedReps.length > 1 ? "s are" : " is"} being printed and will arrive in 3-5 business days.
                   </p>
                 ) : null}
-              </div>
+              </Card>
             )}
           </div>
         )}
 
-        {/* Account prompt — shown after first action when not logged in */}
+        {/* Account prompt */}
         {showAccountPrompt && !user && (
-          <div
-            className="fixed bottom-20 left-4 right-4 z-50 p-4 shadow-lg"
-            style={{
-              backgroundColor: "#111",
-              border: "2px solid #C1272D",
-              maxWidth: "500px",
-              marginLeft: "auto",
-              marginRight: "auto",
-            }}
-          >
-            <div className="flex items-start gap-3">
-              <div className="shrink-0 w-10 h-10 flex items-center justify-center" style={{ backgroundColor: "#C1272D" }}>
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <p className="font-headline text-base text-white">
-                  Track Your Impact
-                </p>
-                <p className="font-mono text-[11px] mt-1" style={{ color: "rgba(255,255,255,0.6)" }}>
-                  Create a free account to earn points, track your letters, and level up your activism.
-                </p>
-                <div className="flex gap-2 mt-3">
-                  <button
-                    onClick={() => {
-                      setShowAccountPrompt(false);
-                      setAuthModalMessage("Your action was saved locally. Create an account to track it across devices and earn points!");
-                      setShowAuthModal(true);
-                    }}
-                    className="px-4 py-2 font-mono text-xs font-bold uppercase cursor-pointer border-none"
-                    style={{ backgroundColor: "#C1272D", color: "#fff" }}
-                  >
-                    Sign Up Free
-                  </button>
-                  <button
-                    onClick={() => setShowAccountPrompt(false)}
-                    className="px-4 py-2 font-mono text-xs cursor-pointer border-none"
-                    style={{ backgroundColor: "transparent", color: "rgba(255,255,255,0.4)" }}
-                  >
-                    Later
-                  </button>
+          <div className="fixed bottom-20 left-4 right-4 z-50 max-w-md mx-auto">
+            <Card padding="md" className="shadow-xl border-gold/30">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gold-50 flex items-center justify-center shrink-0">
+                  <img src="/images/civic/icons/voter-reg.png" alt="" className="w-6 h-6" aria-hidden="true" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-navy">Track Your Impact</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Create a free account to earn points, track letters, and build your civic profile.
+                  </p>
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      onClick={() => {
+                        setShowAccountPrompt(false);
+                        setAuthModalMessage("Your action was saved locally. Create an account to track it across devices!");
+                        setShowAuthModal(true);
+                      }}
+                      variant="primary"
+                      size="sm"
+                      icon={<UserPlus className="w-3.5 h-3.5" />}
+                    >
+                      Sign Up Free
+                    </Button>
+                    <Button onClick={() => setShowAccountPrompt(false)} variant="ghost" size="sm">
+                      Later
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Card>
           </div>
         )}
 
@@ -1369,15 +1145,16 @@ function DraftInner() {
           />
         )}
       </div>
-    );
+    </div>
+  );
 }
 
 export default function DraftPage() {
   return (
     <Suspense fallback={
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <h1 className="font-headline text-4xl md:text-5xl mb-2">Write Congress</h1>
-        <p className="font-mono text-sm text-gray-mid">Loading...</p>
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold text-navy mb-2">Write Congress</h1>
+        <p className="text-gray-500">Loading...</p>
       </div>
     }>
       <DraftInner />

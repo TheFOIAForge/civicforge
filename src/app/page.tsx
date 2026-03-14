@@ -6,27 +6,52 @@ import { useState, useEffect, useRef } from "react";
 import { issues } from "@/data/issues";
 import type { Representative } from "@/data/types";
 import { useMyReps } from "@/lib/my-reps-context";
+import {
+  Search,
+  MapPin,
+  PenLine,
+  Phone,
+  Mail,
+  BookOpen,
+  Users,
+  ArrowRight,
+  ChevronRight,
+  Shield,
+  Star,
+  TrendingUp,
+  Landmark,
+  Heart,
+  Briefcase,
+  GraduationCap,
+  Globe,
+  Home as HomeIcon,
+  Plane,
+  Swords,
+  CheckCircle2,
+} from "lucide-react";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
 
-const issueColor: Record<string, string> = {
-  healthcare: "#c62828",
-  environment: "#2e7d32",
-  housing: "#e65100",
-  immigration: "#1565c0",
-  education: "#6a1b9a",
-  economy: "#f9a825",
-  "civil-rights": "#37474f",
-  defense: "#1a1a2e",
+const issueIcons: Record<string, React.ReactNode> = {
+  healthcare: <Heart className="w-5 h-5" />,
+  environment: <Globe className="w-5 h-5" />,
+  housing: <HomeIcon className="w-5 h-5" />,
+  immigration: <Plane className="w-5 h-5" />,
+  education: <GraduationCap className="w-5 h-5" />,
+  economy: <TrendingUp className="w-5 h-5" />,
+  "civil-rights": <Users className="w-5 h-5" />,
+  defense: <Swords className="w-5 h-5" />,
 };
 
-const issueIcon: Record<string, string> = {
-  healthcare: "&#9769;",
-  environment: "&#9752;",
-  housing: "&#8962;",
-  immigration: "&#9992;",
-  education: "&#9734;",
-  economy: "&#9878;",
-  "civil-rights": "&#9878;",
-  defense: "&#9872;",
+const issueColors: Record<string, { bg: string; text: string; border: string }> = {
+  healthcare: { bg: "bg-red-50", text: "text-red", border: "border-red/20" },
+  environment: { bg: "bg-teal-50", text: "text-teal", border: "border-teal/20" },
+  housing: { bg: "bg-yellow-light", text: "text-yellow", border: "border-yellow/20" },
+  immigration: { bg: "bg-blue-light", text: "text-blue", border: "border-blue/20" },
+  education: { bg: "bg-purple-50", text: "text-purple-600", border: "border-purple-200" },
+  economy: { bg: "bg-gold-50", text: "text-gold-dark", border: "border-gold/20" },
+  "civil-rights": { bg: "bg-gray-100", text: "text-gray-700", border: "border-gray-200" },
+  defense: { bg: "bg-navy-50", text: "text-navy", border: "border-navy/20" },
 };
 
 /** Intersection Observer hook for scroll animations */
@@ -47,7 +72,7 @@ function useScrollReveal() {
             }
           });
         },
-        { threshold: 0, rootMargin: "100px" },
+        { threshold: 0, rootMargin: "80px" },
       );
 
       const targets = el.querySelectorAll(
@@ -100,583 +125,490 @@ export default function Home() {
   }
 
   return (
-      <div ref={scrollRef} style={{ backgroundColor: "#f5e6c8" }}>
-        {/* ═══ HERO — Propaganda poster style ═══ */}
-        <section className="relative min-h-[75vh] flex items-center justify-center overflow-hidden">
-          {/* Background — poster image */}
+    <div ref={scrollRef}>
+      {/* ═══ HERO ═══ */}
+      <section className="relative overflow-hidden bg-gradient-hero">
+        {/* Subtle pattern overlay */}
+        <div className="absolute inset-0 pattern-dots opacity-[0.05]" />
+        {/* Capitol watermark */}
+        <img
+          src="/images/civic/icons/globe.png"
+          alt=""
+          className="absolute right-[-60px] top-[-40px] w-[300px] h-[300px] opacity-[0.06]"
+          aria-hidden="true"
+        />
+
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 py-16 sm:py-24 text-center">
+          {/* Badge with capitol icon from forclaude */}
           <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: "url(/images/propaganda/hero-poster.jpg)",
-              backgroundSize: "cover",
-              backgroundPosition: "center 20%",
-            }}
-          />
-          {/* Dark overlay for text readability */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: "linear-gradient(180deg, rgba(26,26,26,0.6) 0%, rgba(26,26,26,0.4) 40%, rgba(193,39,45,0.3) 70%, rgba(245,230,200,1) 100%)",
-            }}
-          />
-          {/* Vignette edges */}
-          <div
-            className="absolute inset-0"
-            style={{
-              boxShadow: "inset 0 0 150px rgba(0,0,0,0.5)",
-            }}
-          />
+            className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 backdrop-blur
+              rounded-full text-sm text-white/80 mb-6"
+            style={{ animation: "fadeInUp 0.6s ease-out 0.1s both" }}
+          >
+            <img src="/images/civic/icons/capitol.png" alt="" className="w-5 h-5 opacity-90" aria-hidden="true" />
+            <span>Free civic engagement platform</span>
+          </div>
 
-          <div className="relative z-10 text-center px-4 py-16 w-full max-w-3xl mx-auto">
-            {/* Ribbon banner */}
-            <div className="flex justify-center mb-6" style={{ animation: "fadeInUp 0.8s ease-out 0.1s both" }}>
-              <span className="ribbon">Civic Duty</span>
-            </div>
+          <h1
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight leading-[1.1]"
+            style={{ animation: "fadeInUp 0.6s ease-out 0.2s both" }}
+          >
+            Your direct line to{" "}
+            <span className="text-gold">Congress</span>
+          </h1>
 
-            <h1
-              className="font-headline text-5xl sm:text-6xl md:text-8xl uppercase leading-none"
-              style={{
-                color: "#fff",
-                textShadow: "0 4px 20px rgba(0,0,0,0.8), 0 2px 0 #1a1a1a",
-                animation: "fadeInUp 0.8s ease-out 0.2s both",
-              }}
-            >
-              Check<span style={{ color: "#C1272D", textShadow: "0 4px 20px rgba(193,39,45,0.8), 0 2px 0 #9B1B20" }}>My</span>Rep
-            </h1>
+          <p
+            className="mt-5 text-lg sm:text-xl text-white/70 max-w-2xl mx-auto"
+            style={{ animation: "fadeInUp 0.6s ease-out 0.3s both" }}
+          >
+            Find your representatives, write letters, send emails, or make
+            calls — all in one place.
+          </p>
 
-            <div className="mt-4 flex items-center justify-center gap-3" style={{ animation: "fadeInUp 0.8s ease-out 0.3s both" }}>
-              <span style={{ color: "#c4a44a", fontSize: "20px" }}>&#9733;</span>
-              <p className="font-mono text-sm tracking-[0.3em] uppercase" style={{ color: "#f5e6c8" }}>
-                They Work For You
-              </p>
-              <span style={{ color: "#c4a44a", fontSize: "20px" }}>&#9733;</span>
-            </div>
-
-            {/* Search bar — poster-style heavy borders */}
-            <form
-              onSubmit={handleLookup}
-              role="search"
-              aria-label="Find your representatives"
-              className="mt-10 flex flex-col sm:flex-row gap-0 max-w-xl mx-auto"
-              style={{ animation: "fadeInUp 0.8s ease-out 0.45s both" }}
-            >
-              <label htmlFor="address-lookup" className="sr-only">Enter your full address</label>
-              <input
-                id="address-lookup"
-                type="search"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Enter your full address"
-                className="flex-1 px-5 py-4 font-mono text-lg focus:outline-none"
-                style={{
-                  backgroundColor: "#faf6ee",
-                  color: "#1a1a1a",
-                  border: "3px solid #1a1a1a",
-                  borderRight: "none",
-                }}
-              />
+          {/* Search bar */}
+          <form
+            onSubmit={handleLookup}
+            role="search"
+            aria-label="Find your representatives"
+            className="mt-10 max-w-xl mx-auto"
+            style={{ animation: "fadeInUp 0.6s ease-out 0.4s both" }}
+          >
+            <label htmlFor="address-lookup" className="sr-only">
+              Enter your full address
+            </label>
+            <div className="relative flex flex-col sm:flex-row gap-3 sm:gap-0">
+              <div className="relative flex-1">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  id="address-lookup"
+                  type="search"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Enter your full address"
+                  className="w-full pl-12 pr-4 py-4 bg-white text-navy text-base rounded-xl sm:rounded-r-none
+                    border-none placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gold shadow-lg"
+                />
+              </div>
               <button
                 type="submit"
-                className="px-8 py-4 font-headline uppercase text-lg tracking-wider cursor-pointer glow-red"
-                style={{
-                  backgroundColor: "#C1272D",
-                  border: "3px solid #1a1a1a",
-                  color: "#fff",
-                }}
+                className="px-7 py-4 bg-gold text-navy font-semibold text-base rounded-xl sm:rounded-l-none
+                  border-none cursor-pointer hover:bg-gold-dark hover:text-white transition-all shadow-lg"
               >
                 Find My Reps
               </button>
-            </form>
+            </div>
+          </form>
 
-            {/* CTA buttons */}
-            <div className="mt-8 flex flex-col items-center gap-3 w-full max-w-[540px] mx-auto" style={{ animation: "fadeInUp 0.8s ease-out 0.6s both" }}>
-              <Link
-                href="/draft"
-                className="group w-full py-5 font-headline text-xl uppercase tracking-[0.15em] no-underline text-center transition-all hover:scale-[1.02] relative overflow-hidden"
-                style={{
-                  backgroundColor: "#1a1a1a",
-                  color: "#f5e6c8",
-                  border: "3px solid #c4a44a",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
-                }}
-              >
-                <span className="relative z-10 flex items-center justify-center gap-3">
-                  &#9993; Contact Congress
-                </span>
-              </Link>
+          {/* Quick action buttons */}
+          <div
+            className="mt-8 flex flex-wrap items-center justify-center gap-3"
+            style={{ animation: "fadeInUp 0.6s ease-out 0.55s both" }}
+          >
+            <Link
+              href="/draft"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 backdrop-blur
+                text-white text-sm font-medium rounded-xl no-underline
+                border border-white/20 hover:bg-white/20 transition-all"
+            >
+              <PenLine className="w-4 h-4" />
+              Contact Congress
+            </Link>
+            <Link
+              href="/issues"
+              className="inline-flex items-center gap-2 px-5 py-2.5
+                text-white/70 text-sm font-medium rounded-xl no-underline
+                hover:text-white hover:bg-white/10 transition-all"
+            >
+              <BookOpen className="w-4 h-4" />
+              Browse Issues
+            </Link>
+          </div>
+        </div>
 
-              <Link
-                href="/issues"
-                className="w-full py-3 font-mono text-sm font-bold uppercase tracking-[0.15em] no-underline text-center transition-all hover:brightness-110"
-                style={{
-                  backgroundColor: "rgba(26,26,26,0.7)",
-                  color: "#f5e6c8",
-                  border: "2px solid rgba(196,164,74,0.5)",
-                }}
-              >
-                &#9733; Browse Issues &#9733;
-              </Link>
+        {/* Bottom wave divider */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 60" fill="none" className="w-full" preserveAspectRatio="none">
+            <path d="M0 60L1440 60L1440 0C1200 40 960 60 720 40C480 20 240 40 0 20L0 60Z" fill="var(--color-offwhite)" />
+          </svg>
+        </div>
+      </section>
+
+      {/* ═══ Lookup results ═══ */}
+      {lookupLoading && (
+        <section className="px-4 py-12" aria-live="polite" aria-busy="true">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="inline-flex items-center gap-3 px-6 py-4 bg-white rounded-xl shadow-sm border border-gray-200">
+              <svg className="animate-spin h-5 w-5 text-navy" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              <p className="text-navy font-medium">Looking up your representatives...</p>
             </div>
           </div>
         </section>
+      )}
 
-        {/* ═══ Lookup results ═══ */}
-        {lookupLoading && (
-          <section className="px-4 py-10" style={{ backgroundColor: "#f5e6c8" }} aria-live="polite" aria-busy="true">
-            <div className="max-w-3xl mx-auto text-center">
-              <div className="inline-block shimmer px-8 py-4">
-                <p className="font-headline text-2xl motion-safe:animate-pulse" style={{ color: "#1a1a1a" }}>Looking up your representatives...</p>
-              </div>
-            </div>
-          </section>
-        )}
-        {results && !lookupLoading && results.length === 0 && (
-          <section className="px-4 py-10" style={{ backgroundColor: "#f5e6c8" }}>
-            <div className="max-w-3xl mx-auto text-center">
-              <p className="font-headline text-2xl" style={{ color: "#1a1a1a" }}>No representatives found.</p>
-              <p className="font-body text-base mt-2" style={{ color: "#5a5a5a" }}>
-                Try a full address with ZIP code.
+      {results && !lookupLoading && results.length === 0 && (
+        <section className="px-4 py-12">
+          <div className="max-w-3xl mx-auto text-center">
+            <Card padding="lg">
+              <Search className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+              <h3 className="text-xl font-semibold text-navy">No representatives found</h3>
+              <p className="mt-2 text-gray-500">
+                Try entering a full address with ZIP code for the best results.
               </p>
-            </div>
-          </section>
-        )}
-        {results && !lookupLoading && results.length > 0 && (
-          <section className="px-4 py-10" style={{ backgroundColor: "#f5e6c8" }}>
-            <div className="max-w-5xl mx-auto">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="font-headline text-3xl" style={{ color: "#1a1a1a" }}>Your Representatives</h2>
-                <button
-                  onClick={handleSaveReps}
-                  className="px-5 py-3 font-mono text-base font-bold cursor-pointer transition-colors"
-                  style={{ backgroundColor: "#C1272D", color: "#fff", border: "3px solid #1a1a1a" }}
-                >
-                  SAVE AS MY REPS
-                </button>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {results.map((rep) => (
-                  <Link
-                    key={rep.id}
-                    href={`/directory/${rep.slug}`}
-                    className="no-underline group relative overflow-hidden p-6 transition-all"
-                    style={{
-                      backgroundColor: "#faf6ee",
-                      border: "3px solid #1a1a1a",
-                    }}
-                  >
-                    <div className="relative z-10 flex items-center gap-4">
-                      <div
-                        className="w-16 h-16 flex items-center justify-center shrink-0 overflow-hidden relative"
-                        style={{
-                          backgroundColor: rep.party === "D" ? "#1a3a6b" : rep.party === "R" ? "#C1272D" : "#6b5b3e",
-                          border: "2px solid #1a1a1a",
-                        }}
-                      >
-                        <span className="font-headline text-2xl text-white">{rep.firstName[0]}{rep.lastName[0]}</span>
-                        {rep.photoUrl && (
-                          <img src={rep.photoUrl} alt={rep.fullName} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span
-                            className="px-2 py-0.5 text-sm font-mono font-bold text-white"
-                            style={{
-                              backgroundColor: rep.party === "D" ? "#1a3a6b" : rep.party === "R" ? "#C1272D" : "#6b5b3e",
-                            }}
-                          >
-                            {rep.party === "D" ? "DEM" : rep.party === "R" ? "GOP" : "IND"}
-                          </span>
-                        </div>
-                        <h3 className="font-headline text-2xl normal-case" style={{ color: "#1a1a1a" }}>{rep.fullName}</h3>
-                        <p className="font-mono text-base mt-1" style={{ color: "#5a5a5a" }}>
-                          {rep.title} — {rep.state}{rep.district ? `, ${rep.district} District` : ""}
-                        </p>
-                      </div>
-                      <div className="shrink-0">
-                        <Link
-                          href="/draft"
-                          className="px-5 py-2.5 font-mono text-sm font-bold no-underline text-white transition-colors"
-                          style={{ backgroundColor: "#C1272D", border: "2px solid #1a1a1a" }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          WRITE
-                        </Link>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
+            </Card>
+          </div>
+        </section>
+      )}
 
-        {/* ═══ My Reps (saved) ═══ */}
-        {hasSavedReps && !results && (
-          <section className="px-4 py-12" style={{ backgroundColor: "#f5e6c8" }}>
-            <div className="max-w-5xl mx-auto">
-              <div className="flex items-center justify-between mb-6 animate-on-scroll">
-                <div>
-                  <h2 className="font-headline text-3xl" style={{ color: "#1a1a1a" }}>My Representatives</h2>
-                  <p className="font-mono text-sm mt-1 font-bold" style={{ color: "#5a5a5a" }}>
-                    YOUR SAVED REPS
-                  </p>
-                </div>
-                <Link
-                  href="/draft"
-                  className="px-6 py-3 font-mono text-base font-bold no-underline text-white transition-colors glow-red"
-                  style={{ backgroundColor: "#C1272D", border: "3px solid #1a1a1a" }}
-                >
-                  WRITE TO THEM
-                </Link>
+      {results && !lookupLoading && results.length > 0 && (
+        <section className="px-4 sm:px-6 py-12">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-navy">Your Representatives</h2>
+                <p className="text-sm text-gray-500 mt-1">{results.length} found for your address</p>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {myReps.map((rep) => (
-                  <Link
-                    key={rep.id}
-                    href={`/directory/${rep.slug}`}
-                    className="no-underline group relative overflow-hidden p-5 transition-all"
-                    style={{
-                      backgroundColor: "#faf6ee",
-                      border: "3px solid #1a1a1a",
-                    }}
-                  >
-                    <div className="relative z-10 flex items-center gap-4">
-                      <div
-                        className="w-14 h-14 flex items-center justify-center shrink-0 overflow-hidden relative"
-                        style={{
-                          backgroundColor: rep.party === "D" ? "#1a3a6b" : rep.party === "R" ? "#C1272D" : "#6b5b3e",
-                          border: "2px solid #1a1a1a",
-                        }}
-                      >
-                        <span className="font-headline text-xl text-white">{rep.firstName[0]}{rep.lastName[0]}</span>
-                        {rep.photoUrl && (
-                          <img src={rep.photoUrl} alt={rep.fullName} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <span
-                          className="inline-block px-2 py-0.5 text-sm font-mono font-bold text-white mb-1"
-                          style={{
-                            backgroundColor: rep.party === "D" ? "#1a3a6b" : rep.party === "R" ? "#C1272D" : "#6b5b3e",
-                          }}
-                        >
-                          {rep.party === "D" ? "DEM" : rep.party === "R" ? "GOP" : "IND"}
-                        </span>
-                        <h3 className="font-headline text-xl normal-case" style={{ color: "#1a1a1a" }}>{rep.fullName}</h3>
-                        <p className="font-mono text-sm mt-0.5" style={{ color: "#5a5a5a" }}>
-                          {rep.title} — {rep.state}
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+              <Button onClick={handleSaveReps} variant="teal" icon={<CheckCircle2 className="w-4 h-4" />}>
+                Save as My Reps
+              </Button>
             </div>
-          </section>
-        )}
-
-        {/* ═══ Action Cards — What You Can Do ═══ */}
-        <section className="px-4 py-16 relative overflow-hidden" style={{ backgroundColor: "#1a1a1a" }}>
-          {/* Sunburst background */}
-          <div
-            className="absolute inset-0 opacity-[0.06]"
-            style={{
-              backgroundImage: "url(/images/propaganda/progress-banner.jpg)",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          />
-          <div className="max-w-5xl mx-auto relative z-10">
-            <div className="text-center mb-10 animate-on-scroll">
-              <div className="flex justify-center mb-4">
-                <span className="ribbon">Take Action</span>
-              </div>
-              <h2 className="font-headline text-4xl md:text-5xl" style={{ color: "#f5e6c8" }}>
-                Your Civic Arsenal
-              </h2>
-              <div className="mt-4 flex items-center justify-center gap-3">
-                <span style={{ color: "#c4a44a" }}>&#9733;</span>
-                <div className="h-0.5 w-20" style={{ backgroundColor: "#c4a44a" }} />
-                <span style={{ color: "#c4a44a" }}>&#9733;</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
-              {[
-                {
-                  title: "Write A Letter",
-                  desc: "Strongest impact — lands on their desk",
-                  href: "/draft",
-                  icon: "&#9993;",
-                },
-                {
-                  title: "Make A Call",
-                  desc: "2 minutes, 10x the impact of an email",
-                  href: "/draft",
-                  icon: "&#9742;",
-                },
-                {
-                  title: "Browse Issues",
-                  desc: "Find what matters to you",
-                  href: "/issues",
-                  icon: "&#9733;",
-                },
-                {
-                  title: "Find Your Reps",
-                  desc: "Know who represents you",
-                  href: "/directory",
-                  icon: "&#9878;",
-                },
-              ].map((card) => (
-                <Link
-                  key={card.title}
-                  href={card.href}
-                  className="no-underline group relative overflow-hidden transition-all hover:scale-[1.03]"
-                  style={{
-                    backgroundColor: "#faf6ee",
-                    border: "3px solid #c4a44a",
-                  }}
-                >
-                  {/* Icon area */}
-                  <div
-                    className="h-28 flex items-center justify-center relative"
-                    style={{ backgroundColor: "#1a1a1a", borderBottom: "3px solid #c4a44a" }}
-                  >
-                    <span
-                      className="text-5xl group-hover:scale-110 transition-transform"
-                      style={{ color: "#C1272D" }}
-                      dangerouslySetInnerHTML={{ __html: card.icon }}
-                    />
-                    <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: "url(/images/propaganda/progress-banner.jpg)", backgroundSize: "cover", backgroundPosition: "center" }} />
-                  </div>
-                  {/* Card content */}
-                  <div className="p-4">
-                    <h3 className="font-headline text-lg" style={{ color: "#1a1a1a" }}>{card.title}</h3>
-                    <p className="font-mono text-xs mt-1" style={{ color: "#5a5a5a" }}>{card.desc}</p>
-                    <div className="mt-3 font-headline text-sm uppercase group-hover:translate-x-1 transition-transform" style={{ color: "#C1272D" }}>
-                      Go &rarr;
-                    </div>
-                  </div>
-                </Link>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {results.map((rep) => (
+                <RepCard key={rep.id} rep={rep} />
               ))}
             </div>
           </div>
         </section>
+      )}
 
-        {/* ═══ Issues — dramatic poster cards ═══ */}
-        <section className="px-4 py-16 relative" style={{ backgroundColor: "#f5e6c8" }}>
-          <div className="max-w-5xl mx-auto relative z-10">
-            <div className="text-center mb-10 animate-on-scroll">
-              <p className="font-mono text-base tracking-[0.4em] uppercase mb-3" style={{ color: "#5a5a5a" }}>
-                &#9733; The Issues &#9733;
-              </p>
-              <h2 className="font-headline text-4xl md:text-5xl" style={{ color: "#1a1a1a" }}>
-                What Matters To You
-              </h2>
-              <div className="mt-4 h-1 w-20 mx-auto" style={{ backgroundColor: "#C1272D" }} />
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 stagger-children">
-              {issues.map((issue) => {
-                const accent = issueColor[issue.id] || "#1a1a2e";
-                const icon = issueIcon[issue.id] || "&#9733;";
-                return (
-                  <Link
-                    key={issue.id}
-                    href={`/issues/${issue.slug}`}
-                    className="no-underline group relative overflow-hidden transition-all hover:scale-[1.03]"
-                    style={{
-                      backgroundColor: "#faf6ee",
-                      border: "3px solid #1a1a1a",
-                    }}
-                  >
-                    {/* Colored accent top bar */}
-                    <div className="h-1.5" style={{ backgroundColor: accent }} />
-
-                    {/* Icon area — dark with subtle poster texture */}
-                    <div
-                      className="h-24 flex items-center justify-center relative"
-                      style={{ backgroundColor: "#1a1a1a" }}
-                    >
-                      <span
-                        className="text-4xl group-hover:scale-110 transition-transform relative z-10"
-                        style={{ color: accent }}
-                        dangerouslySetInnerHTML={{ __html: icon }}
-                      />
-                      <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: "url(/images/propaganda/progress-banner.jpg)", backgroundSize: "cover", backgroundPosition: "center" }} />
-                    </div>
-
-                    {/* Label — parchment */}
-                    <div className="p-4" style={{ borderTop: `3px solid ${accent}` }}>
-                      <h3
-                        className="font-headline text-base md:text-lg normal-case leading-tight"
-                        style={{ color: "#1a1a1a" }}
-                      >
-                        {issue.name}
-                      </h3>
-                      <div className="mt-2 flex items-center justify-end">
-                        <span
-                          className="font-headline text-base group-hover:translate-x-1 transition-all"
-                          style={{ color: "#C1272D" }}
-                        >
-                          &rarr;
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* ═══ Stats — propaganda banner ═══ */}
-        <section className="px-4 py-16 relative overflow-hidden">
-          {/* Background poster */}
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: "url(/images/propaganda/wide-banner.jpg)",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          />
-          <div className="absolute inset-0" style={{ background: "rgba(26,26,30,0.85)" }} />
-          <div className="absolute inset-0 grid-overlay" />
-
-          <div className="max-w-5xl mx-auto relative z-10 grid grid-cols-2 md:grid-cols-4 gap-6 text-center stagger-children">
-            {[
-              { number: "535", label: "Members Tracked" },
-              { number: "100", label: "Senators" },
-              { number: "435", label: "Representatives" },
-              { number: "50", label: "States Covered" },
-            ].map((stat) => (
-              <div key={stat.label} className="py-4">
-                <div
-                  className="font-headline text-5xl md:text-7xl"
-                  style={{
-                    color: "#C1272D",
-                    textShadow: "0 2px 10px rgba(193,39,45,0.3)",
-                  }}
-                >
-                  {stat.number}
-                </div>
-                <div className="font-mono text-xs md:text-sm mt-3 uppercase tracking-[0.2em]" style={{ color: "#c4a44a" }}>
-                  {stat.label}
-                </div>
+      {/* ═══ My Reps (saved) ═══ */}
+      {hasSavedReps && !results && (
+        <section className="px-4 sm:px-6 py-12">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center justify-between mb-6 animate-on-scroll">
+              <div>
+                <h2 className="text-2xl font-bold text-navy">My Representatives</h2>
+                <p className="text-sm text-gray-500 mt-1">Your saved representatives</p>
               </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ═══ Call Your Rep — poster split ═══ */}
-        <section className="relative overflow-hidden animate-on-scroll" style={{ backgroundColor: "#f5e6c8" }}>
-          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-0">
-            <div
-              className="h-72 md:h-auto relative"
-              style={{
-                backgroundImage: "url(/images/propaganda/icons-poster.jpg)",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                minHeight: "320px",
-              }}
-            >
-              {/* Aged poster overlay */}
-              <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(245,230,200,0.15) 0%, transparent 100%)" }} />
-              <div className="absolute inset-0" style={{ border: "4px solid #1a1a1a" }} />
-            </div>
-            <div className="flex flex-col justify-center p-8 md:p-12" style={{ borderTop: "4px solid #1a1a1a", borderBottom: "4px solid #1a1a1a", borderRight: "4px solid #1a1a1a" }}>
-              <div className="flex items-center gap-3 mb-4">
-                <span style={{ color: "#c4a44a", fontSize: "18px" }}>&#9733;</span>
-                <p className="font-mono text-sm tracking-[0.3em] uppercase" style={{ color: "#5a5a5a" }}>
-                  Make The Call
-                </p>
-              </div>
-              <h2
-                className="font-headline text-4xl md:text-5xl leading-tight"
-                style={{ color: "#C1272D" }}
-              >
-                Your Rep Is One Phone Call Away
-              </h2>
-              <p className="mt-4 font-body text-lg" style={{ color: "#3a3a3a" }}>
-                A two-minute call has 10x the impact of an email. We&apos;ll give you talking points and connect you directly.
-              </p>
-              <Link
-                href="/draft"
-                className="inline-block mt-6 px-8 py-4 font-headline text-base uppercase tracking-wider no-underline transition-all self-start"
-                style={{ backgroundColor: "#C1272D", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
-              >
-                Start A Call Script
+              <Link href="/draft">
+                <Button variant="primary" icon={<PenLine className="w-4 h-4" />}>
+                  Write to Them
+                </Button>
               </Link>
             </div>
-          </div>
-        </section>
-
-        {/* ═══ CTA — final dramatic poster section ═══ */}
-        <section className="px-4 py-20 text-center relative overflow-hidden">
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: "url(/images/propaganda/rally-banner.jpg)",
-              backgroundSize: "cover",
-              backgroundPosition: "center 30%",
-            }}
-          />
-          <div
-            className="absolute inset-0"
-            style={{
-              background: "linear-gradient(180deg, rgba(26,26,26,0.85) 0%, rgba(193,39,45,0.8) 100%)",
-            }}
-          />
-          <div className="absolute inset-0 grid-overlay" />
-          <div className="relative z-10 max-w-xl mx-auto animate-on-scroll">
-            <div className="flex justify-center mb-4">
-              <span className="ribbon">Power To The People</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {myReps.map((rep) => (
+                <RepCard key={rep.id} rep={rep} />
+              ))}
             </div>
-            <h2
-              className="font-headline text-4xl md:text-6xl leading-none"
-              style={{ color: "#f5e6c8", textShadow: "0 4px 30px rgba(0,0,0,0.5)" }}
-            >
-              Your Voice.
-              <br />
-              Their Vote.
-            </h2>
-            <p
-              className="mt-6 font-body text-xl max-w-md mx-auto"
-              style={{ color: "#f5e6c8", textShadow: "0 2px 8px rgba(0,0,0,0.7)" }}
-            >
-              Every letter, every call adds up. Make yours count.
-            </p>
-            <Link
-              href="/draft"
-              className="inline-block mt-8 px-12 py-5 font-headline uppercase text-xl tracking-wider no-underline transition-all glow-red"
-              style={{ backgroundColor: "#1a1a1a", color: "#f5e6c8", border: "3px solid #c4a44a" }}
-            >
-              Write Congress Now
-            </Link>
           </div>
         </section>
+      )}
 
-        {/* ═══ Trust bar ═══ */}
-        <div
-          className="py-5 px-4"
-          style={{ backgroundColor: "#1a1a1a", borderTop: "3px solid #c4a44a" }}
-        >
-          <div className="max-w-3xl mx-auto flex items-center justify-center gap-8 flex-wrap">
-            <span className="font-mono text-xs font-bold uppercase tracking-wider" style={{ color: "#8a8a8a" }}>
-              <strong className="font-headline text-base" style={{ color: "#C1272D" }}>535</strong> MEMBERS TRACKED
-            </span>
-            <span style={{ color: "#c4a44a" }}>&#9733;</span>
-            <span className="font-mono text-xs font-bold uppercase tracking-wider" style={{ color: "#8a8a8a" }}>
-              <strong className="font-headline text-base" style={{ color: "#C1272D" }}>8</strong> ISSUES COVERED
-            </span>
-            <span style={{ color: "#c4a44a" }}>&#9733;</span>
-            <span className="font-mono text-xs font-bold uppercase tracking-wider" style={{ color: "#8a8a8a" }}>
-              <strong className="font-headline text-base" style={{ color: "#C1272D" }}>100%</strong> FREE &amp; OPEN
-            </span>
+      {/* ═══ Action Cards — How It Works ═══ */}
+      <section className="px-4 sm:px-6 py-16">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12 animate-on-scroll">
+            <p className="text-sm font-semibold text-gold-dark uppercase tracking-wider mb-2">
+              Three ways to act
+            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-navy">
+              Make your voice heard
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 stagger-children">
+            {[
+              {
+                title: "Mail a Letter",
+                desc: "The most impactful way to reach your rep. We print, stamp, and deliver via USPS.",
+                price: "$1.50",
+                href: "/draft",
+                Icon: Mail,
+                color: "bg-navy",
+                iconBg: "bg-navy-50 text-navy",
+                civicIcon: "/images/civic/icons/mail.png",
+              },
+              {
+                title: "Send an Email",
+                desc: "Free and instant. Draft a professional email with AI assistance and send directly.",
+                price: "Free",
+                href: "/draft",
+                Icon: PenLine,
+                color: "bg-teal",
+                iconBg: "bg-teal-50 text-teal",
+                civicIcon: "/images/civic/icons/email.png",
+              },
+              {
+                title: "Make a Call",
+                desc: "Two minutes, 10x the impact of an email. We provide talking points and the number.",
+                price: "Free",
+                href: "/draft",
+                Icon: Phone,
+                color: "bg-gold-dark",
+                iconBg: "bg-gold-50 text-gold-dark",
+                civicIcon: "/images/civic/icons/contact.png",
+              },
+            ].map((card) => (
+              <Link
+                key={card.title}
+                href={card.href}
+                className="group no-underline"
+              >
+                <Card hover padding="none" className="overflow-hidden h-full">
+                  <div className={`h-1.5 ${card.color}`} />
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${card.iconBg} overflow-hidden`}>
+                        {card.civicIcon ? (
+                          <img src={card.civicIcon} alt="" className="w-7 h-7 object-contain" aria-hidden="true" />
+                        ) : (
+                          <card.Icon className="w-5 h-5" />
+                        )}
+                      </div>
+                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-600">
+                        {card.price}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-navy mb-2">{card.title}</h3>
+                    <p className="text-sm text-gray-500 leading-relaxed">{card.desc}</p>
+                    <div className="mt-4 flex items-center text-sm font-medium text-navy group-hover:text-gold-dark transition-colors">
+                      Get started
+                      <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            ))}
           </div>
         </div>
+      </section>
+
+      {/* ═══ Issues Grid ═══ */}
+      <section className="px-4 sm:px-6 py-16 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12 animate-on-scroll">
+            <p className="text-sm font-semibold text-teal uppercase tracking-wider mb-2">
+              Explore topics
+            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-navy">
+              Issues that matter to you
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 stagger-children">
+            {issues.map((issue) => {
+              const colors = issueColors[issue.id] || issueColors.defense;
+              const icon = issueIcons[issue.id] || <Star className="w-5 h-5" />;
+              return (
+                <Link
+                  key={issue.id}
+                  href={`/issues/${issue.slug}`}
+                  className="group no-underline"
+                >
+                  <Card hover padding="none" className="overflow-hidden h-full">
+                    <div className="p-5 flex flex-col items-center text-center">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${colors.bg} ${colors.text}
+                        group-hover:scale-110 transition-transform`}>
+                        {icon}
+                      </div>
+                      <h3 className="text-sm font-semibold text-navy leading-tight">
+                        {issue.name}
+                      </h3>
+                      <ChevronRight className="w-4 h-4 text-gray-300 mt-2 group-hover:text-gold-dark transition-colors" />
+                    </div>
+                  </Card>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ Stats ═══ */}
+      <section className="px-4 sm:px-6 py-16 bg-gradient-navy relative overflow-hidden">
+        <div className="absolute inset-0 pattern-grid opacity-[0.04]" />
+        <img
+          src="/images/civic/illustrations/voter-witness.png"
+          alt=""
+          className="absolute right-[-30px] bottom-[-20px] w-40 opacity-[0.06]"
+          aria-hidden="true"
+        />
+        <div className="max-w-5xl mx-auto relative z-10 grid grid-cols-2 md:grid-cols-4 gap-8 text-center stagger-children">
+          {[
+            { number: "535", label: "Members of Congress" },
+            { number: "100", label: "Senators" },
+            { number: "435", label: "Representatives" },
+            { number: "50", label: "States Covered" },
+          ].map((stat) => (
+            <div key={stat.label}>
+              <div className="text-4xl md:text-5xl font-bold text-gold">
+                {stat.number}
+              </div>
+              <div className="text-sm text-white/60 mt-2 font-medium">
+                {stat.label}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ Call to action split ═══ */}
+      <section className="px-4 sm:px-6 py-16 animate-on-scroll">
+        <div className="max-w-5xl mx-auto">
+          <Card padding="none" className="overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-2">
+              {/* Left: Visual — with forclaude voting illustration */}
+              <div className="bg-gradient-hero p-8 md:p-12 flex flex-col justify-center relative overflow-hidden">
+                <div className="absolute inset-0 pattern-dots opacity-[0.06]" />
+                {/* Forclaude illustration overlays */}
+                <img
+                  src="/images/civic/illustrations/vote-by-mail.png"
+                  alt=""
+                  className="absolute bottom-4 right-4 w-32 h-32 opacity-10"
+                  aria-hidden="true"
+                />
+                <img
+                  src="/images/civic/illustrations/signature-sign.png"
+                  alt=""
+                  className="absolute top-4 left-4 w-24 h-24 opacity-[0.07]"
+                  aria-hidden="true"
+                />
+                <div className="relative z-10">
+                  <img src="/images/civic/icons/contact.png" alt="" className="w-10 h-10 mb-4 opacity-90" aria-hidden="true" />
+                  <h3 className="text-2xl md:text-3xl font-bold text-white leading-tight">
+                    Your rep is one phone call away
+                  </h3>
+                  <p className="mt-3 text-white/70">
+                    A two-minute call has 10x the impact of an email. We give you
+                    talking points and connect you directly.
+                  </p>
+                </div>
+              </div>
+              {/* Right: Action */}
+              <div className="p-8 md:p-12 flex flex-col justify-center">
+                <h3 className="text-xl font-semibold text-navy mb-3">
+                  Ready to make a difference?
+                </h3>
+                <p className="text-gray-500 mb-6">
+                  Whether it&apos;s a letter, email, or phone call — every contact
+                  counts. Start now and hold your representatives accountable.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Link href="/draft">
+                    <Button variant="primary" icon={<PenLine className="w-4 h-4" />}>
+                      Write a Letter
+                    </Button>
+                  </Link>
+                  <Link href="/draft">
+                    <Button variant="outline" icon={<Phone className="w-4 h-4" />}>
+                      Call Script
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </section>
+
+      {/* ═══ Final CTA ═══ */}
+      <section className="px-4 sm:px-6 py-20 text-center bg-gradient-hero relative overflow-hidden">
+        <div className="absolute inset-0 pattern-dots opacity-[0.04]" />
+        <img
+          src="/images/civic/illustrations/receive-ballot.png"
+          alt=""
+          className="absolute left-4 bottom-4 w-36 opacity-[0.08]"
+          aria-hidden="true"
+        />
+        <img
+          src="/images/civic/illustrations/vote-by-dropbox.png"
+          alt=""
+          className="absolute right-4 top-4 w-36 opacity-[0.08]"
+          aria-hidden="true"
+        />
+        <div className="relative z-10 max-w-xl mx-auto animate-on-scroll">
+          <img src="/images/civic/icons/globe.png" alt="" className="w-12 h-12 mx-auto mb-4 opacity-90" aria-hidden="true" />
+          <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight leading-tight">
+            Your voice.{" "}
+            <span className="text-gold">Their vote.</span>
+          </h2>
+          <p className="mt-4 text-lg text-white/70 max-w-md mx-auto">
+            Every letter, every call adds up. Make yours count.
+          </p>
+          <Link href="/draft" className="inline-block mt-8">
+            <Button size="lg" variant="secondary" icon={<PenLine className="w-5 h-5" />}>
+              Write Congress Now
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* ═══ Trust bar ═══ */}
+      <div className="py-5 px-4 bg-navy border-t border-white/10">
+        <div className="max-w-3xl mx-auto flex items-center justify-center gap-6 sm:gap-8 flex-wrap text-sm">
+          <span className="text-white/50">
+            <strong className="text-gold font-semibold">535</strong> Members Tracked
+          </span>
+          <span className="text-white/20">|</span>
+          <span className="text-white/50">
+            <strong className="text-gold font-semibold">8</strong> Issues Covered
+          </span>
+          <span className="text-white/20">|</span>
+          <span className="text-white/50">
+            <strong className="text-gold font-semibold">100%</strong> Free &amp; Open
+          </span>
+        </div>
       </div>
-    );
+    </div>
+  );
+}
+
+/* ═══ Rep Card Component ═══ */
+function RepCard({ rep }: { rep: Representative }) {
+  const partyConfig = {
+    D: { label: "Democrat", bg: "bg-blue", text: "text-blue", light: "bg-blue-light" },
+    R: { label: "Republican", bg: "bg-red", text: "text-red", light: "bg-red-light" },
+  } as Record<string, { label: string; bg: string; text: string; light: string }>;
+
+  const party = partyConfig[rep.party] || { label: "Independent", bg: "bg-purple-600", text: "text-purple-600", light: "bg-purple-50" };
+
+  return (
+    <Link
+      href={`/directory/${rep.slug}`}
+      className="group no-underline"
+    >
+      <Card hover padding="none" className="overflow-hidden">
+        <div className="p-5 flex items-center gap-4">
+          <div
+            className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 overflow-hidden relative ${party.bg}`}
+          >
+            <span className="text-white font-semibold text-lg">{rep.firstName[0]}{rep.lastName[0]}</span>
+            {rep.photoUrl && (
+              <img
+                src={rep.photoUrl}
+                alt={rep.fullName}
+                className="absolute inset-0 w-full h-full object-cover rounded-xl"
+                onError={(e) => { e.currentTarget.style.display = "none"; }}
+              />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full text-white ${party.bg}`}>
+                {party.label}
+              </span>
+            </div>
+            <h3 className="text-base font-semibold text-navy truncate">{rep.fullName}</h3>
+            <p className="text-sm text-gray-500 mt-0.5">
+              {rep.title} — {rep.state}{rep.district ? `, District ${rep.district}` : ""}
+            </p>
+          </div>
+          <ChevronRight className="w-5 h-5 text-gray-300 shrink-0 group-hover:text-gold-dark transition-colors" />
+        </div>
+      </Card>
+    </Link>
+  );
 }

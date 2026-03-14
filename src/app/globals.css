@@ -1,217 +1,180 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* ═══ Propaganda Poster Palette ═══ */
+  /* ═══ CheckMyRep — Modern Civic Design System ═══ */
 
-  /* Backgrounds — warm parchment tones */
-  --color-cream: #f5e6c8;
-  --color-cream-dark: #e8d5ad;
-  --color-cream-light: #faf3e6;
-  --color-surface: #faf6ee;
-  --color-hover: #efe2cc;
+  /* Primary — Navy (trust, authority) */
+  --color-navy: #0A2540;
+  --color-navy-light: #0F3460;
+  --color-navy-50: #E8EDF2;
+  --color-navy-100: #C5D1DE;
 
-  /* Text */
-  --color-black: #1a1a1a;
+  /* Accent — Gold (premium, civic) */
+  --color-gold: #C9A66B;
+  --color-gold-dark: #A8864E;
+  --color-gold-light: #E8D5B0;
+  --color-gold-50: #FBF6EE;
 
-  /* Primary (civic red) */
-  --color-red: #C1272D;
-  --color-red-dark: #9B1B20;
-  --color-red-light: #f5d5d0;
+  /* Surfaces */
+  --color-white: #FFFFFF;
+  --color-offwhite: #F8F7F4;
+  --color-surface: #F8F7F4;
+  --color-gray-50: #FAFAFA;
+  --color-gray-100: #F3F4F6;
+  --color-gray-200: #E5E5E5;
+  --color-gray-300: #D1D5DB;
+  --color-gray-400: #9CA3AF;
+  --color-gray-500: #6B7280;
+  --color-gray-600: #4B5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1F2937;
+  --color-gray-900: #111827;
+
+  /* Positive action — Teal */
+  --color-teal: #0F766E;
+  --color-teal-light: #CCFBF1;
+  --color-teal-50: #F0FDFA;
 
   /* Functional status */
-  --color-status-red: #DC2626;
-  --color-status-red-light: #FEF2F2;
-
-  /* Amber (warnings) */
-  --color-yellow: #D97706;
-  --color-yellow-light: #FFFBEB;
-
-  /* Secondary accents */
-  --color-orange: #EA580C;
-  --color-orange-light: #FFF7ED;
-  --color-teal: #0F766E;
-  --color-teal-light: #F0FDFA;
-  --color-purple: #7C3AED;
-  --color-purple-light: #F5F3FF;
-
-  /* Grays */
-  --color-gray-dark: #2a2a2a;
-  --color-gray-mid: #5a5a5a;
-  --color-gray-light: #8a8a8a;
-
-  /* Borders — dark, thick, intentional */
-  --color-border: #1a1a1a;
-  --color-border-light: #c4a44a;
-
-  /* Status */
   --color-green: #16A34A;
   --color-green-light: #F0FDF4;
-  --color-blue: #1a3a6b;
+  --color-red: #DC2626;
+  --color-red-light: #FEF2F2;
+  --color-yellow: #D97706;
+  --color-yellow-light: #FFFBEB;
+  --color-blue: #2563EB;
   --color-blue-light: #EFF6FF;
 
-  /* Party */
-  --color-dem: #1a3a6b;
-  --color-rep: #B91C1C;
-  --color-ind: #78350F;
+  /* Party colors (neutral presentation) */
+  --color-dem: #2563EB;
+  --color-rep: #DC2626;
+  --color-ind: #7C3AED;
 
-  /* Section backgrounds */
-  --color-cta: #1a1a2e;
-  --color-navy: #1a3a6b;
+  /* Text */
+  --color-text: #0A2540;
+  --color-text-secondary: #4B5563;
+  --color-text-muted: #9CA3AF;
 
-  /* Propaganda accents */
-  --color-gold: #c4a44a;
-  --color-parchment: #d4c5a0;
-  --color-aged: #b8a67e;
+  /* Borders */
+  --color-border: #E5E5E5;
+  --color-border-dark: #D1D5DB;
 
-  /* Fonts */
-  --font-headline: "Arial Black", "Arial Bold", Gadget, sans-serif;
-  --font-body: Georgia, "Times New Roman", Times, serif;
-  --font-mono: "Courier New", Courier, monospace;
+  /* Dark mode surfaces */
+  --color-dark-bg: #0A1628;
+  --color-dark-surface: #111D2E;
+  --color-dark-border: #1E3048;
+
+  /* Fonts — Inter system stack */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(10, 37, 64, 0.04);
+  --shadow-sm: 0 1px 3px rgba(10, 37, 64, 0.06), 0 1px 2px rgba(10, 37, 64, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(10, 37, 64, 0.06), 0 2px 4px rgba(10, 37, 64, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(10, 37, 64, 0.08), 0 4px 6px rgba(10, 37, 64, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(10, 37, 64, 0.08), 0 10px 10px rgba(10, 37, 64, 0.03);
+
+  /* Radii */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-full: 9999px;
 }
 
-* {
-  border-radius: 0 !important;
-}
-
+/* ═══ Base Styles ═══ */
 body {
-  background: var(--color-cream);
-  color: var(--color-black);
-  font-family: var(--font-body);
-  font-size: 17px;
-  line-height: 1.7;
+  background: var(--color-offwhite);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-headline);
-  text-transform: uppercase;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  color: var(--color-black);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  color: var(--color-navy);
 }
 
 @layer base {
   a {
-    color: var(--color-red);
-    text-decoration: underline;
+    color: var(--color-navy);
+    text-decoration: none;
   }
 
   a:hover {
-    color: var(--color-red-dark);
+    color: var(--color-gold-dark);
   }
 }
 
 ::selection {
-  background: var(--color-red);
+  background: var(--color-navy);
   color: white;
 }
 
-/* ═══ Propaganda Design Utilities ═══ */
+/* ═══ Modern Design Utilities ═══ */
 
-/* Sunburst radiating lines — the signature look */
-.sunburst {
-  background: repeating-conic-gradient(
-    var(--color-red) 0deg 10deg,
-    #f5e6c8 10deg 20deg
-  );
+/* Subtle gradient backgrounds */
+.bg-gradient-hero {
+  background: linear-gradient(135deg, #0A2540 0%, #0F3460 40%, #0F766E 100%);
 }
 
-.sunburst-dark {
-  background: repeating-conic-gradient(
-    #C1272D 0deg 10deg,
-    #1a1a1a 10deg 20deg
-  );
+.bg-gradient-navy {
+  background: linear-gradient(180deg, #0A2540 0%, #0F3460 100%);
 }
 
-.sunburst-cream {
-  background: repeating-conic-gradient(
-    #e8d5ad 0deg 10deg,
-    #f5e6c8 10deg 20deg
-  );
+.bg-gradient-card {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8F7F4 100%);
 }
 
-/* Aged paper texture — subtle noise overlay */
-.paper-texture {
-  position: relative;
-}
-.paper-texture::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0.4;
+/* Gold accent line */
+.accent-line {
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-gold), var(--color-gold-dark));
+  border-radius: var(--radius-full);
 }
 
-/* Vintage border treatment */
-.propaganda-border {
-  border: 3px solid #1a1a1a;
-  box-shadow: inset 0 0 0 2px #c4a44a, inset 0 0 0 4px #1a1a1a;
+/* Glass effect */
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
-/* Star separator */
-.star-separator {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.star-separator::before,
-.star-separator::after {
-  content: "";
-  flex: 1;
-  height: 2px;
-  background: #1a1a1a;
+.glass-dark {
+  background: rgba(10, 37, 64, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Ribbon banner shape */
-.ribbon {
-  position: relative;
-  display: inline-block;
-  padding: 8px 24px;
-  background: #c4a44a;
-  color: #1a1a1a;
-  font-family: var(--font-headline);
-  text-transform: uppercase;
-  font-size: 12px;
-  letter-spacing: 0.15em;
-}
-.ribbon::before,
-.ribbon::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0;
-  height: 0;
-}
-.ribbon::before {
-  left: -10px;
-  border-right: 10px solid #c4a44a;
-  border-top: 16px solid transparent;
-  border-bottom: 16px solid transparent;
-}
-.ribbon::after {
-  right: -10px;
-  border-left: 10px solid #c4a44a;
-  border-top: 16px solid transparent;
-  border-bottom: 16px solid transparent;
+/* Subtle grid pattern */
+.pattern-grid {
+  background-image:
+    linear-gradient(rgba(10, 37, 64, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(10, 37, 64, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
-/* Ornate frame effect */
-.ornate-frame {
-  border: 4px solid #1a1a1a;
-  box-shadow:
-    inset 0 0 0 3px #f5e6c8,
-    inset 0 0 0 5px #c4a44a,
-    inset 0 0 0 7px #1a1a1a,
-    0 4px 20px rgba(0,0,0,0.3);
+/* Dot pattern */
+.pattern-dots {
+  background-image: radial-gradient(circle, rgba(10, 37, 64, 0.06) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
 /* ═══ Scroll-driven entrance animations ═══ */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(40px);
+    transform: translateY(24px);
   }
   to {
     opacity: 1;
@@ -222,7 +185,7 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes fadeInLeft {
   from {
     opacity: 0;
-    transform: translateX(-40px);
+    transform: translateX(-24px);
   }
   to {
     opacity: 1;
@@ -233,7 +196,7 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes fadeInRight {
   from {
     opacity: 0;
-    transform: translateX(40px);
+    transform: translateX(24px);
   }
   to {
     opacity: 1;
@@ -244,7 +207,7 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes fadeInScale {
   from {
     opacity: 0;
-    transform: scale(0.9);
+    transform: scale(0.95);
   }
   to {
     opacity: 1;
@@ -263,15 +226,6 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-@keyframes glowPulse {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(193, 39, 45, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(193, 39, 45, 0.6);
-  }
-}
-
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -284,7 +238,7 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes countUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
@@ -292,11 +246,20 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(201, 166, 107, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(201, 166, 107, 0);
+  }
+}
+
 /* Intersection Observer triggered classes */
 .animate-on-scroll {
   opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
 }
 
 .animate-on-scroll.visible {
@@ -306,8 +269,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .animate-on-scroll-left {
   opacity: 0;
-  transform: translateX(-40px);
-  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+  transform: translateX(-24px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
 }
 
 .animate-on-scroll-left.visible {
@@ -317,8 +280,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .animate-on-scroll-scale {
   opacity: 0;
-  transform: scale(0.9);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  transform: scale(0.95);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
 }
 
 .animate-on-scroll-scale.visible {
@@ -329,48 +292,42 @@ h1, h2, h3, h4, h5, h6 {
 /* Staggered children animation */
 .stagger-children > * {
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(20px);
   transition: opacity 0.5s ease-out, transform 0.5s ease-out;
 }
 
 .stagger-children.visible > *:nth-child(1) { transition-delay: 0ms; opacity: 1; transform: translateY(0); }
-.stagger-children.visible > *:nth-child(2) { transition-delay: 100ms; opacity: 1; transform: translateY(0); }
-.stagger-children.visible > *:nth-child(3) { transition-delay: 200ms; opacity: 1; transform: translateY(0); }
-.stagger-children.visible > *:nth-child(4) { transition-delay: 300ms; opacity: 1; transform: translateY(0); }
-.stagger-children.visible > *:nth-child(5) { transition-delay: 400ms; opacity: 1; transform: translateY(0); }
-.stagger-children.visible > *:nth-child(6) { transition-delay: 500ms; opacity: 1; transform: translateY(0); }
-.stagger-children.visible > *:nth-child(7) { transition-delay: 600ms; opacity: 1; transform: translateY(0); }
-.stagger-children.visible > *:nth-child(8) { transition-delay: 700ms; opacity: 1; transform: translateY(0); }
-
-/* Glow effect for CTAs */
-.glow-red {
-  animation: glowPulse 3s ease-in-out infinite;
-}
+.stagger-children.visible > *:nth-child(2) { transition-delay: 80ms; opacity: 1; transform: translateY(0); }
+.stagger-children.visible > *:nth-child(3) { transition-delay: 160ms; opacity: 1; transform: translateY(0); }
+.stagger-children.visible > *:nth-child(4) { transition-delay: 240ms; opacity: 1; transform: translateY(0); }
+.stagger-children.visible > *:nth-child(5) { transition-delay: 320ms; opacity: 1; transform: translateY(0); }
+.stagger-children.visible > *:nth-child(6) { transition-delay: 400ms; opacity: 1; transform: translateY(0); }
+.stagger-children.visible > *:nth-child(7) { transition-delay: 480ms; opacity: 1; transform: translateY(0); }
+.stagger-children.visible > *:nth-child(8) { transition-delay: 560ms; opacity: 1; transform: translateY(0); }
 
 /* Shimmer loading effect */
 .shimmer {
-  background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.08) 50%, transparent 75%);
+  background: linear-gradient(90deg, transparent 25%, rgba(201, 166, 107, 0.1) 50%, transparent 75%);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
 
 /* Gradient text */
-.text-gradient-red {
-  background: linear-gradient(135deg, #C1272D 0%, #c4a44a 100%);
+.text-gradient-navy {
+  background: linear-gradient(135deg, #0A2540 0%, #0F766E 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Decorative grid overlay */
-.grid-overlay {
-  background-image:
-    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
+.text-gradient-gold {
+  background: linear-gradient(135deg, #C9A66B 0%, #A8864E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-/* Reduced motion support */
+/* ═══ Reduced motion support ═══ */
 @media (prefers-reduced-motion: reduce) {
   .animate-pulse {
     animation: none;
@@ -395,7 +352,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* Global focus-visible styles for interactive elements */
+/* ═══ Focus-visible styles ═══ */
 @layer base {
   a:focus-visible,
   button:focus-visible,
@@ -403,12 +360,13 @@ h1, h2, h3, h4, h5, h6 {
   select:focus-visible,
   textarea:focus-visible,
   [tabindex]:focus-visible {
-    outline: 2px solid var(--color-red);
+    outline: 2px solid var(--color-navy);
     outline-offset: 2px;
+    border-radius: var(--radius-sm);
   }
 }
 
-/* ─── Print styles ─── */
+/* ═══ Print styles ═══ */
 @media print {
   header,
   footer,
@@ -434,7 +392,6 @@ h1, h2, h3, h4, h5, h6 {
     content: " (" attr(href) ")";
     font-size: 9pt;
     color: #666;
-    font-family: "Courier New", monospace;
   }
 
   nav a::after,

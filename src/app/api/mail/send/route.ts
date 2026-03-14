@@ -1,18 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { MailingAddress } from "@/data/types";
 import { formatLetterHtml } from "@/lib/letter-template";
+import { sendMailSchema, parseBody } from "@/lib/validations";
+import { rateLimit } from "@/lib/rate-limit";
+import { requireAuth } from "@/lib/api-auth";
 
-interface SendMailRequest {
-  senderAddress: MailingAddress;
-  recipientAddress: MailingAddress;
-  recipientTitle: string;
-  recipientLastName: string;
-  letterContent: string;
-  contactLogId: string;
-  repName: string;
-}
+const limiter = rateLimit({ windowMs: 60_000, max: 5 });
 
 export async function POST(request: NextRequest) {
+  const limited = limiter.check(request);
+  if (limited) return limited;
+
+  // Require authentication for direct mail sending
+  const { error: authError } = await requireAuth(request);
+  if (authError) return authError;
+
   try {
     const lobKey = process.env.LOB_API_KEY;
     if (!lobKey) {
@@ -22,19 +24,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body: SendMailRequest = await request.json();
-    const { senderAddress, recipientAddress, recipientTitle, recipientLastName, letterContent, contactLogId, repName } = body;
+    const raw = await request.json();
+    const parsed = parseBody(sendMailSchema, raw);
+    if (!parsed.success) return parsed.response;
 
-    if (!senderAddress || !recipientAddress || !letterContent) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
+    const { senderAddress, recipientAddress, recipientTitle, recipientLastName, letterContent, contactLogId, repName } = parsed.data;
 
     const letterHtml = formatLetterHtml({
-      senderAddress,
-      recipientAddress,
+      senderAddress: senderAddress as MailingAddress,
+      recipientAddress: recipientAddress as MailingAddress,
       recipientTitle: recipientTitle || "Representative",
       recipientLastName: recipientLastName || repName.split(" ").pop() || "",
       date: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),

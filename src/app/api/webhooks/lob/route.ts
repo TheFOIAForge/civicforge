@@ -1,5 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { createHmac } from "crypto";
+
+// ── Lob webhook signature verification ──
+// Lob signs webhooks with HMAC-SHA256. If LOB_WEBHOOK_SECRET is set, we verify.
+function verifyLobSignature(rawBody: string, signature: string | null, secret: string): boolean {
+  if (!signature) return false;
+  const expected = createHmac("sha256", secret).update(rawBody).digest("hex");
+  // Timing-safe comparison
+  if (expected.length !== signature.length) return false;
+  let mismatch = 0;
+  for (let i = 0; i < expected.length; i++) {
+    mismatch |= expected.charCodeAt(i) ^ signature.charCodeAt(i);
+  }
+  return mismatch === 0;
+}
 
 // Lob webhook event types we care about
 type LobEventType =
@@ -40,9 +55,22 @@ export async function POST(request: NextRequest) {
 
   const stripe = new Stripe(secretKey);
 
+  // Read raw body for signature verification
+  const rawBody = await request.text();
+
+  // Verify Lob webhook signature if secret is configured
+  const lobWebhookSecret = process.env.LOB_WEBHOOK_SECRET;
+  if (lobWebhookSecret) {
+    const signature = request.headers.get("lob-signature");
+    if (!verifyLobSignature(rawBody, signature, lobWebhookSecret)) {
+      console.error("Lob webhook signature verification failed");
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    }
+  }
+
   let event: LobWebhookEvent;
   try {
-    event = await request.json();
+    event = JSON.parse(rawBody);
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }

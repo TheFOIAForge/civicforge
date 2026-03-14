@@ -8,15 +8,15 @@ import type { Representative, ContactLogEntry, EmailServiceConfig } from "@/data
 import MailLetterModal from "@/components/MailLetterModal";
 
 function partyColor(party: string) {
-  if (party === "D") return "bg-dem text-[#f5e6c8]";
-  if (party === "R") return "bg-rep text-[#f5e6c8]";
-  return "bg-ind text-[#f5e6c8]";
+  if (party === "D") return "bg-blue text-white";
+  if (party === "R") return "bg-red text-white";
+  return "bg-purple-600 text-white";
 }
 
 function partyBg(party: string) {
-  if (party === "D") return "bg-dem";
-  if (party === "R") return "bg-rep";
-  return "bg-ind";
+  if (party === "D") return "bg-blue";
+  if (party === "R") return "bg-red";
+  return "bg-purple-600";
 }
 
 function partyLabel(party: string) {
@@ -123,7 +123,7 @@ export default function RepProfilePage() {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-        <p className="font-headline text-3xl motion-safe:animate-pulse">Loading profile...</p>
+        <p className="font-sans font-bold text-3xl motion-safe:animate-pulse">Loading profile...</p>
       </div>
     );
   }
@@ -131,14 +131,14 @@ export default function RepProfilePage() {
   if (!rep) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-        <h1 className="font-headline text-5xl">Member Not Found</h1>
-        <p className="mt-4 font-body text-lg text-gray-mid">
+        <h1 className="font-sans font-bold text-5xl">Member Not Found</h1>
+        <p className="mt-4 font-sans text-lg text-gray-mid">
           This profile may not be available yet.
         </p>
         <Link
           href="/directory"
-          className="inline-block mt-6 px-8 py-4 font-headline uppercase text-base no-underline transition-colors"
-          style={{ backgroundColor: "#C1272D", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
+          className="inline-block mt-6 px-8 py-4 font-sans font-bold uppercase text-base no-underline transition-colors"
+          style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
         >
           Back to Directory
         </Link>
@@ -248,10 +248,10 @@ export default function RepProfilePage() {
       </Link>
 
       {/* Header - colored by party */}
-      <div className={`mt-4 ${partyBg(rep.party)} p-8`} style={{ border: "3px solid #1a1a1a" }}>
+      <div className={`mt-4 ${partyBg(rep.party)} p-8`} style={{ border: "1px solid #E5E5E5" }}>
         <div className="flex flex-col md:flex-row md:items-start gap-6">
           {/* Photo / Avatar */}
-          <div className="w-32 h-32 flex items-center justify-center shrink-0 overflow-hidden" style={{ backgroundColor: "rgba(0,0,0,0.2)", border: "3px solid #1a1a1a" }}>
+          <div className="w-32 h-32 flex items-center justify-center shrink-0 overflow-hidden" style={{ backgroundColor: "rgba(0,0,0,0.2)", border: "1px solid #E5E5E5" }}>
             {!imgError ? (
               <Image
                 src={`https://raw.githubusercontent.com/unitedstates/images/gh-pages/congress/225x275/${rep.id}.jpg`}
@@ -262,28 +262,28 @@ export default function RepProfilePage() {
                 onError={() => setImgError(true)}
               />
             ) : (
-              <span className="font-headline text-5xl" style={{ color: "#f5e6c8" }}>
+              <span className="font-sans font-bold text-5xl" style={{ color: "#F8F7F4" }}>
                 {rep.firstName[0]}{rep.lastName[0]}
               </span>
             )}
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-3 flex-wrap">
-              <span className="px-3 py-1 text-sm font-mono font-bold" style={{ backgroundColor: "rgba(245,230,200,0.2)", color: "#f5e6c8" }}>
+              <span className="px-3 py-1 text-sm font-mono font-bold" style={{ backgroundColor: "rgba(245,230,200,0.2)", color: "#F8F7F4" }}>
                 {partyLabel(rep.party)}
               </span>
               {rep.isLeadership && (
-                <span className="px-3 py-1 text-sm font-mono font-bold" style={{ backgroundColor: "rgba(196,164,74,0.3)", color: "#c4a44a" }}>
+                <span className="px-3 py-1 text-sm font-mono font-bold" style={{ backgroundColor: "rgba(196,164,74,0.3)", color: "#C9A66B" }}>
                   &#9733; Leadership
                 </span>
               )}
               {!rep.inOffice && (
-                <span className="px-3 py-1 text-sm font-mono font-bold" style={{ backgroundColor: "rgba(0,0,0,0.3)", color: "#f5e6c8" }}>
+                <span className="px-3 py-1 text-sm font-mono font-bold" style={{ backgroundColor: "rgba(0,0,0,0.3)", color: "#F8F7F4" }}>
                   Former Member
                 </span>
               )}
             </div>
-            <h1 className="font-headline text-5xl md:text-6xl mt-3 normal-case" style={{ color: "#f5e6c8" }}>
+            <h1 className="font-sans font-bold text-5xl md:text-6xl mt-3 normal-case" style={{ color: "#F8F7F4" }}>
               {rep.fullName}
             </h1>
             <p className="font-mono text-base mt-2 font-bold" style={{ color: "rgba(245,230,200,0.9)" }}>
@@ -292,14 +292,14 @@ export default function RepProfilePage() {
               {rep.chamber}
             </p>
             {rep.leadershipRole && (
-              <p className="font-mono text-base mt-1 font-bold" style={{ color: "#c4a44a" }}>{rep.leadershipRole}</p>
+              <p className="font-mono text-base mt-1 font-bold" style={{ color: "#C9A66B" }}>{rep.leadershipRole}</p>
             )}
           </div>
         </div>
       </div>
 
       {/* Stats band */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-0" style={{ borderLeft: "3px solid #1a1a1a", borderRight: "3px solid #1a1a1a", borderBottom: "3px solid #1a1a1a" }}>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-0" style={{ borderLeft: "1px solid #E5E5E5", borderRight: "1px solid #E5E5E5", borderBottom: "1px solid #E5E5E5" }}>
         {[
           { label: "Party Loyalty", value: rep.partyLoyalty ? `${rep.partyLoyalty}%` : "—" },
           { label: "Votes Cast", value: rep.votesCast ? rep.votesCast.toLocaleString() : "—" },
@@ -310,10 +310,10 @@ export default function RepProfilePage() {
           <div
             key={stat.label}
             className="p-4 text-center last:border-r-0"
-            style={{ backgroundColor: "#faf6ee", borderRight: "2px solid #c4a44a", borderBottom: "2px solid #c4a44a" }}
+            style={{ backgroundColor: "#FFFFFF", borderRight: "2px solid #C9A66B", borderBottom: "2px solid #C9A66B" }}
           >
-            <div className="font-headline text-2xl" style={{ color: "#1a1a1a" }}>{stat.value}</div>
-            <div className="font-mono text-xs mt-1 font-bold" style={{ color: "#5a5a5a" }}>{stat.label}</div>
+            <div className="font-sans font-bold text-2xl" style={{ color: "#0A2540" }}>{stat.value}</div>
+            <div className="font-mono text-xs mt-1 font-bold" style={{ color: "#4B5563" }}>{stat.label}</div>
           </div>
         ))}
       </div>
@@ -322,30 +322,33 @@ export default function RepProfilePage() {
       <div className="mt-6 flex flex-wrap gap-3">
         <Link
           href={`/draft?rep=${rep.slug}&mode=letter`}
-          className="px-6 py-3 font-headline uppercase text-base no-underline transition-colors"
-          style={{ backgroundColor: "#C1272D", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
+          className="flex items-center gap-2 px-6 py-3 font-sans font-bold uppercase text-base no-underline transition-colors"
+          style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
         >
-          &#9993; Write a Letter
+          <img src="/images/civic/icons/mail.png" alt="" className="w-5 h-5" style={{ filter: "brightness(10)" }} aria-hidden="true" />
+          Write a Letter
         </Link>
         <Link
           href={`/draft?rep=${rep.slug}&mode=call`}
-          className="px-6 py-3 font-headline uppercase text-base no-underline transition-colors"
-          style={{ backgroundColor: "#1a1a1a", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
+          className="flex items-center gap-2 px-6 py-3 font-sans font-bold uppercase text-base no-underline transition-colors"
+          style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
         >
-          &#128222; Call Script
+          <img src="/images/civic/icons/contact.png" alt="" className="w-5 h-5" style={{ filter: "brightness(10)" }} aria-hidden="true" />
+          Call Script
         </Link>
         <Link
           href={`/draft?rep=${rep.slug}&mode=social`}
-          className="px-6 py-3 font-headline uppercase text-base no-underline transition-colors"
-          style={{ backgroundColor: "#1a1a1a", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
+          className="flex items-center gap-2 px-6 py-3 font-sans font-bold uppercase text-base no-underline transition-colors"
+          style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
         >
-          &#128241; Social Post
+          <img src="/images/civic/icons/email.png" alt="" className="w-5 h-5" style={{ filter: "brightness(10)" }} aria-hidden="true" />
+          Send Email
         </Link>
         {rep.offices[0] && (
           <a
             href={`tel:${rep.offices[0].phone}`}
-            className="px-6 py-3 font-headline uppercase text-base no-underline transition-colors"
-            style={{ backgroundColor: "#1a1a1a", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
+            className="px-6 py-3 font-sans font-bold uppercase text-base no-underline transition-colors"
+            style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
           >
             &#128222; {rep.offices[0].phone}
           </a>
@@ -356,8 +359,11 @@ export default function RepProfilePage() {
         {/* Left column: Contact + Bio */}
         <div className="lg:col-span-2 space-y-6">
           {/* Contact Info */}
-          <section className="p-6" style={{ border: "3px solid #1a1a1a", backgroundColor: "#faf6ee" }}>
-            <h2 className="font-headline text-2xl mb-5" style={{ color: "#1a1a1a" }}>&#128203; Contact Information</h2>
+          <section className="p-6" style={{ border: "1px solid #E5E5E5", backgroundColor: "#FFFFFF" }}>
+            <div className="flex items-center gap-3 mb-5">
+              <img src="/images/civic/icons/contact.png" alt="" className="w-7 h-7 opacity-70" aria-hidden="true" />
+              <h2 className="font-sans font-bold text-2xl" style={{ color: "#0A2540" }}>Contact Information</h2>
+            </div>
 
             {/* Quick action buttons */}
             <div className="flex flex-wrap gap-2 mb-5">
@@ -366,16 +372,16 @@ export default function RepProfilePage() {
                   href={rep.contactForm}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-5 py-3 font-headline uppercase text-sm no-underline transition-colors"
-                  style={{ backgroundColor: "#C1272D", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
+                  className="px-5 py-3 font-sans font-bold uppercase text-sm no-underline transition-colors"
+                  style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
                 >
                   Open Contact Form &#8594;
                 </a>
               )}
               <button
                 onClick={openMailto}
-                className="px-5 py-3 font-headline uppercase text-sm cursor-pointer transition-colors"
-                style={{ backgroundColor: "#1a1a1a", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
+                className="px-5 py-3 font-sans font-bold uppercase text-sm cursor-pointer transition-colors"
+                style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
               >
                 &#9993; Send Email
               </button>
@@ -384,12 +390,12 @@ export default function RepProfilePage() {
             {rep.offices.map((office, i) => (
               <div key={i} className="mb-5 pb-5 border-b-2 border-border-light last:border-0 last:mb-0 last:pb-0">
                 <h3 className="font-mono text-sm text-gray-mid font-bold mb-2">{office.label.toUpperCase()}</h3>
-                <p className="font-body text-base">{office.street}</p>
-                <p className="font-body text-base">{office.city}, {office.state} {office.zip}</p>
+                <p className="font-sans text-base">{office.street}</p>
+                <p className="font-sans text-base">{office.city}, {office.state} {office.zip}</p>
                 <a
                   href={`tel:${office.phone}`}
                   className="inline-flex items-center gap-2 mt-2 px-4 py-2 font-mono text-sm no-underline transition-colors font-bold"
-                  style={{ border: "3px solid #1a1a1a", color: "#1a1a1a", backgroundColor: "#faf6ee" }}
+                  style={{ border: "1px solid #E5E5E5", color: "#0A2540", backgroundColor: "#FFFFFF" }}
                 >
                   &#128222; Call {office.phone}
                 </a>
@@ -422,31 +428,31 @@ export default function RepProfilePage() {
               <div className="flex flex-wrap gap-2">
                 {rep.social.twitter && (
                   <a href={`https://twitter.com/${rep.social.twitter}`} target="_blank" rel="noopener noreferrer"
-                    className="px-4 py-2 font-mono text-sm no-underline transition-colors font-bold" style={{ border: "3px solid #1a1a1a", color: "#1a1a1a", backgroundColor: "#faf6ee" }}>
+                    className="px-4 py-2 font-mono text-sm no-underline transition-colors font-bold" style={{ border: "1px solid #E5E5E5", color: "#0A2540", backgroundColor: "#FFFFFF" }}>
                     &#120143; @{rep.social.twitter}
                   </a>
                 )}
                 {rep.social.facebook && (
                   <a href={`https://facebook.com/${rep.social.facebook}`} target="_blank" rel="noopener noreferrer"
-                    className="px-4 py-2 font-mono text-sm no-underline transition-colors font-bold" style={{ border: "3px solid #1a1a1a", color: "#1a1a1a", backgroundColor: "#faf6ee" }}>
+                    className="px-4 py-2 font-mono text-sm no-underline transition-colors font-bold" style={{ border: "1px solid #E5E5E5", color: "#0A2540", backgroundColor: "#FFFFFF" }}>
                     FB: {rep.social.facebook}
                   </a>
                 )}
                 {rep.social.instagram && (
                   <a href={`https://instagram.com/${rep.social.instagram}`} target="_blank" rel="noopener noreferrer"
-                    className="px-4 py-2 font-mono text-sm no-underline transition-colors font-bold" style={{ border: "3px solid #1a1a1a", color: "#1a1a1a", backgroundColor: "#faf6ee" }}>
+                    className="px-4 py-2 font-mono text-sm no-underline transition-colors font-bold" style={{ border: "1px solid #E5E5E5", color: "#0A2540", backgroundColor: "#FFFFFF" }}>
                     IG: @{rep.social.instagram}
                   </a>
                 )}
                 {rep.social.youtube && (
                   <a href={`https://youtube.com/${rep.social.youtube}`} target="_blank" rel="noopener noreferrer"
-                    className="px-4 py-2 font-mono text-sm no-underline transition-colors font-bold" style={{ border: "3px solid #1a1a1a", color: "#1a1a1a", backgroundColor: "#faf6ee" }}>
+                    className="px-4 py-2 font-mono text-sm no-underline transition-colors font-bold" style={{ border: "1px solid #E5E5E5", color: "#0A2540", backgroundColor: "#FFFFFF" }}>
                     YT: {rep.social.youtube}
                   </a>
                 )}
                 {rep.social.tiktok && (
                   <a href={`https://tiktok.com/@${rep.social.tiktok}`} target="_blank" rel="noopener noreferrer"
-                    className="px-4 py-2 font-mono text-sm no-underline transition-colors font-bold" style={{ border: "3px solid #1a1a1a", color: "#1a1a1a", backgroundColor: "#faf6ee" }}>
+                    className="px-4 py-2 font-mono text-sm no-underline transition-colors font-bold" style={{ border: "1px solid #E5E5E5", color: "#0A2540", backgroundColor: "#FFFFFF" }}>
                     TikTok: @{rep.social.tiktok}
                   </a>
                 )}
@@ -458,7 +464,7 @@ export default function RepProfilePage() {
               <div className="mt-5 pt-5 border-t-2 border-border-light">
                 <h3 className="font-mono text-sm text-gray-mid font-bold mb-3">KEY STAFF</h3>
                 {rep.staff.map((s, i) => (
-                  <div key={i} className="font-body text-base mb-1">
+                  <div key={i} className="font-sans text-base mb-1">
                     <span className="font-bold">{s.name}</span> — {s.title}
                   </div>
                 ))}
@@ -474,7 +480,7 @@ export default function RepProfilePage() {
                     <span
                       key={i}
                       className="px-3 py-2 font-mono text-sm font-bold"
-                      style={{ border: "2px solid #c4a44a", backgroundColor: "#faf6ee", color: "#3a3a3a" }}
+                      style={{ border: "2px solid #C9A66B", backgroundColor: "#FFFFFF", color: "#374151" }}
                     >
                       {c}
                     </span>
@@ -485,15 +491,15 @@ export default function RepProfilePage() {
           </section>
 
           {/* Biography */}
-          <section className="p-6" style={{ border: "3px solid #1a1a1a", backgroundColor: "#faf6ee" }}>
-            <h2 className="font-headline text-2xl mb-4">&#128214; Biography</h2>
-            <p className="font-body text-base leading-relaxed">{rep.bio}</p>
+          <section className="p-6" style={{ border: "1px solid #E5E5E5", backgroundColor: "#FFFFFF" }}>
+            <h2 className="font-sans font-bold text-2xl mb-4">&#128214; Biography</h2>
+            <p className="font-sans text-base leading-relaxed">{rep.bio}</p>
           </section>
 
           {/* Notable Legislation */}
           {rep.notableLegislation.length > 0 && (
-            <section className="p-6" style={{ border: "3px solid #1a1a1a", backgroundColor: "#faf6ee" }}>
-              <h2 className="font-headline text-2xl mb-5">&#9878;&#65039; Notable Legislation</h2>
+            <section className="p-6" style={{ border: "1px solid #E5E5E5", backgroundColor: "#FFFFFF" }}>
+              <h2 className="font-sans font-bold text-2xl mb-5">&#9878;&#65039; Notable Legislation</h2>
               {rep.notableLegislation.filter(bill => bill.title?.trim()).map((bill, i) => (
                 <div key={i} className="mb-5 pb-5 border-b-2 border-border-light last:border-0 last:mb-0 last:pb-0">
                   <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -513,7 +519,7 @@ export default function RepProfilePage() {
                       {bill.role}
                     </span>
                   </div>
-                  <h3 className="font-headline text-lg normal-case">
+                  <h3 className="font-sans font-bold text-lg normal-case">
                     {bill.url ? (
                       <a href={bill.url} target="_blank" rel="noopener noreferrer" className="text-black no-underline hover:text-red">
                         {bill.title}
@@ -523,7 +529,7 @@ export default function RepProfilePage() {
                     )}
                   </h3>
                   {bill.description && (
-                    <p className="font-body text-base text-gray-mid mt-1">{bill.description}</p>
+                    <p className="font-sans text-base text-gray-mid mt-1">{bill.description}</p>
                   )}
                 </div>
               ))}
@@ -550,9 +556,9 @@ export default function RepProfilePage() {
 
           {/* Lobbying Activity */}
           {!enriching && (rep.lobbyingFilings || []).length > 0 && (
-            <section className="p-6" style={{ border: "3px solid #1a1a1a", backgroundColor: "#faf6ee" }}>
-              <h2 className="font-headline text-2xl mb-5">&#127970; Lobbying Activity</h2>
-              <p className="font-body text-sm text-gray-mid mb-4">
+            <section className="p-6" style={{ border: "1px solid #E5E5E5", backgroundColor: "#FFFFFF" }}>
+              <h2 className="font-sans font-bold text-2xl mb-5">&#127970; Lobbying Activity</h2>
+              <p className="font-sans text-sm text-gray-mid mb-4">
                 Lobbying filings that reference this member or their legislation. Source: Senate LDA.
               </p>
 
@@ -597,7 +603,7 @@ export default function RepProfilePage() {
                     <span className="px-1.5 py-0.5 bg-red text-white text-[10px] font-mono font-bold">AI</span>
                     <span className="font-mono text-xs text-gray-mid font-bold">LOBBYING ANALYSIS</span>
                   </div>
-                  <p className="font-body text-sm leading-relaxed whitespace-pre-wrap">{lobbyAnalysis}</p>
+                  <p className="font-sans text-sm leading-relaxed whitespace-pre-wrap">{lobbyAnalysis}</p>
                 </div>
               )}
 
@@ -608,7 +614,7 @@ export default function RepProfilePage() {
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-headline text-base">{filing.client}</span>
+                        <span className="font-sans font-bold text-base">{filing.client}</span>
                         {filing.matchesDonor && (
                           <span className="px-2 py-0.5 bg-yellow font-mono text-[10px] font-bold text-black">
                             MATCHES DONOR
@@ -616,7 +622,7 @@ export default function RepProfilePage() {
                         )}
                       </div>
                       {filing.clientDescription && (
-                        <div className="font-body text-xs text-gray-mid mt-0.5 italic">{filing.clientDescription}</div>
+                        <div className="font-sans text-xs text-gray-mid mt-0.5 italic">{filing.clientDescription}</div>
                       )}
                       <div className="font-mono text-xs text-gray-mid mt-0.5">
                         via {filing.registrant} ({filing.filingYear})
@@ -667,7 +673,7 @@ export default function RepProfilePage() {
                   {/* Expandable details */}
                   {filing.specificIssues.length > 0 && (
                     <>
-                      <div className="mt-2 font-body text-sm text-gray-mid">
+                      <div className="mt-2 font-sans text-sm text-gray-mid">
                         {isExpanded ? filing.specificIssues.join(" | ") : filing.specificIssues[0].slice(0, 150)}
                         {!isExpanded && filing.specificIssues[0].length > 150 && "..."}
                       </div>
@@ -700,7 +706,7 @@ export default function RepProfilePage() {
           {/* Follow the Money: Connections */}
           {!enriching && (
             <section className="border-3 border-border border-l-[6px] border-l-red p-6 bg-cream-dark">
-              <h2 className="font-headline text-2xl mb-2 flex items-center gap-2">
+              <h2 className="font-sans font-bold text-2xl mb-2 flex items-center gap-2">
                 <svg className="w-6 h-6 text-red" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                 </svg>
@@ -724,8 +730,8 @@ export default function RepProfilePage() {
                                   <span className="font-mono text-xs text-gray-mid font-bold">{conn.amount} spent</span>
                                 )}
                               </div>
-                              <div className="font-headline text-base">{conn.entity}</div>
-                              <div className="font-body text-sm text-gray-mid mt-1">
+                              <div className="font-sans font-bold text-base">{conn.entity}</div>
+                              <div className="font-sans text-sm text-gray-mid mt-1">
                                 Lobbied on <span className="font-mono text-xs font-bold text-red">{conn.bill}</span>
                                 {conn.billTitle && <> ({conn.billTitle})</>}
                               </div>
@@ -751,10 +757,10 @@ export default function RepProfilePage() {
                               <span className="font-mono text-xs text-gray-mid font-bold">{conn.amount}</span>
                             )}
                           </div>
-                          <div className="font-headline text-base">
+                          <div className="font-sans font-bold text-base">
                             Top donor <span className="text-red">{conn.entity}</span>
                           </div>
-                          <div className="font-body text-sm text-gray-mid mt-1">
+                          <div className="font-sans text-sm text-gray-mid mt-1">
                             Lobbying client: {conn.lobbyClient}
                             {conn.matchedBillCount && conn.matchedBillCount > 0 && conn.matchedBills && (
                               <span className="font-mono text-xs"> &mdash; lobbied on {conn.matchedBillCount} bill{conn.matchedBillCount > 1 ? "s" : ""} that {rep.lastName} voted on</span>
@@ -780,7 +786,7 @@ export default function RepProfilePage() {
                 </div>
               ) : (
                 <div className="bg-surface border-2 border-border-light p-4 text-center">
-                  <p className="font-body text-sm text-gray-mid">
+                  <p className="font-sans text-sm text-gray-mid">
                     No direct connections found between campaign donors and lobbying activity for {rep.fullName}.
                   </p>
                 </div>
@@ -794,8 +800,8 @@ export default function RepProfilePage() {
 
           {/* Committee Hearings */}
           {!enriching && (rep.committeeHearings || []).length > 0 && (
-            <section className="p-6" style={{ border: "3px solid #1a1a1a", backgroundColor: "#faf6ee" }}>
-              <h2 className="font-headline text-2xl mb-5">&#127963;&#65039; Committee Hearings</h2>
+            <section className="p-6" style={{ border: "1px solid #E5E5E5", backgroundColor: "#FFFFFF" }}>
+              <h2 className="font-sans font-bold text-2xl mb-5">&#127963;&#65039; Committee Hearings</h2>
               {rep.committeeHearings!.map((hearing, i) => (
                 <div key={i} className="mb-4 pb-4 border-b-2 border-border-light last:border-0 last:mb-0 last:pb-0">
                   <div className="flex items-center gap-2 mb-1">
@@ -808,7 +814,7 @@ export default function RepProfilePage() {
                     href={hearing.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-body text-base text-black no-underline hover:text-red"
+                    className="font-sans text-base text-black no-underline hover:text-red"
                   >
                     {hearing.title}
                   </a>
@@ -821,14 +827,14 @@ export default function RepProfilePage() {
           {/* Controversies */}
           {rep.controversies.length > 0 && (
             <section className="border-3 border-status-red p-6 bg-status-red-light">
-              <h2 className="font-headline text-2xl mb-5">&#128293; Controversies &amp; Key Disputes</h2>
+              <h2 className="font-sans font-bold text-2xl mb-5">&#128293; Controversies &amp; Key Disputes</h2>
               {rep.controversies.map((c, i) => (
                 <div key={i} className="mb-5 pb-5 border-b-2 border-status-red/20 last:border-0 last:mb-0 last:pb-0">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="px-2 py-1 font-mono text-xs bg-status-red text-white font-bold">{c.year}</span>
                   </div>
-                  <h3 className="font-headline text-lg normal-case">{c.title}</h3>
-                  <p className="font-body text-base text-gray-mid mt-1">{c.description}</p>
+                  <h3 className="font-sans font-bold text-lg normal-case">{c.title}</h3>
+                  <p className="font-sans text-base text-gray-mid mt-1">{c.description}</p>
                 </div>
               ))}
             </section>
@@ -836,8 +842,8 @@ export default function RepProfilePage() {
 
           {/* Voting Record */}
           {rep.votingRecord.length > 0 && (
-            <section className="p-6" style={{ border: "3px solid #1a1a1a", backgroundColor: "#faf6ee" }}>
-              <h2 className="font-headline text-2xl mb-5">&#128202; Voting Record by Issue</h2>
+            <section className="p-6" style={{ border: "1px solid #E5E5E5", backgroundColor: "#FFFFFF" }}>
+              <h2 className="font-sans font-bold text-2xl mb-5">&#128202; Voting Record by Issue</h2>
               <div className="space-y-4">
                 {rep.votingRecord.map((v) => {
                   const total = v.yea + v.nay;
@@ -878,9 +884,9 @@ export default function RepProfilePage() {
 
           {/* Interest Group Ratings */}
           {rep.interestGroupRatings && rep.interestGroupRatings.length > 0 && (
-            <section className="p-6" style={{ border: "3px solid #1a1a1a", backgroundColor: "#faf6ee" }}>
-              <h2 className="font-headline text-2xl mb-1">Interest Group Ratings</h2>
-              <p className="font-body text-sm text-gray-mid mb-5">How advocacy organizations score this member</p>
+            <section className="p-6" style={{ border: "1px solid #E5E5E5", backgroundColor: "#FFFFFF" }}>
+              <h2 className="font-sans font-bold text-2xl mb-1">Interest Group Ratings</h2>
+              <p className="font-sans text-sm text-gray-mid mb-5">How advocacy organizations score this member</p>
               <div className="space-y-4">
                 {rep.interestGroupRatings.map((r) => {
                   // Convert letter grades to percentage widths
@@ -890,7 +896,7 @@ export default function RepProfilePage() {
                   };
                   const isLetter = typeof r.score === "string";
                   const barWidth = isLetter ? (letterToWidth[r.score as string] || 10) : (r.score as number);
-                  const barColor = r.lean === "left" ? "bg-[#1a3a6b]" : "bg-[#C1272D]";
+                  const barColor = r.lean === "left" ? "bg-[#1a3a6b]" : "bg-[#0A2540]";
                   return (
                     <div key={r.group}>
                       <div className="flex justify-between mb-1.5">
@@ -916,7 +922,7 @@ export default function RepProfilePage() {
                   <span className="w-4 h-4 bg-[#1a3a6b] inline-block border-2 border-border" /> Left-leaning groups
                 </span>
                 <span className="flex items-center gap-2">
-                  <span className="w-4 h-4 bg-[#C1272D] inline-block border-2 border-border" /> Right-leaning groups
+                  <span className="w-4 h-4 bg-[#0A2540] inline-block border-2 border-border" /> Right-leaning groups
                 </span>
               </div>
             </section>
@@ -924,8 +930,8 @@ export default function RepProfilePage() {
 
           {/* Key Votes */}
           {rep.keyVotes.length > 0 && (
-            <section className="p-6" style={{ border: "3px solid #1a1a1a", backgroundColor: "#faf6ee" }}>
-              <h2 className="font-headline text-2xl mb-5">&#128499;&#65039; Key Votes</h2>
+            <section className="p-6" style={{ border: "1px solid #E5E5E5", backgroundColor: "#FFFFFF" }}>
+              <h2 className="font-sans font-bold text-2xl mb-5">&#128499;&#65039; Key Votes</h2>
               {rep.keyVotes.map((kv, i) => (
                 <div key={i} className="mb-4 pb-4 border-b-2 border-border-light last:border-0 last:mb-0 last:pb-0 flex items-center gap-4">
                   <span className={`px-3 py-2 font-mono text-sm font-bold ${kv.vote === "YEA" ? "bg-green text-white" : kv.vote === "NAY" ? "bg-status-red text-white" : "bg-gray-mid text-white"}`}>
@@ -933,7 +939,7 @@ export default function RepProfilePage() {
                   </span>
                   <div>
                     <span className="font-mono text-sm text-gray-mid">{kv.bill} — {kv.date}</span>
-                    <div className="font-body text-base font-bold">{kv.title}</div>
+                    <div className="font-sans text-base font-bold">{kv.title}</div>
                   </div>
                   {kv.brokeWithParty && (
                     <span className="px-3 py-1 font-mono text-xs bg-yellow-light text-yellow font-bold">
@@ -949,8 +955,8 @@ export default function RepProfilePage() {
         {/* Right column: Contact + Money + Links */}
         <div className="space-y-6">
           {/* Sticky Contact This Rep Card */}
-          <section className="p-6 lg:sticky lg:top-4 z-10" style={{ border: "3px solid #C1272D", backgroundColor: "#faf6ee" }}>
-            <h2 className="font-headline text-2xl mb-4" style={{ color: "#1a1a1a" }}>&#9993; Contact This Rep</h2>
+          <section className="p-6 lg:sticky lg:top-4 z-10" style={{ border: "1px solid #E5E5E5", backgroundColor: "#FFFFFF" }}>
+            <h2 className="font-sans font-bold text-2xl mb-4" style={{ color: "#0A2540" }}>&#9993; Contact This Rep</h2>
 
             {/* Contact Form / Email buttons */}
             <div className="space-y-3 mb-5">
@@ -959,8 +965,8 @@ export default function RepProfilePage() {
                   href={rep.contactForm}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full px-5 py-4 font-headline uppercase text-base text-center no-underline transition-colors"
-                  style={{ backgroundColor: "#C1272D", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
+                  className="block w-full px-5 py-4 font-sans font-bold uppercase text-base text-center no-underline transition-colors"
+                  style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
                 >
                   Open Contact Form &#8594;
                 </a>
@@ -968,8 +974,8 @@ export default function RepProfilePage() {
 
               <button
                 onClick={openMailto}
-                className="w-full px-5 py-4 font-headline uppercase text-base text-center cursor-pointer transition-colors"
-                style={{ backgroundColor: "#1a1a1a", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
+                className="w-full px-5 py-4 font-sans font-bold uppercase text-base text-center cursor-pointer transition-colors"
+                style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
               >
                 {latestDraft ? "Send Your Letter via Email" : "Send Email"}
               </button>
@@ -980,7 +986,7 @@ export default function RepProfilePage() {
                   <button
                     onClick={sendDirectEmail}
                     disabled={emailSending}
-                    className={`w-full px-5 py-4 font-headline uppercase text-base text-center cursor-pointer transition-colors border-3 ${
+                    className={`w-full px-5 py-4 font-sans font-bold uppercase text-base text-center cursor-pointer transition-colors border-3 ${
                       emailSending
                         ? "bg-gray-mid text-white border-gray-mid"
                         : "bg-green text-white border-green hover:bg-black hover:border-black"
@@ -1004,8 +1010,8 @@ export default function RepProfilePage() {
               {latestDraft?.content && (
                 <button
                   onClick={() => setMailModalOpen(true)}
-                  className="w-full px-5 py-4 font-headline uppercase text-base text-center cursor-pointer transition-colors border-3"
-                  style={{ backgroundColor: "#1a1a1a", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
+                  className="w-full px-5 py-4 font-sans font-bold uppercase text-base text-center cursor-pointer transition-colors border-3"
+                  style={{ backgroundColor: "#0A2540", color: "#F8F7F4", border: "1px solid #E5E5E5" }}
                 >
                   Mail This Letter — $1.50
                 </button>
@@ -1019,7 +1025,8 @@ export default function RepProfilePage() {
                 <a
                   key={i}
                   href={`tel:${office.phone}`}
-                  className="flex items-center justify-between w-full px-4 py-3 border-2 border-border font-mono text-sm no-underline text-black hover:bg-red hover:text-white hover:border-red transition-colors font-bold"
+                  className="flex items-center justify-between w-full px-4 py-3 font-mono text-sm no-underline transition-colors font-bold"
+                  style={{ border: "1px solid #E5E5E5", color: "#0A2540", backgroundColor: "#FFFFFF" }}
                 >
                   <span>{office.label}</span>
                   <span>&#128222; {office.phone}</span>
@@ -1031,10 +1038,10 @@ export default function RepProfilePage() {
             <div className="space-y-3">
               <h3 className="font-mono text-sm text-gray-mid font-bold">OFFICE ADDRESSES</h3>
               {rep.offices.map((office, i) => (
-                <div key={i} className="p-3 border-2 border-border-light bg-cream">
+                <div key={i} className="p-3" style={{ border: "2px solid #C9A66B", backgroundColor: "#F8F7F4" }}>
                   <p className="font-mono text-xs text-gray-mid font-bold mb-1">{office.label.toUpperCase()}</p>
-                  <p className="font-body text-sm">{office.street}</p>
-                  <p className="font-body text-sm">{office.city}, {office.state} {office.zip}</p>
+                  <p className="font-sans text-sm">{office.street}</p>
+                  <p className="font-sans text-sm">{office.city}, {office.state} {office.zip}</p>
                 </div>
               ))}
             </div>
@@ -1059,7 +1066,7 @@ export default function RepProfilePage() {
 
           {/* Follow the Money */}
           <section className="border-3 border-border p-6 bg-cream-dark">
-            <h2 className="font-headline text-2xl mb-4">&#128176; Follow the Money</h2>
+            <h2 className="font-sans font-bold text-2xl mb-4">&#128176; Follow the Money</h2>
 
             {enriching && (
               <div className="space-y-4 motion-safe:animate-pulse">
@@ -1193,7 +1200,7 @@ RULES:
                 <div className="space-y-3">
                   {aiMessages.filter((m) => m.role === "assistant").map((m, i) => (
                     <div key={i} className="bg-surface border-2 border-border p-4">
-                      <p className="font-body text-sm leading-relaxed whitespace-pre-wrap">{m.content}</p>
+                      <p className="font-sans text-sm leading-relaxed whitespace-pre-wrap">{m.content}</p>
                     </div>
                   ))}
 
@@ -1291,11 +1298,11 @@ RULES:
                 <>
                   <div className="grid grid-cols-2 gap-3 mb-5">
                     <div className="bg-surface border-2 border-border p-4 text-center">
-                      <div className="font-headline text-2xl text-black">{cycle.totalFundraising}</div>
+                      <div className="font-sans font-bold text-2xl text-black">{cycle.totalFundraising}</div>
                       <div className="font-mono text-xs text-gray-mid font-bold mt-1">Total Raised</div>
                     </div>
                     <div className="bg-surface border-2 border-border p-4 text-center">
-                      <div className="font-headline text-2xl text-black">{cycle.smallDollarPct}%</div>
+                      <div className="font-sans font-bold text-2xl text-black">{cycle.smallDollarPct}%</div>
                       <div className="font-mono text-xs text-gray-mid font-bold mt-1 group/tip relative inline-flex items-center gap-1 cursor-help">
                         Small Dollar
                         <span className="text-gray-mid/60 text-[10px]">&#9432;</span>
@@ -1315,7 +1322,7 @@ RULES:
                             <span className={`px-1.5 py-0.5 text-xs font-mono font-bold ${d.support ? 'bg-green-700 text-white' : 'bg-status-red text-white'}`}>
                               {d.support ? 'FOR' : 'AGAINST'}
                             </span>
-                            <span className="font-body text-base">{d.name}</span>
+                            <span className="font-sans text-base">{d.name}</span>
                           </div>
                           <span className="font-mono text-sm text-gray-mid font-bold shrink-0 ml-2">{d.amount}</span>
                         </div>
@@ -1331,7 +1338,7 @@ RULES:
                 <h3 className="font-mono text-sm text-gray-mid font-bold mb-3">TOP DONOR EMPLOYERS</h3>
                 {rep.topDonors.map((d, i) => (
                   <div key={i} className="flex justify-between py-2 border-b-2 border-border-light last:border-0">
-                    <span className="font-body text-base">{d.name}</span>
+                    <span className="font-sans text-base">{d.name}</span>
                     <span className="font-mono text-sm text-gray-mid font-bold">{d.amount}</span>
                   </div>
                 ))}
@@ -1343,7 +1350,7 @@ RULES:
                 <h3 className="font-mono text-sm text-gray-mid font-bold mb-3">DONOR OCCUPATIONS</h3>
                 {rep.topIndustries.map((d, i) => (
                   <div key={i} className="flex justify-between py-2 border-b-2 border-border-light last:border-0">
-                    <span className="font-body text-base">{d.name}</span>
+                    <span className="font-sans text-base">{d.name}</span>
                     <span className="font-mono text-sm text-gray-mid font-bold">{d.amount}</span>
                   </div>
                 ))}
@@ -1355,7 +1362,7 @@ RULES:
               <div className="mb-5 border-t-2 border-border-light pt-5">
                 <h3 className="font-mono text-sm text-gray-mid font-bold mb-3">DARK MONEY CONNECTIONS</h3>
                 <div className="p-3 bg-surface border-2 border-border-light mb-4">
-                  <p className="font-body text-sm text-gray-mid mb-2">
+                  <p className="font-sans text-sm text-gray-mid mb-2">
                     Dark money refers to political spending by nonprofits (501(c)(4)s) that aren&apos;t required to disclose their donors. These organizations can spend unlimited amounts on elections without revealing who funds them.
                   </p>
                   <a
@@ -1367,7 +1374,7 @@ RULES:
                     LEARN MORE &rarr;
                   </a>
                 </div>
-                <p className="font-body text-xs text-gray-mid mb-3">
+                <p className="font-sans text-xs text-gray-mid mb-3">
                   Outside spenders with connected 501(c)(4) nonprofit organizations. Source: ProPublica.
                 </p>
                 {rep.darkMoneyConnections!.map((dm, i) => (
@@ -1376,7 +1383,7 @@ RULES:
                       <span className={`px-1.5 py-0.5 text-xs font-mono font-bold ${dm.support ? "bg-green-700 text-white" : "bg-status-red text-white"}`}>
                         {dm.support ? "FOR" : "AGAINST"}
                       </span>
-                      <span className="font-body text-sm font-bold">{dm.spenderName}</span>
+                      <span className="font-sans text-sm font-bold">{dm.spenderName}</span>
                       <span className="font-mono text-xs text-gray-mid ml-auto">{dm.spenderAmount}</span>
                     </div>
                     {dm.connectedNonprofits.map((np, j) => (
@@ -1409,26 +1416,26 @@ RULES:
           {/* District Spending */}
           {!enriching && rep.districtSpending && rep.districtSpending.totalObligated > 0 && (
             <section className="border-3 border-border p-6 bg-cream-dark">
-              <h2 className="font-headline text-2xl mb-4">
+              <h2 className="font-sans font-bold text-2xl mb-4">
                 &#127970; Federal Spending in {rep.chamber === "Senate" ? rep.state : `${rep.stateAbbr}-${rep.district}`}
               </h2>
-              <p className="font-body text-xs text-gray-mid mb-4">
+              <p className="font-sans text-xs text-gray-mid mb-4">
                 Federal contracts and grants in this {rep.chamber === "Senate" ? "state" : "district"} (current fiscal year). Source: USAspending.gov.
               </p>
 
               <div className="grid grid-cols-3 gap-2 mb-4">
                 <div className="bg-surface border-2 border-border p-3 text-center">
-                  <div className="font-headline text-lg">
+                  <div className="font-sans font-bold text-lg">
                     ${(rep.districtSpending.totalObligated / 1_000_000).toFixed(1)}M
                   </div>
                   <div className="font-mono text-[10px] text-gray-mid font-bold">TOTAL</div>
                 </div>
                 <div className="bg-surface border-2 border-border p-3 text-center">
-                  <div className="font-headline text-lg">{rep.districtSpending.contractCount}</div>
+                  <div className="font-sans font-bold text-lg">{rep.districtSpending.contractCount}</div>
                   <div className="font-mono text-[10px] text-gray-mid font-bold">CONTRACTS</div>
                 </div>
                 <div className="bg-surface border-2 border-border p-3 text-center">
-                  <div className="font-headline text-lg">{rep.districtSpending.grantCount}</div>
+                  <div className="font-sans font-bold text-lg">{rep.districtSpending.grantCount}</div>
                   <div className="font-mono text-[10px] text-gray-mid font-bold">GRANTS</div>
                 </div>
               </div>
@@ -1436,7 +1443,7 @@ RULES:
               {rep.districtSpending.donorContractorOverlaps.length > 0 && (
                 <div className="mb-4 p-3 bg-yellow-light border-2 border-yellow">
                   <h3 className="font-mono text-xs font-bold mb-1">DONOR-CONTRACTOR OVERLAP</h3>
-                  <p className="font-body text-xs text-gray-mid">
+                  <p className="font-sans text-xs text-gray-mid">
                     These organizations appear in both top donors and federal contractors:
                   </p>
                   {rep.districtSpending.donorContractorOverlaps.map((name, i) => (
@@ -1450,7 +1457,7 @@ RULES:
                   <h3 className="font-mono text-sm text-gray-mid font-bold mb-2">TOP RECIPIENTS</h3>
                   {rep.districtSpending.topRecipients.slice(0, 7).map((r, i) => (
                     <div key={i} className="flex justify-between py-1.5 border-b border-border-light last:border-0">
-                      <span className="font-body text-sm">{r.name}</span>
+                      <span className="font-sans text-sm">{r.name}</span>
                       <span className="font-mono text-xs text-gray-mid font-bold">
                         ${(r.total / 1_000_000).toFixed(1)}M
                       </span>
@@ -1464,7 +1471,7 @@ RULES:
                   <h3 className="font-mono text-sm text-gray-mid font-bold mb-2">TOP AGENCIES</h3>
                   {rep.districtSpending.topAgencies.slice(0, 5).map((a, i) => (
                     <div key={i} className="flex justify-between py-1.5 border-b border-border-light last:border-0">
-                      <span className="font-body text-sm">{a.name}</span>
+                      <span className="font-sans text-sm">{a.name}</span>
                       <span className="font-mono text-xs text-gray-mid font-bold">
                         ${(a.total / 1_000_000).toFixed(1)}M
                       </span>
@@ -1480,8 +1487,8 @@ RULES:
             <div className="flex items-start gap-4">
               <span className="text-3xl shrink-0">&#128451;</span>
               <div className="flex-1">
-                <h2 className="font-headline text-xl normal-case mb-2">Request Government Records</h2>
-                <p className="font-body text-sm text-gray-mid leading-relaxed mb-3">
+                <h2 className="font-sans font-bold text-xl normal-case mb-2">Request Government Records</h2>
+                <p className="font-sans text-sm text-gray-mid leading-relaxed mb-3">
                   Use FOIA Forge to file a Freedom of Information Act request for records related to {rep.fullName}&apos;s committees, votes, or agencies they oversee.
                 </p>
                 <a
@@ -1499,7 +1506,7 @@ RULES:
 
           {/* Research Links */}
           <section className="border-3 border-border p-6 bg-cream-dark">
-            <h2 className="font-headline text-2xl mb-5">&#128279; Research &amp; Links</h2>
+            <h2 className="font-sans font-bold text-2xl mb-5">&#128279; Research &amp; Links</h2>
             <div className="space-y-2">
               {[
                 { label: "Congress.gov", url: rep.congressGov },

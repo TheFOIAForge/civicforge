@@ -51,7 +51,7 @@ function RingChart({ value, color, size = 120, label }: {
           strokeLinecap="butt" className="transition-all duration-700"
         />
       </svg>
-      <div className="-mt-[76px] mb-[40px] font-headline text-2xl">{value.toFixed(1)}%</div>
+      <div className="-mt-[76px] mb-[40px] font-sans font-bold text-2xl">{value.toFixed(1)}%</div>
       <div className="font-mono text-xs text-black/50 mt-1">{label}</div>
     </div>
   );
@@ -121,11 +121,11 @@ function VerdictBanner({ verdict, repA, repB }: {
             >
               {verdict.margin === "decisive" ? "Clear Winner" : verdict.margin === "moderate" ? "Winner" : "Edge"}
             </span>
-            <span className="font-headline text-lg uppercase">{verdict.winnerName}</span>
+            <span className="font-sans font-bold text-lg uppercase">{verdict.winnerName}</span>
           </>
         )}
       </div>
-      <p className="font-body text-sm text-black/70 leading-relaxed">{verdict.summary}</p>
+      <p className="font-sans text-sm text-black/70 leading-relaxed">{verdict.summary}</p>
     </div>
   );
 }
@@ -139,7 +139,7 @@ function Section({ title, icon, children, id }: {
     <section id={id} className="mb-10">
       <div className="bg-black text-white px-5 py-4 flex items-center gap-3 mb-0">
         <span className="text-2xl" aria-hidden="true">{icon}</span>
-        <h2 className="font-headline text-xl uppercase tracking-wide m-0">{title}</h2>
+        <h2 className="font-sans font-bold text-xl uppercase tracking-wide m-0">{title}</h2>
       </div>
       <div className="border-3 border-t-0 border-black p-6 bg-white">
         {children}
@@ -217,15 +217,15 @@ function LegislativeSection({ a, b, verdict }: { a: Representative; b: Represent
             <div className="font-mono text-xs font-bold uppercase mb-3">{rep.fullName}</div>
             <div className="flex items-end gap-4 mb-4">
               <div className="text-center">
-                <div className="font-headline text-4xl">{rep.billsIntroduced}</div>
+                <div className="font-sans font-bold text-4xl">{rep.billsIntroduced}</div>
                 <div className="font-mono text-[10px] text-black/40 uppercase">Introduced</div>
               </div>
               <div className="text-center">
-                <div className="font-headline text-4xl text-red">{rep.billsEnacted}</div>
+                <div className="font-sans font-bold text-4xl text-red">{rep.billsEnacted}</div>
                 <div className="font-mono text-[10px] text-black/40 uppercase">Enacted</div>
               </div>
               <div className="text-center">
-                <div className="font-headline text-3xl" style={{ color: PC[rep.party] }}>{sr.toFixed(1)}%</div>
+                <div className="font-sans font-bold text-3xl" style={{ color: PC[rep.party] }}>{sr.toFixed(1)}%</div>
                 <div className="font-mono text-[10px] text-black/40 uppercase">Success Rate</div>
               </div>
             </div>
@@ -401,7 +401,7 @@ function VotingRecordSection({ a, b, verdict }: { a: Representative; b: Represen
     <Section title="Voting Record by Issue" icon="🗳️" id="sec-voting">
       {allCats.length === 0 ? (
         <div className="bg-black/5 px-5 py-10 text-center">
-          <div className="font-headline text-xl mb-2">No Issue Voting Data Available</div>
+          <div className="font-sans font-bold text-xl mb-2">No Issue Voting Data Available</div>
           <p className="font-mono text-xs text-black/40">
             Detailed issue-by-issue voting breakdowns are not yet available for these representatives.
             This data will be populated when live Congress.gov vote data is connected.
@@ -611,7 +611,7 @@ function EthicsSection({ a, b, verdict }: { a: Representative; b: Representative
                       <span className="font-mono text-[10px] text-black/30">{c.year}</span>
                       <span className="font-mono text-xs font-bold">{c.title}</span>
                     </div>
-                    <p className="font-body text-xs text-black/60 mt-1 leading-relaxed">{c.description}</p>
+                    <p className="font-sans text-xs text-black/60 mt-1 leading-relaxed">{c.description}</p>
                   </div>
                 ))}
               </div>
