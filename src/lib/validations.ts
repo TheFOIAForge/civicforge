@@ -12,16 +12,25 @@ const safeString = (maxLen = 500) =>
 
 const email = z.string().email().max(320);
 
-const usState = z.string().length(2).regex(/^[A-Z]{2}$/);
+// Coerce empty string to undefined so `.optional()` works with form inputs
+const optionalEmail = z.preprocess(
+  (val) => (typeof val === "string" && val.trim() === "" ? undefined : val),
+  email.optional()
+);
 
-const zipCode = z.string().regex(/^\d{5}(-\d{4})?$/);
+const usState = z.string().min(2).max(2).transform((s) => s.toUpperCase());
+
+const zipCode = z.string().regex(/^\d{5}(-\d{4})?$/, "Invalid ZIP code format");
 
 // ── Address ──────────────────────────────────────────────────
 
 export const addressSchema = z.object({
   name: safeString(200).optional(),
   address_line1: safeString(200),
-  address_line2: safeString(200).optional().default(""),
+  address_line2: z.preprocess(
+    (val) => (val == null || val === "" ? "" : val),
+    safeString(200).default("")
+  ),
   address_city: safeString(100),
   address_state: usState,
   address_zip: zipCode,
@@ -54,7 +63,7 @@ const recipientSchema = z.object({
 export const createCheckoutSchema = z.object({
   contactLogId: safeString(100),
   senderAddress: addressSchema,
-  senderEmail: email.optional(),
+  senderEmail: optionalEmail,
   letterContent: safeString(10_000),
   // Multi-rep format
   recipients: z.array(recipientSchema).min(1).max(10).optional(),
