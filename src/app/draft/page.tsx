@@ -43,10 +43,10 @@ import {
 
 type Mode = "letter" | "call" | "social";
 
-const modeConfig: Record<Mode, { label: string; desc: string; action: string; hint: string; Icon: typeof Mail; civicIcon: string }> = {
-  letter: { label: "Mail a Letter", desc: "Physical letter via USPS", action: "GENERATE LETTER", hint: "Strongest impact — lands on their desk", Icon: Mail, civicIcon: "/images/civic/icons/mail-animation.mp4" },
-  call: { label: "Make a Call", desc: "Talking points for a phone call", action: "GENERATE SCRIPT", hint: "Fastest way to get attention", Icon: Phone, civicIcon: "/images/civic/icons/call-phone.mp4" },
-  social: { label: "Send an Email", desc: "Email their office directly", action: "GENERATE EMAIL", hint: "Quick and convenient", Icon: PenLine, civicIcon: "/images/civic/icons/email-at.mp4" },
+const modeConfig: Record<Mode, { label: string; desc: string; action: string; hint: string; Icon: typeof Mail; civicIcon: string; civicPoster: string }> = {
+  letter: { label: "Mail a Letter", desc: "Physical letter via USPS", action: "GENERATE LETTER", hint: "Strongest impact — lands on their desk", Icon: Mail, civicIcon: "/images/civic/icons/mail-animation.mp4", civicPoster: "/images/civic/icons/mail-animation-poster.png" },
+  call: { label: "Make a Call", desc: "Talking points for a phone call", action: "GENERATE SCRIPT", hint: "Fastest way to get attention", Icon: Phone, civicIcon: "/images/civic/icons/call-phone.mp4", civicPoster: "/images/civic/icons/call-phone-poster.png" },
+  social: { label: "Send an Email", desc: "Email their office directly", action: "GENERATE EMAIL", hint: "Quick and convenient", Icon: PenLine, civicIcon: "/images/civic/icons/email-at.mp4", civicPoster: "/images/civic/icons/email-at-poster.png" },
 };
 
 const quickTopics = [
@@ -1087,7 +1087,22 @@ function DraftInner() {
                         <div className="py-2 text-center bg-black/80 transition-colors duration-300 group-hover:bg-black/90">
                           <span className="text-2xl tracking-[0.15em] uppercase transition-all duration-300 group-hover:tracking-[0.25em]" style={{ fontFamily: "'Bebas Neue', sans-serif", color: strokeColor, textShadow: `0 0 12px ${strokeColor}50` }}>{videoLabel}</span>
                         </div>
-                        <video src={cfg.civicIcon} autoPlay loop muted playsInline className="w-full object-cover min-h-[100px] transition-all duration-300 group-hover:brightness-110 group-hover:contrast-110" aria-hidden="true" />
+                        <video
+                          src={cfg.civicIcon}
+                          poster={cfg.civicPoster}
+                          loop
+                          muted
+                          playsInline
+                          preload="none"
+                          className="w-full object-cover min-h-[100px] transition-all duration-300 group-hover:brightness-110 group-hover:contrast-110"
+                          aria-hidden="true"
+                          onMouseEnter={(e) => e.currentTarget.play()}
+                          onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0; }}
+                          onTouchStart={(e) => {
+                            const v = e.currentTarget;
+                            if (v.paused) v.play(); else { v.pause(); v.currentTime = 0; }
+                          }}
+                        />
                       </div>
                       {isSelected && (
                         <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-md animate-[bounce_0.4s_ease-out]">
