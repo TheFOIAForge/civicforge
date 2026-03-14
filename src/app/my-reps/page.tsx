@@ -62,9 +62,13 @@ export default function MyRepsPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <h1 className="font-headline text-5xl md:text-6xl mb-2">My Representatives</h1>
-      <p className="font-mono text-sm text-gray-mid mb-8 font-bold">
+      <p className="font-mono text-sm text-gray-mid mb-2 font-bold">
         SAVE YOUR REPS FOR QUICK ACCESS ACROSS CHECKMYREP
       </p>
+      {/* Star separator */}
+      <div className="mb-8" style={{ color: "#c4a44a", letterSpacing: "0.5em", fontSize: "14px" }}>
+        &#9733; &#9733; &#9733;
+      </div>
 
       {/* Saved Reps */}
       {hasSavedReps ? (
@@ -72,21 +76,22 @@ export default function MyRepsPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-headline text-2xl">
               Your Saved Representatives
-              <span className="ml-3 px-2 py-1 bg-red text-white font-mono text-xs font-bold align-middle">
+              <span className="ml-3 px-2 py-1 font-mono text-xs font-bold align-middle" style={{ backgroundColor: "#C1272D", color: "#f5e6c8", border: "3px solid #1a1a1a" }}>
                 {myReps.length}
               </span>
             </h2>
             <div className="flex items-center gap-3">
               <Link
                 href="/draft"
-                className="px-4 py-2 bg-red text-white font-mono text-sm font-bold no-underline hover:bg-black transition-colors"
+                className="px-4 py-2 font-mono text-sm font-bold no-underline hover:bg-black transition-colors"
+                style={{ backgroundColor: "#C1272D", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
               >
                 WRITE TO THEM
               </Link>
               {!showClearConfirm ? (
                 <button
                   onClick={() => setShowClearConfirm(true)}
-                  className="px-3 py-2 bg-surface text-gray-mid font-mono text-xs font-bold border-2 border-border cursor-pointer hover:border-red hover:text-red transition-colors"
+                  className="px-3 py-2 bg-surface text-gray-mid font-mono text-xs font-bold border-3 border-border cursor-pointer hover:border-red hover:text-red transition-colors"
                 >
                   CLEAR ALL
                 </button>
@@ -95,13 +100,14 @@ export default function MyRepsPage() {
                   <span className="font-mono text-xs text-red font-bold">Sure?</span>
                   <button
                     onClick={() => { clearMyReps(); setShowClearConfirm(false); }}
-                    className="px-3 py-1.5 bg-red text-white font-mono text-xs font-bold cursor-pointer"
+                    className="px-3 py-1.5 font-mono text-xs font-bold cursor-pointer"
+                    style={{ backgroundColor: "#C1272D", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
                   >
                     YES
                   </button>
                   <button
                     onClick={() => setShowClearConfirm(false)}
-                    className="px-3 py-1.5 bg-surface text-black font-mono text-xs font-bold border border-border cursor-pointer"
+                    className="px-3 py-1.5 bg-surface text-black font-mono text-xs font-bold border-3 border-border cursor-pointer"
                   >
                     NO
                   </button>
@@ -119,7 +125,7 @@ export default function MyRepsPage() {
                 {/* Remove button */}
                 <button
                   onClick={() => removeRep(rep.id)}
-                  className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center bg-surface border border-border text-gray-mid hover:bg-red hover:text-white hover:border-red transition-colors cursor-pointer font-mono text-xs font-bold opacity-0 group-hover:opacity-100 focus:opacity-100"
+                  className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center bg-surface border-3 border-border text-gray-mid hover:bg-red hover:text-cream hover:border-red transition-colors cursor-pointer font-mono text-xs font-bold opacity-0 group-hover:opacity-100 focus:opacity-100"
                   aria-label={`Remove ${rep.fullName}`}
                   title="Remove from My Reps"
                 >
@@ -127,15 +133,15 @@ export default function MyRepsPage() {
                 </button>
 
                 <div className="flex items-start gap-4 mb-4">
-                  <div className={`w-14 h-14 ${partyBg(rep.party)} flex items-center justify-center shrink-0 overflow-hidden relative`}>
-                    <span className="font-headline text-xl text-white">{rep.firstName[0]}{rep.lastName[0]}</span>
+                  <div className={`w-14 h-14 ${partyBg(rep.party)} flex items-center justify-center shrink-0 overflow-hidden relative`} style={{ border: "3px solid #1a1a1a" }}>
+                    <span className="font-headline text-xl text-cream">{rep.firstName[0]}{rep.lastName[0]}</span>
                     {rep.photoUrl && (
                       <img src={rep.photoUrl} alt={rep.fullName} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className={`px-2 py-0.5 text-xs font-mono font-bold ${partyBg(rep.party)} text-white`}>
+                      <span className={`px-2 py-0.5 text-xs font-mono font-bold ${partyBg(rep.party)} text-cream`}>
                         {rep.party === "D" ? "DEM" : rep.party === "R" ? "GOP" : "IND"}
                       </span>
                       <span className="font-mono text-xs text-gray-mid font-bold">{rep.chamber}</span>
@@ -152,16 +158,16 @@ export default function MyRepsPage() {
                 {/* Quick stats */}
                 <div className="flex gap-3 mb-4 text-center">
                   {rep.partyLoyalty > 0 && (
-                    <div className="flex-1 bg-cream-dark p-2 border border-border-light">
+                    <div className="flex-1 bg-cream-dark p-2 border-3 border-border-light">
                       <span className="block font-headline text-lg">{rep.partyLoyalty}%</span>
                       <span className="font-mono text-[9px] text-gray-mid font-bold">PARTY LOYAL</span>
                     </div>
                   )}
-                  <div className="flex-1 bg-cream-dark p-2 border border-border-light">
+                  <div className="flex-1 bg-cream-dark p-2 border-3 border-border-light">
                     <span className="block font-headline text-lg">{rep.billsIntroduced}</span>
                     <span className="font-mono text-[9px] text-gray-mid font-bold">BILLS</span>
                   </div>
-                  <div className="flex-1 bg-cream-dark p-2 border border-border-light">
+                  <div className="flex-1 bg-cream-dark p-2 border-3 border-border-light">
                     <span className="block font-headline text-lg">{rep.committees.length}</span>
                     <span className="font-mono text-[9px] text-gray-mid font-bold">COMMITTEES</span>
                   </div>
@@ -171,19 +177,21 @@ export default function MyRepsPage() {
                 <div className="flex gap-2">
                   <Link
                     href={`/draft?rep=${rep.slug}`}
-                    className="flex-1 px-3 py-2.5 bg-red text-white font-mono text-xs font-bold no-underline text-center hover:bg-black transition-colors"
+                    className="flex-1 px-3 py-2.5 font-mono text-xs font-bold no-underline text-center hover:bg-black transition-colors"
+                    style={{ backgroundColor: "#C1272D", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
                   >
                     WRITE
                   </Link>
                   <Link
                     href={`/draft?rep=${rep.slug}&mode=call`}
-                    className="flex-1 px-3 py-2.5 bg-black text-white font-mono text-xs font-bold no-underline text-center hover:bg-red transition-colors"
+                    className="flex-1 px-3 py-2.5 font-mono text-xs font-bold no-underline text-center hover:bg-red transition-colors"
+                    style={{ backgroundColor: "#1a1a1a", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
                   >
                     CALL SCRIPT
                   </Link>
                   <Link
                     href={`/directory/${rep.slug}`}
-                    className="flex-1 px-3 py-2.5 bg-surface text-black font-mono text-xs font-bold no-underline text-center border-2 border-border hover:border-red transition-colors"
+                    className="flex-1 px-3 py-2.5 bg-surface text-black font-mono text-xs font-bold no-underline text-center border-3 border-border hover:border-red transition-colors"
                   >
                     PROFILE
                   </Link>
@@ -202,7 +210,7 @@ export default function MyRepsPage() {
         /* Empty state */
         <section className="border-3 border-border bg-surface p-8 md:p-12 mb-10 text-center">
           <div className="max-w-lg mx-auto">
-            <p className="font-headline text-4xl mb-2">🏛️</p>
+            <p className="font-headline text-4xl mb-2" style={{ color: "#c4a44a" }}>&#9733;</p>
             <h2 className="font-headline text-2xl mb-3">No Representatives Saved Yet</h2>
             <p className="font-body text-base text-gray-mid mb-6 leading-relaxed">
               Enter your address below to find and save your elected officials.
@@ -236,14 +244,15 @@ export default function MyRepsPage() {
           <button
             type="submit"
             disabled={lookupLoading}
-            className="px-8 py-4 bg-red text-white font-headline uppercase text-base tracking-wider border-3 border-red hover:bg-red-dark hover:border-red-dark transition-colors cursor-pointer disabled:bg-gray-mid disabled:border-gray-mid"
+            className="px-8 py-4 font-headline uppercase text-base tracking-wider cursor-pointer disabled:bg-gray-mid disabled:border-gray-mid transition-colors"
+            style={{ backgroundColor: "#C1272D", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
           >
             {lookupLoading ? "Searching..." : "Find My Reps"}
           </button>
         </form>
 
         {lookupError && (
-          <div className="p-4 border-2 border-red bg-red-light font-mono text-sm font-bold text-red" role="alert">
+          <div className="p-4 border-3 border-red bg-red-light font-mono text-sm font-bold text-red" role="alert">
             {lookupError}
           </div>
         )}
@@ -255,7 +264,8 @@ export default function MyRepsPage() {
               <h3 className="font-headline text-xl">Found {lookupResults.length} Representatives</h3>
               <button
                 onClick={() => handleSaveAll(lookupResults)}
-                className="px-5 py-2.5 bg-black text-white font-mono text-sm font-bold cursor-pointer hover:bg-red transition-colors"
+                className="px-5 py-2.5 font-mono text-sm font-bold cursor-pointer hover:bg-red transition-colors"
+                style={{ backgroundColor: "#1a1a1a", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
               >
                 SAVE ALL AS MY REPS
               </button>
@@ -264,15 +274,15 @@ export default function MyRepsPage() {
               {lookupResults.map((rep) => (
                 <div
                   key={rep.id}
-                  className="border-2 border-border bg-cream-dark p-4"
+                  className="border-3 border-border bg-cream-dark p-4"
                 >
-                  <div className={`w-12 h-12 ${partyBg(rep.party)} flex items-center justify-center mb-2 overflow-hidden relative`}>
-                    <span className="font-headline text-lg text-white">{rep.firstName[0]}{rep.lastName[0]}</span>
+                  <div className={`w-12 h-12 ${partyBg(rep.party)} flex items-center justify-center mb-2 overflow-hidden relative`} style={{ border: "3px solid #1a1a1a" }}>
+                    <span className="font-headline text-lg text-cream">{rep.firstName[0]}{rep.lastName[0]}</span>
                     {rep.photoUrl && (
                       <img src={rep.photoUrl} alt={rep.fullName} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                     )}
                   </div>
-                  <span className={`inline-block px-2 py-0.5 text-xs font-mono font-bold ${partyBg(rep.party)} text-white`}>
+                  <span className={`inline-block px-2 py-0.5 text-xs font-mono font-bold ${partyBg(rep.party)} text-cream`}>
                     {rep.party === "D" ? "DEM" : rep.party === "R" ? "GOP" : "IND"}
                   </span>
                   <h4 className="font-headline text-lg mt-1 normal-case">{rep.fullName}</h4>
@@ -281,7 +291,8 @@ export default function MyRepsPage() {
                   </p>
                   <button
                     onClick={() => saveRep(rep)}
-                    className="mt-3 w-full px-3 py-2 bg-red text-white font-mono text-xs font-bold cursor-pointer hover:bg-black transition-colors"
+                    className="mt-3 w-full px-3 py-2 font-mono text-xs font-bold cursor-pointer hover:bg-black transition-colors"
+                    style={{ backgroundColor: "#C1272D", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
                   >
                     SAVE THIS REP
                   </button>
@@ -294,7 +305,10 @@ export default function MyRepsPage() {
 
       {/* How it works */}
       <section className="border-3 border-border bg-cream-dark p-6 mb-8">
-        <h2 className="font-headline text-xl normal-case mb-3">How Saved Reps Work</h2>
+        <h2 className="font-headline text-xl normal-case mb-1">How Saved Reps Work</h2>
+        <div className="mb-4" style={{ color: "#c4a44a", letterSpacing: "0.5em", fontSize: "12px" }}>
+          &#9733; &#9733; &#9733;
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="flex items-start gap-3">
             <span className="font-headline text-lg text-red shrink-0">1.</span>

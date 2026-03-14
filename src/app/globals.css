@@ -1,29 +1,32 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Backgrounds */
-  --color-cream: #FAFAF9;
-  --color-cream-dark: #F5F5F4;
-  --color-surface: #FFFFFF;
-  --color-hover: #F1F5F9;
+  /* ═══ Propaganda Poster Palette ═══ */
+
+  /* Backgrounds — warm parchment tones */
+  --color-cream: #f5e6c8;
+  --color-cream-dark: #e8d5ad;
+  --color-cream-light: #faf3e6;
+  --color-surface: #faf6ee;
+  --color-hover: #efe2cc;
 
   /* Text */
-  --color-black: #0F172A;
+  --color-black: #1a1a1a;
 
   /* Primary (civic red) */
   --color-red: #C1272D;
   --color-red-dark: #9B1B20;
-  --color-red-light: #FEF2F2;
+  --color-red-light: #f5d5d0;
 
   /* Functional status */
   --color-status-red: #DC2626;
   --color-status-red-light: #FEF2F2;
 
-  /* Amber (warnings, in-committee) */
+  /* Amber (warnings) */
   --color-yellow: #D97706;
   --color-yellow-light: #FFFBEB;
 
-  /* Secondary accents (kept but muted) */
+  /* Secondary accents */
   --color-orange: #EA580C;
   --color-orange-light: #FFF7ED;
   --color-teal: #0F766E;
@@ -32,27 +35,33 @@
   --color-purple-light: #F5F3FF;
 
   /* Grays */
-  --color-gray-dark: #1E293B;
-  --color-gray-mid: #64748B;
-  --color-gray-light: #94A3B8;
+  --color-gray-dark: #2a2a2a;
+  --color-gray-mid: #5a5a5a;
+  --color-gray-light: #8a8a8a;
 
-  /* Borders */
-  --color-border: #334155;
-  --color-border-light: #CBD5E1;
+  /* Borders — dark, thick, intentional */
+  --color-border: #1a1a1a;
+  --color-border-light: #c4a44a;
 
   /* Status */
   --color-green: #16A34A;
   --color-green-light: #F0FDF4;
-  --color-blue: #2563EB;
+  --color-blue: #1a3a6b;
   --color-blue-light: #EFF6FF;
 
   /* Party */
-  --color-dem: #1E40AF;
+  --color-dem: #1a3a6b;
   --color-rep: #B91C1C;
   --color-ind: #78350F;
 
   /* Section backgrounds */
-  --color-cta: #1E3A5F;
+  --color-cta: #1a1a2e;
+  --color-navy: #1a3a6b;
+
+  /* Propaganda accents */
+  --color-gold: #c4a44a;
+  --color-parchment: #d4c5a0;
+  --color-aged: #b8a67e;
 
   /* Fonts */
   --font-headline: "Arial Black", "Arial Bold", Gadget, sans-serif;
@@ -96,7 +105,109 @@ h1, h2, h3, h4, h5, h6 {
   color: white;
 }
 
-/* ─── Scroll-driven entrance animations ─── */
+/* ═══ Propaganda Design Utilities ═══ */
+
+/* Sunburst radiating lines — the signature look */
+.sunburst {
+  background: repeating-conic-gradient(
+    var(--color-red) 0deg 10deg,
+    #f5e6c8 10deg 20deg
+  );
+}
+
+.sunburst-dark {
+  background: repeating-conic-gradient(
+    #C1272D 0deg 10deg,
+    #1a1a1a 10deg 20deg
+  );
+}
+
+.sunburst-cream {
+  background: repeating-conic-gradient(
+    #e8d5ad 0deg 10deg,
+    #f5e6c8 10deg 20deg
+  );
+}
+
+/* Aged paper texture — subtle noise overlay */
+.paper-texture {
+  position: relative;
+}
+.paper-texture::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.4;
+}
+
+/* Vintage border treatment */
+.propaganda-border {
+  border: 3px solid #1a1a1a;
+  box-shadow: inset 0 0 0 2px #c4a44a, inset 0 0 0 4px #1a1a1a;
+}
+
+/* Star separator */
+.star-separator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.star-separator::before,
+.star-separator::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  background: #1a1a1a;
+}
+
+/* Ribbon banner shape */
+.ribbon {
+  position: relative;
+  display: inline-block;
+  padding: 8px 24px;
+  background: #c4a44a;
+  color: #1a1a1a;
+  font-family: var(--font-headline);
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+}
+.ribbon::before,
+.ribbon::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+}
+.ribbon::before {
+  left: -10px;
+  border-right: 10px solid #c4a44a;
+  border-top: 16px solid transparent;
+  border-bottom: 16px solid transparent;
+}
+.ribbon::after {
+  right: -10px;
+  border-left: 10px solid #c4a44a;
+  border-top: 16px solid transparent;
+  border-bottom: 16px solid transparent;
+}
+
+/* Ornate frame effect */
+.ornate-frame {
+  border: 4px solid #1a1a1a;
+  box-shadow:
+    inset 0 0 0 3px #f5e6c8,
+    inset 0 0 0 5px #c4a44a,
+    inset 0 0 0 7px #1a1a1a,
+    0 4px 20px rgba(0,0,0,0.3);
+}
+
+/* ═══ Scroll-driven entrance animations ═══ */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -245,7 +356,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Gradient text */
 .text-gradient-red {
-  background: linear-gradient(135deg, #C1272D 0%, #f9a825 100%);
+  background: linear-gradient(135deg, #C1272D 0%, #c4a44a 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -299,7 +410,6 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ─── Print styles ─── */
 @media print {
-  /* Hide navigation, footer, and non-content UI */
   header,
   footer,
   nav,
@@ -308,7 +418,6 @@ h1, h2, h3, h4, h5, h6 {
     display: none !important;
   }
 
-  /* Reset backgrounds and colors for ink-friendly output */
   body {
     background: white !important;
     color: black !important;
@@ -316,13 +425,11 @@ h1, h2, h3, h4, h5, h6 {
     line-height: 1.5;
   }
 
-  /* Remove decorative borders and shadows */
   * {
     box-shadow: none !important;
     text-shadow: none !important;
   }
 
-  /* Make links show their URL */
   a[href^="http"]::after {
     content: " (" attr(href) ")";
     font-size: 9pt;
@@ -330,13 +437,11 @@ h1, h2, h3, h4, h5, h6 {
     font-family: "Courier New", monospace;
   }
 
-  /* Don't show URL for internal nav links */
   nav a::after,
   [data-print-hide] a::after {
     content: none !important;
   }
 
-  /* Printable content area — clean white, max width */
   [data-print-content] {
     max-width: 100% !important;
     padding: 0 !important;
@@ -345,7 +450,6 @@ h1, h2, h3, h4, h5, h6 {
     background: white !important;
   }
 
-  /* Letter/output — clean, readable, no background colors */
   [data-print-letter] {
     border: none !important;
     background: white !important;
@@ -357,7 +461,6 @@ h1, h2, h3, h4, h5, h6 {
     white-space: pre-wrap;
   }
 
-  /* Print header with rep info */
   [data-print-header] {
     border-bottom: 2pt solid black !important;
     padding-bottom: 12pt !important;
@@ -365,7 +468,6 @@ h1, h2, h3, h4, h5, h6 {
     background: white !important;
   }
 
-  /* Hide all interactive elements: buttons, forms, inputs */
   button,
   select,
   input,
@@ -375,12 +477,10 @@ h1, h2, h3, h4, h5, h6 {
     display: none !important;
   }
 
-  /* But show print-visible buttons if explicitly marked */
   [data-print-show] {
     display: block !important;
   }
 
-  /* Page breaks */
   h1, h2, h3 {
     page-break-after: avoid;
   }
@@ -389,13 +489,11 @@ h1, h2, h3, h4, h5, h6 {
     page-break-before: always;
   }
 
-  /* Ensure images don't overflow */
   img {
     max-width: 100% !important;
     height: auto !important;
   }
 
-  /* Contact log entries — clean borders for print */
   [data-print-entry] {
     border: 1pt solid #ccc !important;
     padding: 8pt !important;

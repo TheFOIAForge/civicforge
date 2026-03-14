@@ -30,7 +30,7 @@ export default function ScorecardPage() {
           </p>
           <Link
             href="/my-reps"
-            className="inline-block px-8 py-4 bg-red text-white font-headline uppercase text-base no-underline hover:bg-red-dark transition-colors border-3 border-red hover:border-red-dark"
+            className="inline-block px-8 py-4 bg-red text-cream font-headline uppercase text-base no-underline hover:bg-red-dark transition-colors border-3 border-black"
           >
             Find My Representatives
           </Link>
@@ -54,7 +54,7 @@ export default function ScorecardPage() {
           </p>
           <Link
             href="/votes"
-            className="inline-block px-8 py-4 bg-red text-white font-headline uppercase text-base no-underline hover:bg-red-dark transition-colors border-3 border-red hover:border-red-dark"
+            className="inline-block px-8 py-4 bg-red text-cream font-headline uppercase text-base no-underline hover:bg-red-dark transition-colors border-3 border-black"
           >
             Vote on Bills
           </Link>
@@ -137,7 +137,7 @@ export default function ScorecardPage() {
               {/* Link to profile */}
               <Link
                 href={`/directory/${rep.slug}`}
-                className="block mt-4 text-center font-mono text-xs text-red no-underline font-bold hover:text-black transition-colors"
+                className="block mt-4 text-center font-mono text-xs text-gold no-underline font-bold hover:text-red transition-colors"
               >
                 VIEW FULL PROFILE
               </Link>
@@ -152,7 +152,7 @@ export default function ScorecardPage() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-black text-white">
+              <tr className="bg-black text-cream">
                 <th scope="col" className="text-left px-4 py-3 font-mono text-xs font-bold uppercase">
                   Bill
                 </th>
@@ -236,7 +236,7 @@ export default function ScorecardPage() {
       <div className="text-center">
         <Link
           href="/votes"
-          className="inline-block px-8 py-4 bg-red text-white font-headline uppercase text-base no-underline hover:bg-red-dark transition-colors border-3 border-red hover:border-red-dark"
+          className="inline-block px-8 py-4 bg-red text-cream font-headline uppercase text-base no-underline hover:bg-red-dark transition-colors border-3 border-black"
         >
           Vote on More Bills &rarr;
         </Link>

@@ -12,15 +12,14 @@ export default function ActivistTopBar() {
     <header
       className="sticky top-0 z-50"
       style={{
-        background: "rgba(255,255,255,0.95)",
-        borderBottom: "1px solid rgba(0,0,0,0.1)",
-        backdropFilter: "blur(12px)",
+        background: "#1a1a1a",
+        borderBottom: "3px solid #c4a44a",
       }}
     >
       <div className="px-4">
         <div className="flex items-center justify-between h-14">
-          <Link href="/" className="no-underline text-gray-900 hover:text-gray-700">
-            <span className="font-headline text-2xl tracking-tight uppercase">
+          <Link href="/" className="no-underline">
+            <span className="font-headline text-2xl tracking-tight uppercase" style={{ color: "#f5e6c8" }}>
               Check<span style={{ color: "#C1272D" }}>My</span>Rep
             </span>
           </Link>
@@ -38,7 +37,7 @@ export default function ActivistTopBar() {
                 </div>
                 <div
                   className="w-8 h-8 flex items-center justify-center font-headline text-sm"
-                  style={{ backgroundColor: level.color, color: "#fff" }}
+                  style={{ backgroundColor: level.color, color: "#fff", border: "2px solid #c4a44a" }}
                 >
                   {profile?.display_name?.[0]?.toUpperCase() || "?"}
                 </div>
@@ -49,8 +48,8 @@ export default function ActivistTopBar() {
                 className="px-3 py-1.5 font-mono text-[11px] font-bold uppercase cursor-pointer"
                 style={{
                   backgroundColor: "#C1272D",
-                  color: "#fff",
-                  border: "none",
+                  color: "#f5e6c8",
+                  border: "2px solid #c4a44a",
                 }}
               >
                 Sign In

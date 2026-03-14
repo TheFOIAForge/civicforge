@@ -59,16 +59,16 @@ interface BillAIState {
 
 function BillSkeleton() {
   return (
-    <div className="border-2 border-border-light p-5 bg-cream motion-safe:animate-pulse">
+    <div className="p-5 motion-safe:animate-pulse" style={{ border: "3px solid #1a1a1a", backgroundColor: "#faf6ee" }}>
       <div className="flex items-center gap-2 mb-3">
-        <div className="h-5 w-24 bg-border-light" />
-        <div className="h-5 w-16 bg-border-light" />
-        <div className="h-5 w-20 bg-border-light" />
+        <div className="h-5 w-24" style={{ backgroundColor: "#f5e6c8" }} />
+        <div className="h-5 w-16" style={{ backgroundColor: "#f5e6c8" }} />
+        <div className="h-5 w-20" style={{ backgroundColor: "#f5e6c8" }} />
       </div>
-      <div className="h-6 w-3/4 bg-border-light mb-2" />
-      <div className="h-4 w-1/2 bg-border-light mb-2" />
-      <div className="h-4 w-full bg-border-light" />
-      <div className="h-4 w-5/6 bg-border-light mt-1" />
+      <div className="h-6 w-3/4 mb-2" style={{ backgroundColor: "#f5e6c8" }} />
+      <div className="h-4 w-1/2 mb-2" style={{ backgroundColor: "#f5e6c8" }} />
+      <div className="h-4 w-full" style={{ backgroundColor: "#f5e6c8" }} />
+      <div className="h-4 w-5/6 mt-1" style={{ backgroundColor: "#f5e6c8" }} />
     </div>
   );
 }
@@ -264,9 +264,9 @@ RULES:
 
   if (!issue) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-        <h1 className="font-headline text-5xl">Issue Not Found</h1>
-        <Link href="/issues" className="inline-block mt-6 px-8 py-4 bg-black text-white font-headline uppercase text-base no-underline hover:bg-red transition-colors">
+      <div className="max-w-4xl mx-auto px-4 py-16 text-center" style={{ backgroundColor: "#f5e6c8" }}>
+        <h1 className="font-headline text-5xl" style={{ color: "#1a1a1a" }}>Issue Not Found</h1>
+        <Link href="/issues" className="inline-block mt-6 px-8 py-4 text-white font-headline uppercase text-base no-underline hover:opacity-90 transition-colors" style={{ backgroundColor: "#C1272D", border: "3px solid #1a1a1a" }}>
           Back to Issues
         </Link>
       </div>
@@ -286,22 +286,24 @@ RULES:
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <Link href="/issues" className="font-mono text-sm text-gray-mid hover:text-red no-underline font-bold">
+      <Link href="/issues" className="font-mono text-sm no-underline font-bold hover:opacity-80" style={{ color: "#c4a44a" }}>
         &larr; BACK TO ISSUES
       </Link>
 
       {/* Header */}
-      <div className="mt-4 bg-black text-white border-3 border-border p-8">
+      <div className="mt-4 text-white p-8" style={{ backgroundColor: "#1a1a1a", border: "3px solid #1a1a1a" }}>
         <span className="block mb-4" style={{ fontSize: 80 }}>{emoji}</span>
-        <h1 className="font-headline text-5xl md:text-6xl normal-case text-white">
+        <h1 className="font-headline text-5xl md:text-6xl normal-case" style={{ color: "#faf6ee" }}>
           {issue.name}
         </h1>
-        <p className="mt-4 font-body text-lg text-white/85">
+        <p className="font-mono text-xs mt-2 font-bold" style={{ color: "#c4a44a" }}>&#9733; &#9733; &#9733;</p>
+        <p className="mt-4 font-body text-lg" style={{ color: "rgba(250,246,238,0.85)" }}>
           {issue.description}
         </p>
         <Link
           href={`/draft?issue=${issue.slug}`}
-          className="inline-block mt-6 px-8 py-4 bg-red text-white font-headline uppercase text-base no-underline hover:bg-red-dark transition-colors border-3 border-red hover:border-red-dark"
+          className="inline-block mt-6 px-8 py-4 text-white font-headline uppercase text-base no-underline hover:opacity-90 transition-colors"
+          style={{ backgroundColor: "#C1272D", border: "3px solid #C1272D" }}
         >
           Take Action on {issue.name} &rarr;
         </Link>
@@ -311,22 +313,23 @@ RULES:
         {/* Main content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Explainer */}
-          <section className="border-3 border-border p-6 bg-surface">
-            <h2 className="font-headline text-2xl mb-4">{"\u{1F4D6}"} What You Need to Know</h2>
-            <p className="font-body text-base leading-relaxed text-gray-mid">{issue.explainer}</p>
+          <section className="p-6" style={{ border: "3px solid #1a1a1a", backgroundColor: "#faf6ee" }}>
+            <h2 className="font-headline text-2xl mb-1" style={{ color: "#1a1a1a" }}>What You Need to Know</h2>
+            <p className="font-mono text-xs mb-4 font-bold" style={{ color: "#c4a44a" }}>&#9733; &#9733; &#9733;</p>
+            <p className="font-body text-base leading-relaxed" style={{ color: "#3a3a3a" }}>{issue.explainer}</p>
           </section>
 
           {/* Legislation Feed */}
-          <section className="border-3 border-border p-6 bg-surface">
+          <section className="p-6" style={{ border: "3px solid #1a1a1a", backgroundColor: "#faf6ee" }}>
             <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
-              <h2 className="font-headline text-2xl">{"\u{1F4DC}"} Current Legislation</h2>
+              <h2 className="font-headline text-2xl" style={{ color: "#1a1a1a" }}>Current Legislation</h2>
               {!isUsingFallback && (
-                <span className="font-mono text-[10px] text-gray-mid border border-border-light px-2 py-1">
+                <span className="ribbon">
                   LIVE FROM CONGRESS.GOV
                 </span>
               )}
               {isUsingFallback && !billsLoading && (
-                <span className="font-mono text-[10px] text-gray-mid border border-border-light px-2 py-1">
+                <span className="ribbon">
                   SAMPLE LEGISLATION
                 </span>
               )}
@@ -343,24 +346,25 @@ RULES:
 
             {/* Bills list */}
             {!billsLoading && displayBills.length === 0 ? (
-              <p className="font-mono text-base text-gray-mid">No tracked legislation for this issue yet.</p>
+              <p className="font-mono text-base" style={{ color: "#5a5a5a" }}>No tracked legislation for this issue yet.</p>
             ) : !billsLoading ? (
               <div className="space-y-4">
                 {displayBills.map((bill) => (
-                  <div key={bill.id} className="border-2 border-border-light p-5 bg-cream">
+                  <div key={bill.id} className="p-5" style={{ border: "3px solid #1a1a1a", backgroundColor: "#f5e6c8" }}>
                     <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className={`px-3 py-1 font-mono text-xs font-bold ${statusColor(bill.status)}`}>
                           {statusLabel(bill.status)}
                         </span>
-                        <span className="font-mono text-sm text-gray-mid font-bold">{bill.billNumber}</span>
-                        <span className="font-mono text-sm text-gray-mid">{bill.date}</span>
+                        <span className="font-mono text-sm font-bold" style={{ color: "#1a1a1a" }}>{bill.billNumber}</span>
+                        <span className="font-mono text-sm" style={{ color: "#5a5a5a" }}>{bill.date}</span>
                       </div>
                       {/* Ask AI button */}
                       {hasApiKey ? (
                         <button
                           onClick={() => startBillAI(bill)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-red text-white font-mono text-xs font-bold cursor-pointer hover:bg-black transition-colors shrink-0"
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-white font-mono text-xs font-bold cursor-pointer hover:opacity-90 transition-colors shrink-0"
+                          style={{ backgroundColor: "#C1272D", border: "2px solid #1a1a1a" }}
                         >
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -370,21 +374,22 @@ RULES:
                       ) : (
                         <Link
                           href="/settings"
-                          className="flex items-center gap-1.5 px-3 py-1.5 border border-border text-gray-mid font-mono text-[10px] font-bold no-underline hover:text-red hover:border-red transition-colors shrink-0"
+                          className="flex items-center gap-1.5 px-3 py-1.5 font-mono text-[10px] font-bold no-underline transition-colors shrink-0"
+                          style={{ border: "2px solid #1a1a1a", color: "#5a5a5a" }}
                         >
                           SET API KEY FOR AI
                         </Link>
                       )}
                     </div>
-                    <h3 className="font-headline text-lg normal-case">{bill.title}</h3>
-                    <p className="font-mono text-sm text-gray-mid mt-1 font-bold">
+                    <h3 className="font-headline text-lg normal-case" style={{ color: "#1a1a1a" }}>{bill.title}</h3>
+                    <p className="font-mono text-sm mt-1 font-bold" style={{ color: "#3a3a3a" }}>
                       Sponsor: {bill.sponsor}
                     </p>
-                    <p className="font-body text-base text-gray-mid mt-2">{bill.summary}</p>
+                    <p className="font-body text-base mt-2" style={{ color: "#5a5a5a" }}>{bill.summary}</p>
 
                     {/* Scorecard YEA/NAY buttons */}
-                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border-light">
-                      <span className="font-mono text-[10px] text-gray-mid font-bold">YOUR POSITION:</span>
+                    <div className="flex items-center gap-2 mt-3 pt-3" style={{ borderTop: "2px solid #1a1a1a" }}>
+                      <span className="font-mono text-[10px] font-bold" style={{ color: "#5a5a5a" }}>YOUR POSITION:</span>
                       <button
                         onClick={() => {
                           if (hasVoted(bill.billNumber) === "YEA") {
@@ -420,20 +425,21 @@ RULES:
                       {hasVoted(bill.billNumber) && (
                         <Link
                           href="/scorecard"
-                          className="font-mono text-[10px] text-red no-underline font-bold hover:text-black transition-colors ml-2"
+                          className="font-mono text-[10px] no-underline font-bold transition-colors ml-2"
+                          style={{ color: "#C1272D" }}
                         >
                           VIEW SCORECARD
                         </Link>
                       )}
                     </div>
 
-                    {/* AI Analysis Panel — inline under this bill */}
+                    {/* AI Analysis Panel -- inline under this bill */}
                     {billAI && billAI.billId === bill.id && (
-                      <div className="mt-4 border-t-2 border-border-light pt-4">
+                      <div className="mt-4 pt-4" style={{ borderTop: "3px solid #1a1a1a" }}>
                         {/* Member picker */}
                         {billAI.phase === "picking" && (
                           <div>
-                            <p className="font-mono text-xs font-bold text-gray-mid mb-2">
+                            <p className="font-mono text-xs font-bold mb-2" style={{ color: "#5a5a5a" }}>
                               SELECT A MEMBER TO ANALYZE THIS BILL IN THEIR CONTEXT:
                             </p>
                             <input
@@ -445,18 +451,20 @@ RULES:
                                   prev ? { ...prev, memberSearch: e.target.value } : null
                                 )
                               }
-                              className="w-full px-3 py-2 border-2 border-border bg-surface font-mono text-sm mb-2 focus:outline-none focus:border-red"
+                              className="w-full px-3 py-2 font-mono text-sm mb-2 focus:outline-none"
+                              style={{ border: "3px solid #1a1a1a", backgroundColor: "#faf6ee", color: "#1a1a1a" }}
                               autoFocus
                             />
                             {allMembers.length === 0 ? (
-                              <p className="font-mono text-xs text-gray-mid motion-safe:animate-pulse">Loading members...</p>
+                              <p className="font-mono text-xs motion-safe:animate-pulse" style={{ color: "#5a5a5a" }}>Loading members...</p>
                             ) : (
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-64 overflow-y-auto">
                                 {filteredMembers.map((m) => (
                                   <button
                                     key={m.id}
                                     onClick={() => selectMemberForBill(bill, m)}
-                                    className="flex items-center gap-2 p-2 border border-border-light hover:border-red hover:bg-red/5 transition-colors cursor-pointer text-left"
+                                    className="flex items-center gap-2 p-2 transition-colors cursor-pointer text-left"
+                                    style={{ border: "2px solid #1a1a1a", backgroundColor: "#faf6ee" }}
                                   >
                                     <span
                                       className={`w-7 h-7 flex items-center justify-center text-white text-[10px] font-mono font-bold shrink-0 ${
@@ -466,8 +474,8 @@ RULES:
                                       {m.party}
                                     </span>
                                     <div className="min-w-0">
-                                      <div className="font-mono text-xs font-bold truncate">{m.fullName}</div>
-                                      <div className="font-mono text-[10px] text-gray-mid">{m.title} — {m.stateAbbr}</div>
+                                      <div className="font-mono text-xs font-bold truncate" style={{ color: "#1a1a1a" }}>{m.fullName}</div>
+                                      <div className="font-mono text-[10px]" style={{ color: "#5a5a5a" }}>{m.title} — {m.stateAbbr}</div>
                                     </div>
                                   </button>
                                 ))}
@@ -475,7 +483,7 @@ RULES:
                             )}
                             <button
                               onClick={() => setBillAI(null)}
-                              className="mt-2 font-mono text-xs text-gray-mid hover:text-red cursor-pointer"
+                              className="mt-2 font-mono text-xs cursor-pointer" style={{ color: "#5a5a5a" }}
                             >
                               Cancel
                             </button>
@@ -485,10 +493,10 @@ RULES:
                         {/* Loading */}
                         {billAI.phase === "loading" && billAI.selectedMember && (
                           <div className="text-center py-4">
-                            <p className="font-mono text-sm text-gray-mid motion-safe:animate-pulse mb-1">
+                            <p className="font-mono text-sm motion-safe:animate-pulse mb-1" style={{ color: "#3a3a3a" }}>
                               Analyzing {bill.billNumber} in context of {billAI.selectedMember.fullName}...
                             </p>
-                            <p className="font-mono text-[10px] text-gray-mid">
+                            <p className="font-mono text-[10px]" style={{ color: "#5a5a5a" }}>
                               Cross-referencing donors, lobbying filings, and committee data
                             </p>
                           </div>
@@ -499,30 +507,31 @@ RULES:
                           <div>
                             {billAI.selectedMember && (
                               <div className="flex items-center gap-2 mb-3">
-                                <span className="font-mono text-xs font-bold text-gray-mid">ANALYSIS FOR:</span>
+                                <span className="font-mono text-xs font-bold" style={{ color: "#5a5a5a" }}>ANALYSIS FOR:</span>
                                 <Link
                                   href={`/directory/${billAI.selectedMember.slug}`}
-                                  className="font-mono text-xs font-bold text-red no-underline hover:underline"
+                                  className="font-mono text-xs font-bold no-underline hover:underline"
+                                  style={{ color: "#C1272D" }}
                                 >
                                   {billAI.selectedMember.fullName} ({billAI.selectedMember.party}-{billAI.selectedMember.stateAbbr})
                                 </Link>
                               </div>
                             )}
-                            <div className="bg-surface border-2 border-border p-4">
-                              <p className="font-body text-sm leading-relaxed whitespace-pre-wrap">
+                            <div className="p-4" style={{ backgroundColor: "#faf6ee", border: "3px solid #1a1a1a" }}>
+                              <p className="font-body text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "#3a3a3a" }}>
                                 {billAI.analysis}
                               </p>
                             </div>
                             <div className="flex gap-3 mt-2">
                               <button
                                 onClick={() => startBillAI(bill)}
-                                className="font-mono text-xs text-gray-mid hover:text-red cursor-pointer font-bold"
+                                className="font-mono text-xs cursor-pointer font-bold" style={{ color: "#c4a44a" }}
                               >
                                 ANALYZE WITH DIFFERENT MEMBER
                               </button>
                               <button
                                 onClick={() => setBillAI(null)}
-                                className="font-mono text-xs text-gray-mid hover:text-red cursor-pointer"
+                                className="font-mono text-xs cursor-pointer" style={{ color: "#5a5a5a" }}
                               >
                                 Close
                               </button>
@@ -537,7 +546,8 @@ RULES:
                 {/* View more legislation label */}
                 {!isUsingFallback && (
                   <span
-                    className="block mt-4 px-5 py-3 border-3 border-border text-center font-headline uppercase text-base text-black"
+                    className="block mt-4 px-5 py-3 text-center font-headline uppercase text-base"
+                    style={{ border: "3px solid #1a1a1a", color: "#1a1a1a", backgroundColor: "#f5e6c8" }}
                   >
                     View more legislation &rarr;
                   </span>
@@ -547,21 +557,23 @@ RULES:
           </section>
 
           {/* Related reps */}
-          <section className="border-3 border-border p-6 bg-surface">
-            <h2 className="font-headline text-2xl mb-5">{"\u{1F465}"} Write to These Members</h2>
+          <section className="p-6" style={{ border: "3px solid #1a1a1a", backgroundColor: "#faf6ee" }}>
+            <h2 className="font-headline text-2xl mb-1" style={{ color: "#1a1a1a" }}>Write to These Members</h2>
+            <p className="font-mono text-xs mb-5 font-bold" style={{ color: "#c4a44a" }}>&#9733; &#9733; &#9733;</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {featuredReps.map((rep) => (
                 <Link
                   key={rep.id}
                   href={`/draft?rep=${rep.slug}&issue=${issue.slug}`}
-                  className="no-underline text-black border-2 border-border p-4 hover:bg-hover transition-colors flex items-center gap-3 group"
+                  className="no-underline p-4 transition-colors flex items-center gap-3 group"
+                  style={{ border: "3px solid #1a1a1a", color: "#1a1a1a", backgroundColor: "#f5e6c8" }}
                 >
                   <div className={`w-10 h-10 ${rep.party === "D" ? "bg-dem" : rep.party === "R" ? "bg-rep" : "bg-ind"} flex items-center justify-center shrink-0`}>
                     <span className="font-headline text-sm text-white">{rep.firstName[0]}{rep.lastName[0]}</span>
                   </div>
                   <div>
-                    <div className="font-headline text-base normal-case group-hover:text-red">{rep.fullName}</div>
-                    <div className="font-mono text-xs text-gray-mid">{rep.title} — {rep.state}</div>
+                    <div className="font-headline text-base normal-case" style={{ color: "#1a1a1a" }}>{rep.fullName}</div>
+                    <div className="font-mono text-xs" style={{ color: "#5a5a5a" }}>{rep.title} — {rep.state}</div>
                   </div>
                 </Link>
               ))}
@@ -572,39 +584,44 @@ RULES:
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Talking Points */}
-          <section className="border-3 border-border p-6 bg-cream-dark">
-            <h2 className="font-headline text-2xl mb-5">{"\u{1F4AC}"} Talking Points</h2>
+          <section className="p-6" style={{ border: "3px solid #1a1a1a", backgroundColor: "#f5e6c8" }}>
+            <h2 className="font-headline text-2xl mb-1" style={{ color: "#1a1a1a" }}>Talking Points</h2>
+            <p className="font-mono text-xs mb-5 font-bold" style={{ color: "#c4a44a" }}>&#9733; &#9733; &#9733;</p>
             <div className="space-y-4">
               {issue.talkingPoints.map((point, i) => (
-                <div key={i} className="border-l-4 border-red pl-4 py-1">
-                  <p className="font-body text-base text-gray-mid">{point}</p>
+                <div key={i} className="pl-4 py-1" style={{ borderLeft: "4px solid #C1272D" }}>
+                  <p className="font-body text-base" style={{ color: "#3a3a3a" }}>{point}</p>
                 </div>
               ))}
             </div>
           </section>
 
           {/* Quick actions */}
-          <section className="border-3 border-border p-6 bg-surface">
-            <h2 className="font-headline text-2xl mb-4">Take Action</h2>
-            <p className="font-body text-base text-gray-mid mb-5">
+          <section className="p-6" style={{ border: "3px solid #1a1a1a", backgroundColor: "#faf6ee" }}>
+            <h2 className="font-headline text-2xl mb-1" style={{ color: "#1a1a1a" }}>Take Action</h2>
+            <p className="font-mono text-xs mb-4 font-bold" style={{ color: "#c4a44a" }}>&#9733; &#9733; &#9733;</p>
+            <p className="font-body text-base mb-5" style={{ color: "#5a5a5a" }}>
               Use these talking points to draft a letter, call script, or social
               post to your representatives.
             </p>
             <Link
               href={`/draft?issue=${issue.slug}`}
-              className="block px-5 py-4 bg-red text-white font-headline uppercase text-base text-center no-underline hover:bg-red-dark transition-colors mb-3"
+              className="block px-5 py-4 text-white font-headline uppercase text-base text-center no-underline hover:opacity-90 transition-colors mb-3"
+              style={{ backgroundColor: "#C1272D", border: "3px solid #1a1a1a" }}
             >
               {"\u{270F}\u{FE0F}"} Draft a Letter
             </Link>
             <Link
               href={`/draft?issue=${issue.slug}&mode=call`}
-              className="block px-5 py-4 bg-black text-white font-headline uppercase text-base text-center no-underline hover:bg-gray-dark transition-colors mb-3"
+              className="block px-5 py-4 text-white font-headline uppercase text-base text-center no-underline hover:opacity-90 transition-colors mb-3"
+              style={{ backgroundColor: "#1a1a1a", border: "3px solid #1a1a1a" }}
             >
               {"\u{1F4DE}"} Call Script
             </Link>
             <Link
               href="/directory"
-              className="block px-5 py-4 bg-black text-white font-headline uppercase text-base text-center no-underline hover:bg-gray-dark transition-colors"
+              className="block px-5 py-4 text-white font-headline uppercase text-base text-center no-underline hover:opacity-90 transition-colors"
+              style={{ backgroundColor: "#1a1a1a", border: "3px solid #1a1a1a" }}
             >
               {"\u{1F50D}"} Find Your Rep
             </Link>
@@ -612,7 +629,8 @@ RULES:
               href="https://www.thefoiaforge.org/new-request"
               target="_blank"
               rel="noopener noreferrer"
-              className="block px-5 py-4 bg-[#1a1a2e] text-white font-headline uppercase text-base text-center no-underline hover:bg-red transition-colors mt-3"
+              className="block px-5 py-4 text-white font-headline uppercase text-base text-center no-underline hover:opacity-90 transition-colors mt-3"
+              style={{ backgroundColor: "#c4a44a", border: "3px solid #1a1a1a" }}
             >
               📄 File a FOIA Request
             </a>

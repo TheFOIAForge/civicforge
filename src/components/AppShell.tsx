@@ -18,7 +18,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <main
         id="main-content"
         className="flex-1"
-        style={{ paddingBottom: "5rem", backgroundColor: "#ffffff" }}
+        style={{ paddingBottom: "5rem", backgroundColor: "#f5e6c8" }}
       >
         {children}
       </main>

@@ -389,7 +389,7 @@ export default function VotesPage() {
                 onClick={() => setChamberFilter(ch)}
                 className={`px-4 py-2 font-mono text-xs font-bold uppercase cursor-pointer border-2 transition-colors ${
                   chamberFilter === ch
-                    ? "bg-black text-white border-black"
+                    ? "bg-black text-cream border-black"
                     : "bg-surface text-gray-mid border-border hover:border-black"
                 }`}
               >
@@ -426,12 +426,12 @@ export default function VotesPage() {
               >
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
                   {rv.billNumber && (
-                    <span className="px-2 py-1 bg-black text-white font-mono text-[10px] font-bold">
+                    <span className="px-2 py-1 bg-black text-cream font-mono text-[10px] font-bold">
                       {rv.billNumber}
                     </span>
                   )}
                   <span className={`px-2 py-1 font-mono text-[10px] font-bold text-white ${
-                    rv.chamber === "Senate" ? "bg-blue-900" : "bg-red"
+                    rv.chamber === "Senate" ? "bg-navy" : "bg-red"
                   }`}>
                     {rv.chamber.toUpperCase()}
                   </span>
@@ -512,7 +512,7 @@ export default function VotesPage() {
               <button
                 onClick={() => handleSearch()}
                 disabled={loading || !billInput.trim()}
-                className="w-full px-8 py-3 bg-black text-white font-mono text-sm uppercase cursor-pointer hover:bg-red transition-colors font-bold disabled:opacity-40 disabled:cursor-not-allowed border-2 border-black"
+                className="w-full px-8 py-3 bg-red text-cream font-mono text-sm uppercase cursor-pointer hover:bg-red-dark transition-colors font-bold disabled:opacity-40 disabled:cursor-not-allowed border-3 border-black"
               >
                 {loading ? "Searching..." : "Search"}
               </button>
@@ -523,7 +523,7 @@ export default function VotesPage() {
         {/* Notable bills */}
         <div className="mt-6 border-3 border-border bg-surface p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-black flex items-center justify-center text-white shrink-0">
+            <div className="w-8 h-8 bg-black flex items-center justify-center text-cream shrink-0">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
@@ -546,11 +546,11 @@ export default function VotesPage() {
                 className="text-left border-2 border-border-light bg-cream-dark p-4 hover:border-red hover:bg-hover transition-colors cursor-pointer group"
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="px-2 py-1 bg-black text-white font-mono text-xs font-bold">
+                  <span className="px-2 py-1 bg-black text-cream font-mono text-xs font-bold">
                     {bill.label}
                   </span>
                   <span className={`px-2 py-1 font-mono text-[10px] font-bold text-white ${
-                    bill.chamber === "Senate" ? "bg-blue-900" : "bg-red"
+                    bill.chamber === "Senate" ? "bg-navy" : "bg-red"
                   }`}>
                     {bill.chamber.toUpperCase()}
                   </span>
@@ -559,7 +559,7 @@ export default function VotesPage() {
                   </span>
                 </div>
                 <p className="font-body text-sm text-gray-mid leading-relaxed mb-2">{bill.desc}</p>
-                <span className="font-mono text-xs font-bold text-black/40 group-hover:text-red transition-colors">
+                <span className="font-mono text-xs font-bold text-gray-mid group-hover:text-red transition-colors">
                   LOOK UP VOTES &rarr;
                 </span>
               </button>
@@ -617,7 +617,7 @@ export default function VotesPage() {
             <div className="h-2 w-full bg-red" />
             <div className="p-6">
               <div className="flex items-start gap-4 mb-4">
-                <span className="px-3 py-1.5 bg-black text-white font-mono text-sm font-bold shrink-0">
+                <span className="px-3 py-1.5 bg-black text-cream font-mono text-sm font-bold shrink-0">
                   {result.bill.number}
                 </span>
                 <div>
@@ -654,7 +654,7 @@ export default function VotesPage() {
               <div className="mt-4 pt-4 border-t-2 border-border-light flex flex-wrap items-center gap-4">
                 <Link
                   href={`/draft?issue=${encodeURIComponent(`${result.bill.number}: ${result.bill.title}`)}`}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-red text-white font-mono text-xs font-bold no-underline hover:bg-black transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-red text-cream font-mono text-xs font-bold no-underline hover:bg-red-dark transition-colors border border-black"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -804,7 +804,7 @@ export default function VotesPage() {
                         }`}
                       >
                         <span className={`w-3 h-3 flex items-center justify-center text-white text-[8px] ${
-                          partyLabel(v.party) === "DEM" ? "bg-blue-900" : "bg-red"
+                          partyLabel(v.party) === "DEM" ? "bg-navy" : "bg-red"
                         }`}>
                           {v.party.charAt(0)}
                         </span>
@@ -869,7 +869,7 @@ export default function VotesPage() {
                     onClick={() => setPartyFilter(p)}
                     className={`px-4 py-2 font-mono text-xs font-bold uppercase cursor-pointer border-2 transition-colors ${
                       partyFilter === p
-                        ? "bg-black text-white border-black"
+                        ? "bg-black text-cream border-black"
                         : "bg-surface text-gray-mid border-border hover:border-black"
                     }`}
                   >
@@ -887,7 +887,7 @@ export default function VotesPage() {
               <div className="overflow-x-auto border-2 border-border">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-black text-white">
+                    <tr className="bg-black text-cream">
                       <th
                         scope="col"
                         onClick={() => handleSort("memberName")}
@@ -967,7 +967,7 @@ export default function VotesPage() {
                           <td className="px-4 py-3">
                             <Link
                               href={`/draft?rep=${encodeURIComponent(v.memberName)}&issue=${encodeURIComponent(`${result.bill.number}: ${result.bill.title} — ${v.memberName} voted ${v.vote.toUpperCase()} on this bill.`)}`}
-                              className="inline-flex items-center gap-1 px-2 py-1 bg-red text-white font-mono text-[10px] font-bold no-underline hover:bg-black transition-colors"
+                              className="inline-flex items-center gap-1 px-2 py-1 bg-red text-cream font-mono text-[10px] font-bold no-underline hover:bg-red-dark transition-colors border border-black"
                             >
                               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -1144,7 +1144,7 @@ export default function VotesPage() {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="border-2 border-border p-4 bg-cream-dark">
-              <div className="w-10 h-10 bg-red flex items-center justify-center text-white mb-3">
+              <div className="w-10 h-10 bg-red flex items-center justify-center text-cream mb-3">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
@@ -1159,7 +1159,7 @@ export default function VotesPage() {
               </Link>
             </div>
             <div className="border-2 border-border p-4 bg-cream-dark">
-              <div className="w-10 h-10 bg-black flex items-center justify-center text-white mb-3">
+              <div className="w-10 h-10 bg-black flex items-center justify-center text-cream mb-3">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
@@ -1175,7 +1175,7 @@ export default function VotesPage() {
               </Link>
             </div>
             <div className="border-2 border-border p-4 bg-cream-dark">
-              <div className="w-10 h-10 bg-blue-900 flex items-center justify-center text-white mb-3">
+              <div className="w-10 h-10 bg-navy flex items-center justify-center text-cream mb-3">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>

@@ -120,9 +120,13 @@ export default function SettingsPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="font-headline text-5xl md:text-6xl mb-2">Settings</h1>
-      <p className="font-mono text-sm text-gray-mid mb-8 font-bold">
+      <p className="font-mono text-sm text-gray-mid mb-2 font-bold">
         YOUR API KEY. YOUR BROWSER. YOUR DATA. NOTHING LEAVES YOUR MACHINE.
       </p>
+      {/* Star separator */}
+      <div className="mb-8" style={{ color: "#c4a44a", letterSpacing: "0.5em", fontSize: "14px" }}>
+        &#9733; &#9733; &#9733;
+      </div>
 
       {/* API Key Section */}
       <section className="border-3 border-border p-6 bg-surface mb-6">
@@ -134,7 +138,7 @@ export default function SettingsPage() {
         </p>
 
         {savedKey && (
-          <div className="mb-5 p-4 bg-green-light border-2 border-green">
+          <div className="mb-5 p-4 bg-green-light border-3 border-green">
             <p className="font-mono text-sm text-green font-bold mb-1">{"\u{2705}"} KEY SAVED</p>
             <p className="font-mono text-base text-gray-mid">{masked}</p>
           </div>
@@ -149,30 +153,32 @@ export default function SettingsPage() {
             onChange={(e) => setApiKey(e.target.value)}
             placeholder="sk-ant-api03-..."
             aria-required="true"
-            className="w-full px-4 py-3 border-2 border-border font-mono text-base focus:outline-none focus:border-red bg-cream"
+            className="w-full px-4 py-3 border-3 border-border font-mono text-base focus:outline-none focus:border-red bg-cream"
           />
         </div>
 
         <div className="flex flex-wrap gap-3">
           <button
             onClick={handleSave}
-            className="px-6 py-3 bg-red text-white font-headline uppercase text-base cursor-pointer hover:bg-red-dark transition-colors border-3 border-red hover:border-red-dark"
+            className="px-6 py-3 font-headline uppercase text-base cursor-pointer hover:bg-red-dark transition-colors"
+            style={{ backgroundColor: "#C1272D", color: "#f5e6c8", border: "3px solid #1a1a1a" }}
           >
             Save Key
           </button>
           <button
             onClick={handleTest}
             disabled={testing || !apiKey.trim()}
-            className={`px-6 py-3 font-headline uppercase text-base border-3 border-border cursor-pointer transition-colors ${
-              testing ? "bg-gray-mid text-white" : "bg-black text-white hover:bg-gray-dark"
+            className={`px-6 py-3 font-headline uppercase text-base cursor-pointer transition-colors ${
+              testing ? "bg-gray-mid" : "bg-black hover:bg-gray-dark"
             }`}
+            style={{ color: "#f5e6c8", border: "3px solid #1a1a1a" }}
           >
             {testing ? "Testing..." : "Test Connection"}
           </button>
           {savedKey && (
             <button
               onClick={handleRemove}
-              className="px-6 py-3 font-headline uppercase text-base border-3 border-border cursor-pointer hover:bg-status-red hover:text-white hover:border-status-red transition-colors"
+              className="px-6 py-3 font-headline uppercase text-base border-3 border-border cursor-pointer hover:bg-status-red hover:text-cream hover:border-status-red transition-colors"
             >
               Remove Key
             </button>
@@ -180,7 +186,7 @@ export default function SettingsPage() {
         </div>
 
         {testResult && (
-          <div role="alert" className={`mt-5 p-4 border-2 font-mono text-base font-bold ${
+          <div role="alert" className={`mt-5 p-4 border-3 font-mono text-base font-bold ${
             testResult === "success"
               ? "border-green bg-green-light text-green"
               : "border-status-red bg-status-red-light text-status-red"
@@ -190,7 +196,7 @@ export default function SettingsPage() {
         )}
 
         {/* Instructions */}
-        <div className="mt-8 pt-6 border-t-2 border-border-light">
+        <div className="mt-8 pt-6" style={{ borderTop: "3px solid #c4a44a" }}>
           <h3 className="font-headline text-xl mb-4">How to Get an API Key</h3>
           <ol className="font-body text-base text-gray-mid space-y-3 list-decimal list-inside">
             <li>
@@ -204,7 +210,7 @@ export default function SettingsPage() {
             <li>Go to <strong>API Keys</strong> and create a new key</li>
             <li>Copy the key and paste it above</li>
           </ol>
-          <div className="mt-4 p-4 bg-yellow-light border-2 border-yellow">
+          <div className="mt-4 p-4 bg-yellow-light border-3 border-yellow">
             <p className="font-mono text-sm font-bold text-gray-mid">
               TYPICAL COST: Each AI-drafted message costs roughly $0.01–0.05 via Claude Sonnet.
               Most users spend less than $1/month.
@@ -212,6 +218,11 @@ export default function SettingsPage() {
           </div>
         </div>
       </section>
+
+      {/* Star separator */}
+      <div className="text-center mb-6" style={{ color: "#c4a44a", letterSpacing: "0.5em", fontSize: "14px" }}>
+        &#9733; &#9733; &#9733;
+      </div>
 
       {/* Email Service (Optional) */}
       <section className="border-3 border-border p-6 bg-surface mb-6">
@@ -223,7 +234,7 @@ export default function SettingsPage() {
         </p>
 
         {emailSaved && (
-          <div className="mb-5 p-4 bg-green-light border-2 border-green">
+          <div className="mb-5 p-4 bg-green-light border-3 border-green">
             <p className="font-mono text-sm text-green font-bold mb-1">{"\u{2705}"} EMAIL SERVICE CONFIGURED</p>
             <p className="font-mono text-base text-gray-mid">
               {emailProvider.toUpperCase()} &middot; {senderEmail}
@@ -237,7 +248,7 @@ export default function SettingsPage() {
             <select
               value={emailProvider}
               onChange={(e) => setEmailProvider(e.target.value as "resend" | "sendgrid")}
-              className="w-full sm:w-auto px-4 py-3 border-2 border-border font-mono text-base bg-cream focus:outline-none focus:border-red"
+              className="w-full sm:w-auto px-4 py-3 border-3 border-border font-mono text-base bg-cream focus:outline-none focus:border-red"
             >
               <option value="resend">Resend</option>
               <option value="sendgrid">SendGrid</option>
@@ -251,7 +262,7 @@ export default function SettingsPage() {
               value={emailApiKey}
               onChange={(e) => setEmailApiKey(e.target.value)}
               placeholder={emailProvider === "resend" ? "re_..." : "SG..."}
-              className="w-full px-4 py-3 border-2 border-border font-mono text-base focus:outline-none focus:border-red bg-cream"
+              className="w-full px-4 py-3 border-3 border-border font-mono text-base focus:outline-none focus:border-red bg-cream"
             />
           </div>
 
@@ -262,7 +273,7 @@ export default function SettingsPage() {
               value={senderEmail}
               onChange={(e) => setSenderEmail(e.target.value)}
               placeholder="you@yourdomain.com"
-              className="w-full px-4 py-3 border-2 border-border font-mono text-base focus:outline-none focus:border-red bg-cream"
+              className="w-full px-4 py-3 border-3 border-border font-mono text-base focus:outline-none focus:border-red bg-cream"
             />
           </div>
         </div>
@@ -279,11 +290,16 @@ export default function SettingsPage() {
               setEmailSaved(true);
             }}
             disabled={!emailApiKey.trim() || !senderEmail.trim()}
-            className={`px-6 py-3 font-headline uppercase text-base cursor-pointer transition-colors border-3 ${
+            className={`px-6 py-3 font-headline uppercase text-base cursor-pointer transition-colors ${
               !emailApiKey.trim() || !senderEmail.trim()
-                ? "bg-gray-mid text-white border-gray-mid"
-                : "bg-red text-white border-red hover:bg-red-dark hover:border-red-dark"
+                ? "bg-gray-mid border-gray-mid"
+                : "hover:bg-red-dark hover:border-red-dark"
             }`}
+            style={{
+              backgroundColor: (!emailApiKey.trim() || !senderEmail.trim()) ? undefined : "#C1272D",
+              color: "#f5e6c8",
+              border: "3px solid #1a1a1a",
+            }}
           >
             Save Email Config
           </button>
@@ -295,14 +311,14 @@ export default function SettingsPage() {
                 setSenderEmail("");
                 setEmailSaved(false);
               }}
-              className="px-6 py-3 font-headline uppercase text-base border-3 border-border cursor-pointer hover:bg-status-red hover:text-white hover:border-status-red transition-colors"
+              className="px-6 py-3 font-headline uppercase text-base border-3 border-border cursor-pointer hover:bg-status-red hover:text-cream hover:border-status-red transition-colors"
             >
               Remove Config
             </button>
           )}
         </div>
 
-        <div className="mt-5 p-4 bg-yellow-light border-2 border-yellow">
+        <div className="mt-5 p-4 bg-yellow-light border-3 border-yellow">
           <p className="font-mono text-sm font-bold text-gray-mid">
             NOTE: You need a verified domain with your email provider. Resend offers a free
             tier (100 emails/day). SendGrid offers 100 emails/day free. Your API key never
@@ -320,7 +336,7 @@ export default function SettingsPage() {
         </p>
 
         <div className="space-y-4">
-          <div className="flex items-center justify-between border-2 border-border p-4">
+          <div className="flex items-center justify-between border-3 border-border p-4">
             <div>
               <p className="font-mono text-base font-bold">Contact Log</p>
               <p className="font-mono text-sm text-gray-mid">
@@ -329,12 +345,12 @@ export default function SettingsPage() {
             </div>
             <button
               onClick={handleClearContacts}
-              className="px-5 py-2 font-mono text-sm border-2 border-border cursor-pointer hover:bg-status-red hover:text-white hover:border-status-red transition-colors font-bold"
+              className="px-5 py-2 font-mono text-sm border-3 border-border cursor-pointer hover:bg-status-red hover:text-cream hover:border-status-red transition-colors font-bold"
             >
               Clear
             </button>
           </div>
-          <div className="flex items-center justify-between border-2 border-border p-4">
+          <div className="flex items-center justify-between border-3 border-border p-4">
             <div>
               <p className="font-mono text-base font-bold">Campaigns</p>
               <p className="font-mono text-sm text-gray-mid">
@@ -343,7 +359,7 @@ export default function SettingsPage() {
             </div>
             <button
               onClick={handleClearCampaigns}
-              className="px-5 py-2 font-mono text-sm border-2 border-border cursor-pointer hover:bg-status-red hover:text-white hover:border-status-red transition-colors font-bold"
+              className="px-5 py-2 font-mono text-sm border-3 border-border cursor-pointer hover:bg-status-red hover:text-cream hover:border-status-red transition-colors font-bold"
             >
               Clear
             </button>
@@ -351,14 +367,19 @@ export default function SettingsPage() {
         </div>
       </section>
 
+      {/* Star separator */}
+      <div className="text-center my-6" style={{ color: "#c4a44a", letterSpacing: "0.5em", fontSize: "14px" }}>
+        &#9733; &#9733; &#9733;
+      </div>
+
       {/* API Status */}
-      <section className="border-3 border-border p-6 bg-surface mt-6">
+      <section className="border-3 border-border p-6 bg-surface">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-headline text-3xl">API Status</h2>
           <button
             onClick={fetchApiStatus}
             disabled={apisLoading}
-            className="px-4 py-2 font-mono text-sm border-2 border-border cursor-pointer hover:bg-black hover:text-white transition-colors font-bold"
+            className="px-4 py-2 font-mono text-sm border-3 border-border cursor-pointer hover:bg-black hover:text-cream transition-colors font-bold"
           >
             {apisLoading ? "Checking..." : "Refresh"}
           </button>
@@ -377,7 +398,7 @@ export default function SettingsPage() {
               {apis.map((api) => (
                 <div
                   key={api.name}
-                  className="flex items-center justify-between border-2 border-border p-4"
+                  className="flex items-center justify-between border-3 border-border p-4"
                 >
                   <div className="flex items-center gap-3">
                     <span

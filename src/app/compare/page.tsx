@@ -14,9 +14,9 @@ import dynamic from "next/dynamic";
 const AdvancedAnalytics = dynamic(
   () => import("@/components/compare/AdvancedAnalytics"),
   { ssr: false, loading: () => (
-    <div className="mt-10 border-3 border-black bg-white p-8 text-center">
+    <div className="mt-10 border-3 border-black bg-surface p-8 text-center">
       <div className="font-headline text-xl uppercase mb-2">Loading Advanced Analytics...</div>
-      <p className="font-mono text-xs text-black/40">Preparing 8 visualization tabs</p>
+      <p className="font-mono text-xs text-gray-mid">Preparing 8 visualization tabs</p>
     </div>
   )}
 );
@@ -27,35 +27,35 @@ function LoadingComparison() {
   return (
     <div className="py-16 text-center">
       {/* Spinner */}
-      <div className="inline-flex items-center justify-center w-20 h-20 border-3 border-black bg-white mb-6">
+      <div className="inline-flex items-center justify-center w-20 h-20 border-3 border-black bg-surface mb-6">
         <svg className="animate-spin w-10 h-10 text-red" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
           <path className="opacity-80" d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
         </svg>
       </div>
       <div className="font-headline text-2xl uppercase mb-2">Comparing Representatives</div>
-      <p className="font-mono text-xs text-black/40 uppercase tracking-wider mb-8">
+      <p className="font-mono text-xs text-gray-mid uppercase tracking-wider mb-8">
         Loading voting records, funding data, and committee assignments...
       </p>
 
       {/* Skeleton sections */}
       <div className="space-y-6 motion-safe:animate-pulse text-left">
         {["Party Loyalty", "Attendance", "Legislation", "Funding"].map((label) => (
-          <div key={label} className="border-3 border-black/20 bg-white">
-            <div className="px-5 py-4 bg-black/5 flex items-center gap-3">
-              <div className="w-8 h-8 bg-black/10" />
-              <div className="h-5 bg-black/10 w-48" />
+          <div key={label} className="border-3 border-border bg-surface">
+            <div className="px-5 py-4 bg-cream-dark flex items-center gap-3">
+              <div className="w-8 h-8 bg-parchment" />
+              <div className="h-5 bg-parchment w-48" />
             </div>
             <div className="p-6">
-              <div className="h-4 bg-black/5 w-full mb-3" />
+              <div className="h-4 bg-cream-dark w-full mb-3" />
               <div className="flex gap-6">
                 <div className="flex-1">
-                  <div className="h-3 bg-black/5 w-24 mb-2" />
-                  <div className="h-10 bg-black/5 w-full" />
+                  <div className="h-3 bg-cream-dark w-24 mb-2" />
+                  <div className="h-10 bg-cream-dark w-full" />
                 </div>
                 <div className="flex-1">
-                  <div className="h-3 bg-black/5 w-24 mb-2" />
-                  <div className="h-10 bg-black/5 w-full" />
+                  <div className="h-3 bg-cream-dark w-24 mb-2" />
+                  <div className="h-10 bg-cream-dark w-full" />
                 </div>
               </div>
             </div>
@@ -190,7 +190,7 @@ function ComparePageInner() {
         <h1 className="font-headline text-5xl md:text-6xl mb-2">
           Compare Representatives
         </h1>
-        <p className="font-mono text-sm text-black/40 mb-8 font-bold uppercase tracking-wider">
+        <p className="font-mono text-sm text-gray-mid mb-8 font-bold uppercase tracking-wider">
           Side-by-side comparison of voting records, funding, legislation, and more
         </p>
       </div>
@@ -221,9 +221,9 @@ function ComparePageInner() {
 
         {/* Status message */}
         {!repA && !repB && (
-          <div className="mt-6 text-center border-3 border-black/10 bg-cream px-6 py-8">
+          <div className="mt-6 text-center border-3 border-border bg-cream-dark px-6 py-8">
             <div className="font-headline text-2xl mb-2">Pick Two Representatives</div>
-            <p className="font-body text-black/50">
+            <p className="font-body text-gray-mid">
               Select two members of Congress above to see a detailed side-by-side comparison
               with verdicts, infographics, and shareable results.
             </p>
@@ -232,7 +232,7 @@ function ComparePageInner() {
 
         {repA && !repB && (
           <div className="mt-4 text-center">
-            <p className="font-mono text-sm text-black/40">
+            <p className="font-mono text-sm text-gray-mid">
               Now select a second representative to compare with {repA.fullName}
             </p>
           </div>
@@ -262,7 +262,7 @@ function ComparePageInner() {
                 <a
                   key={cat.key}
                   href={`#sec-${cat.key === "partyLoyalty" ? "loyalty" : cat.key === "votingRecord" ? "voting" : cat.key === "keyVotes" ? "keyvotes" : cat.key}`}
-                  className="px-3 py-2 border-2 border-black/15 font-mono text-xs font-bold uppercase no-underline text-black/60 hover:border-black hover:text-black transition-colors"
+                  className="px-3 py-2 border-3 border-border font-mono text-xs font-bold uppercase no-underline text-gray-mid hover:border-black hover:text-black transition-colors"
                 >
                   {cat.icon} {cat.label}
                 </a>
@@ -280,27 +280,28 @@ function ComparePageInner() {
             <AdvancedAnalytics repA={enrichedA} repB={enrichedB} />
 
             {/* Bottom CTA */}
-            <div className="border-3 border-black bg-cream p-8 text-center mt-8" data-print-hide>
+            <div className="border-3 border-black bg-cream-dark p-8 text-center mt-8" data-print-hide>
               <h3 className="font-headline text-2xl uppercase mb-3">Take Action</h3>
-              <p className="font-body text-black/60 mb-6">
+              <p className="font-body text-gray-mid mb-6">
                 Now that you&apos;ve compared these representatives, make your voice heard.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <a
                   href={`/draft?rep=${enrichedA.slug}`}
-                  className="px-6 py-3 bg-red text-white font-headline text-sm uppercase no-underline hover:bg-red/90 transition-colors border-3 border-red"
+                  className="px-6 py-3 font-headline text-sm uppercase no-underline hover:opacity-90 transition-colors border-3 border-black"
+                  style={{ backgroundColor: "#C1272D", color: "#f5e6c8" }}
                 >
                   Write to {enrichedA.lastName}
                 </a>
                 <a
                   href={`/draft?rep=${enrichedB.slug}`}
-                  className="px-6 py-3 bg-[#1a3a6b] text-white font-headline text-sm uppercase no-underline hover:bg-[#1a3a6b]/90 transition-colors border-3 border-[#1a3a6b]"
+                  className="px-6 py-3 bg-black text-cream font-headline text-sm uppercase no-underline hover:opacity-90 transition-colors border-3 border-black"
                 >
                   Write to {enrichedB.lastName}
                 </a>
                 <a
                   href="/directory"
-                  className="px-6 py-3 bg-white text-black font-headline text-sm uppercase no-underline hover:bg-black/5 transition-colors border-3 border-black"
+                  className="px-6 py-3 bg-surface text-black font-headline text-sm uppercase no-underline hover:bg-cream-dark transition-colors border-3 border-black"
                 >
                   Compare Others
                 </a>
@@ -320,7 +321,7 @@ export default function ComparePage() {
     <Suspense fallback={
       <div className="max-w-6xl mx-auto px-4 py-8">
         <h1 className="font-headline text-5xl md:text-6xl mb-2">Compare Representatives</h1>
-        <p className="font-mono text-sm text-black/40 mb-8 font-bold uppercase tracking-wider">Loading...</p>
+        <p className="font-mono text-sm text-gray-mid mb-8 font-bold uppercase tracking-wider">Loading...</p>
       </div>
     }>
       <ComparePageInner />
