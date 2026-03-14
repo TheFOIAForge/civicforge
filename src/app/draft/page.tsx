@@ -505,8 +505,15 @@ function DraftInner() {
           width={1344}
           height={768}
           priority
-          className="w-full h-auto object-cover"
+          className="w-full h-auto object-cover opacity-70"
         />
+        {/* Bottom fade into black background */}
+        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black via-black/60 to-transparent" />
+        {/* Top subtle fade */}
+        <div className="absolute top-0 left-0 right-0 h-1/4 bg-gradient-to-b from-black/40 to-transparent" />
+        {/* Side fades */}
+        <div className="absolute inset-y-0 left-0 w-1/6 bg-gradient-to-r from-black/50 to-transparent" />
+        <div className="absolute inset-y-0 right-0 w-1/6 bg-gradient-to-l from-black/50 to-transparent" />
       </div>
 
       {/* Main content */}
