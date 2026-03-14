@@ -15,7 +15,16 @@ export async function middleware(request: NextRequest) {
     const origin = request.headers.get("origin");
     const host = request.headers.get("host");
 
-    if (origin && host) {
+    // Block requests with no Origin header (CSRF bypass prevention).
+    // Legitimate browser fetch/XHR always sends Origin on mutations.
+    if (!origin) {
+      return NextResponse.json(
+        { error: "Missing origin header" },
+        { status: 403 }
+      );
+    }
+
+    if (host) {
       try {
         const originHost = new URL(origin).host;
         if (originHost !== host) {
@@ -57,6 +66,22 @@ export async function middleware(request: NextRequest) {
       },
     },
   });
+
+  // ── CORS lockdown — restrict API responses to own origin ──
+  if (isApiRoute) {
+    supabaseResponse.headers.set(
+      "Access-Control-Allow-Origin",
+      request.headers.get("origin") &&
+        request.headers.get("host") &&
+        new URL(request.headers.get("origin")!).host === request.headers.get("host")
+        ? request.headers.get("origin")!
+        : ""
+    );
+    supabaseResponse.headers.set("Access-Control-Allow-Credentials", "true");
+    supabaseResponse.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    supabaseResponse.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    supabaseResponse.headers.set("Vary", "Origin");
+  }
 
   return supabaseResponse;
 }
