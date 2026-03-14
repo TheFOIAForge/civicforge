@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, Suspense, useRef, useCallback, useMemo } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -211,6 +212,7 @@ function DraftInner() {
   const [addressQuery, setAddressQuery] = useState("");
   const lookupTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastLookupRef = useRef("");
+  const listParentRef = useRef<HTMLDivElement>(null);
 
   function doAddressLookup(q: string) {
     if (!q || q === lastLookupRef.current) return;
@@ -288,14 +290,28 @@ function DraftInner() {
     });
   }, [allReps, chamberFilter, partyFilter, stateFilter, zipResult, repSearch]);
 
+  const rowVirtualizer = useVirtualizer({
+    count: dropdownReps.length,
+    getScrollElement: () => listParentRef.current,
+    estimateSize: () => 56, // ~py-3 + content height
+    overscan: 10,
+  });
 
   function handleSearchKeyDown(e: React.KeyboardEvent) {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setHighlightIdx(i => Math.min(i + 1, dropdownReps.length - 1));
+      setHighlightIdx(i => {
+        const next = Math.min(i + 1, dropdownReps.length - 1);
+        rowVirtualizer.scrollToIndex(next, { align: "auto" });
+        return next;
+      });
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setHighlightIdx(i => Math.max(i - 1, 0));
+      setHighlightIdx(i => {
+        const next = Math.max(i - 1, 0);
+        rowVirtualizer.scrollToIndex(next, { align: "auto" });
+        return next;
+      });
     } else if (e.key === "Enter" && highlightIdx >= 0 && dropdownReps[highlightIdx]) {
       e.preventDefault();
       const rep = dropdownReps[highlightIdx];
@@ -908,8 +924,8 @@ function DraftInner() {
                       )}
                     </div>
 
-                    {/* Inline scrollable results list */}
-                    <div className="max-h-80 overflow-y-auto rounded-xl border-2 border-white/10 bg-black/30">
+                    {/* Inline scrollable virtualized results list */}
+                    <div ref={listParentRef} className="max-h-80 overflow-y-auto rounded-xl border-2 border-white/10 bg-black/30">
                       {repsLoading || zipLoading ? (
                         <div className="flex flex-col items-center justify-center py-12 gap-3">
                           <div className="w-8 h-8 border-3 border-red-500 border-t-transparent rounded-full animate-spin" />
@@ -919,54 +935,63 @@ function DraftInner() {
                           {!zipLoading && <p className="text-xs text-white/30">535 representatives</p>}
                         </div>
                       ) : dropdownReps.length > 0 ? (
-                        dropdownReps.map((rep, idx) => {
-                          const party = partyConfig(rep.party);
-                          const partyColor = rep.party === "R" ? "#dc2626" : rep.party === "D" ? "#2563eb" : "#9333ea";
-                          const isRepSelected = selectedReps.some((r) => r.id === rep.id);
-                          return (
-                            <div
-                              key={rep.id}
-                              onClick={() => {
-                                setSelectedReps((prev) => {
-                                  const exists = prev.some((r) => r.id === rep.id);
-                                  return exists ? prev.filter((r) => r.id !== rep.id) : [...prev, rep];
-                                });
-                                setStep(3);
-                                setTimeout(() => document.getElementById("step-3-topics")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
-                              }}
-                              role="button"
-                              tabIndex={0}
-                              className={`w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer transition-colors border-b border-white/5
-                                ${isRepSelected ? "bg-white/10" : "bg-transparent hover:bg-white/5"}`}
-                              style={isRepSelected ? { boxShadow: `inset 3px 0 0 ${partyColor}` } : {}}
-                            >
-                              <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 overflow-hidden relative border-2"
-                                style={{ borderColor: `${partyColor}60`, background: `linear-gradient(135deg, ${partyColor}30, ${partyColor}10)` }}
+                        <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: "100%", position: "relative" }}>
+                          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                            const rep = dropdownReps[virtualRow.index];
+                            const party = partyConfig(rep.party);
+                            const partyColor = rep.party === "R" ? "#dc2626" : rep.party === "D" ? "#2563eb" : "#9333ea";
+                            const isRepSelected = selectedReps.some((r) => r.id === rep.id);
+                            return (
+                              <div
+                                key={rep.id}
+                                data-index={virtualRow.index}
+                                ref={rowVirtualizer.measureElement}
+                                style={{ position: "absolute", top: 0, left: 0, width: "100%", transform: `translateY(${virtualRow.start}px)` }}
                               >
-                                <span className="text-white text-xs font-bold">{rep.firstName[0]}{rep.lastName[0]}</span>
-                                {rep.photoUrl && (
-                                  <Image src={rep.photoUrl} alt="" fill sizes="48px" className="object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                                )}
+                                <div
+                                  onClick={() => {
+                                    setSelectedReps((prev) => {
+                                      const exists = prev.some((r) => r.id === rep.id);
+                                      return exists ? prev.filter((r) => r.id !== rep.id) : [...prev, rep];
+                                    });
+                                    setStep(3);
+                                    setTimeout(() => document.getElementById("step-3-topics")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+                                  }}
+                                  role="button"
+                                  tabIndex={0}
+                                  className={`w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer transition-colors border-b border-white/5
+                                    ${isRepSelected ? "bg-white/10" : "bg-transparent hover:bg-white/5"}`}
+                                  style={isRepSelected ? { boxShadow: `inset 3px 0 0 ${partyColor}` } : {}}
+                                >
+                                  <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 overflow-hidden relative border-2"
+                                    style={{ borderColor: `${partyColor}60`, background: `linear-gradient(135deg, ${partyColor}30, ${partyColor}10)` }}
+                                  >
+                                    <span className="text-white text-xs font-bold">{rep.firstName[0]}{rep.lastName[0]}</span>
+                                    {rep.photoUrl && (
+                                      <Image src={rep.photoUrl} alt="" fill sizes="48px" className="object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                                    )}
+                                  </div>
+                                  <span className="text-sm font-bold text-white flex-1">{rep.fullName}</span>
+                                  <span className="text-xs text-white/40 font-medium">
+                                    {party.label.slice(0, 3)} · {rep.stateAbbr}{rep.district ? `-${rep.district}` : ""} · {rep.chamber}
+                                  </span>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (isMyRep(rep.id)) { removeRep(rep.id); } else { saveRep(rep); }
+                                    }}
+                                    className="p-1.5 rounded-lg hover:bg-white/10 cursor-pointer bg-transparent border-none transition-colors shrink-0"
+                                    aria-label={isMyRep(rep.id) ? "Remove from My Reps" : "Save to My Reps"}
+                                    title={isMyRep(rep.id) ? "Remove from My Reps" : "Save to My Reps"}
+                                  >
+                                    <Star className={`w-4 h-4 ${isMyRep(rep.id) ? "text-yellow-400 fill-yellow-400" : "text-white/20 hover:text-yellow-400"}`} />
+                                  </button>
+                                  {isRepSelected && <Check className="w-4 h-4 text-red-400 shrink-0" />}
+                                </div>
                               </div>
-                              <span className="text-sm font-bold text-white flex-1">{rep.fullName}</span>
-                              <span className="text-xs text-white/40 font-medium">
-                                {party.label.slice(0, 3)} · {rep.stateAbbr}{rep.district ? `-${rep.district}` : ""} · {rep.chamber}
-                              </span>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (isMyRep(rep.id)) { removeRep(rep.id); } else { saveRep(rep); }
-                                }}
-                                className="p-1.5 rounded-lg hover:bg-white/10 cursor-pointer bg-transparent border-none transition-colors shrink-0"
-                                aria-label={isMyRep(rep.id) ? "Remove from My Reps" : "Save to My Reps"}
-                                title={isMyRep(rep.id) ? "Remove from My Reps" : "Save to My Reps"}
-                              >
-                                <Star className={`w-4 h-4 ${isMyRep(rep.id) ? "text-yellow-400 fill-yellow-400" : "text-white/20 hover:text-yellow-400"}`} />
-                              </button>
-                              {isRepSelected && <Check className="w-4 h-4 text-red-400 shrink-0" />}
-                            </div>
-                          );
-                        })
+                            );
+                          })}
+                        </div>
                       ) : (
                         <div className="p-6 text-center">
                           <p className="text-sm text-white/50">
