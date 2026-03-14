@@ -320,7 +320,6 @@ function DraftInner() {
       setAddressQuery("");
       setShowAllReps(false);
       setStep(3);
-      setTimeout(() => document.getElementById("step-3-topics")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
     }
   }
 
@@ -724,7 +723,6 @@ function DraftInner() {
                               if (next.length > 0) setStep(3);
                               return next;
                             });
-                            setTimeout(() => document.getElementById("step-3-topics")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
                           }}
                           className={`flex items-center gap-3 p-3 rounded-xl text-left cursor-pointer transition-all border-2
                             ${isRepSelected
@@ -955,7 +953,6 @@ function DraftInner() {
                                       return exists ? prev.filter((r) => r.id !== rep.id) : [...prev, rep];
                                     });
                                     setStep(3);
-                                    setTimeout(() => document.getElementById("step-3-topics")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
                                   }}
                                   role="button"
                                   tabIndex={0}
